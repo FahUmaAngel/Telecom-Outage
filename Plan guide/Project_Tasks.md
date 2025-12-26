@@ -2,6 +2,13 @@
 
 This task list is generated based on the architectural documents in the `Plan guide` folder.
 
+## 📡 Data Sources
+
+### Telecom Operators
+- **Telia**: [Driftinformation - Mobila Nätet](https://www.telia.se/foretag/support/driftinformation?category=mobila-natet)
+- **Tre**: [Täckningskarta](https://www.tre.se/varfor-tre/tackning/tackningskarta)
+- **Lycamobile**: [5G Coverage](https://www.lycamobile.se/sv/5g-coverage/)
+
 ## 🏗️ Backend Development (FastAPI / Node.js)
 - [ ] **Infrastructure & Core**
   - [ ] Initialize FastAPI project structure
