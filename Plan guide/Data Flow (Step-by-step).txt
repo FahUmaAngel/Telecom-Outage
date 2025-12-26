@@ -1,0 +1,11 @@
+1. Telia / Tre publish outage info (public websites)
+2. Scrapers fetch data every N minutes
+3. Raw data stored (immutable)
+4. Normalizer standardizes format
+5. Outage Engine detects:
+   - new incident
+   - status change
+   - resolved incident
+6. Database updated
+7. Frontend polls API / receives update
+8. Map + dashboards update

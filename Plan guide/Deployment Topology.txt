@@ -1,0 +1,11 @@
+CloudFront
+    ↓
+Frontend (Vercel / S3)
+    ↓
+API Gateway
+    ↓
+Backend (ECS / Lambda)
+    ↓
+Postgres + PostGIS
+    ↓
+Scraper Workers (Lambda / EC2)

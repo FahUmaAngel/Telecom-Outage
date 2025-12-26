@@ -1,0 +1,10 @@
+[ Operators ]  ──public info──▶  [ Scrapers ]
+                                  │
+                                  ▼
+                        [ Immutable Raw Data ]
+                                  │
+                                  ▼
+                       [ Transparent Algorithms ]
+                                  │
+                                  ▼
+                         [ Public Visualization ]

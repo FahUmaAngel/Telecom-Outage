@@ -1,0 +1,13 @@
+# Core Endpoints
+
+GET  /api/outages/current
+GET  /api/outages/{id}
+GET  /api/outages/history
+GET  /api/analytics/mttr
+GET  /api/analytics/reliability
+POST /api/reports
+
+
+# Auth-only
+GET  /api/research/datasets
+GET  /api/research/api-key
