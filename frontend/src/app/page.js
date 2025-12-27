@@ -32,10 +32,10 @@ export default function Home() {
   const [reliabilityData, setReliabilityData] = useState([]);
   const previousOutageIds = useRef(new Set());
   const [stats, setStats] = useState([
-    { label_sv: "Aktiva Avbrott", label_en: "Active Outages", value: "0", trend_sv: "Laddar...", trend_en: "Loading...", color: "var(--status-critical)", key: "active_outages" },
-    { label_sv: "Genomsnittlig reparationstid", label_en: "Mean Time to Repair", value: "0h", trend_sv: "Beräknar...", trend_en: "Calculating...", color: "var(--accent-primary)", key: "mttr" },
-    { label_sv: "Användarrapporter", label_en: "User Reports", value: "0", trend_sv: "Hämtar...", trend_en: "Fetching...", color: "var(--status-warning)", key: "reports" },
-    { label_sv: "Nätverkstillförlitlighet", label_en: "Network Reliability", value: "100%", trend_sv: "Stabil", trend_en: "Stable", color: "var(--status-success)", key: "reliability" },
+    { label_sv: "Aktiva Avbrott", label_en: "Active Outages", value: "0", trend_sv: "Laddar...", trend_en: "Loading...", color: "var(--status-critical)", key: "active_outages", link: "/reports?status=active" },
+    { label_sv: "Genomsnittlig reparationstid", label_en: "Mean Time to Repair", value: "0h", trend_sv: "Beräknar...", trend_en: "Calculating...", color: "var(--accent-primary)", key: "mttr", link: "/analytics" },
+    { label_sv: "Användarrapporter", label_en: "User Reports", value: "0", trend_sv: "Hämtar...", trend_en: "Fetching...", color: "var(--status-warning)", key: "reports", link: "/map" },
+    { label_sv: "Nätverkstillförlitlighet", label_en: "Network Reliability", value: "100%", trend_sv: "Stabil", trend_en: "Stable", color: "var(--status-success)", key: "reliability", link: "/analytics" },
   ]);
 
   useEffect(() => {
@@ -173,13 +173,13 @@ export default function Home() {
 
       <div className="stats-grid">
         {stats.map((stat, i) => (
-          <div key={i} className="premium-card stat-card">
+          <Link href={stat.link || "#"} key={i} className="premium-card stat-card interactive">
             <div className="stat-content">
               <span className="stat-label">{lang === "sv" ? stat.label_sv : stat.label_en}</span>
               <h2 className="stat-value">{stat.value}</h2>
               <span className="stat-meta">{lang === "sv" ? stat.trend_sv : stat.trend_en}</span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -301,6 +301,14 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          text-decoration: none;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card.interactive:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-lg);
+          border-color: var(--accent-primary);
         }
 
         .stat-label {

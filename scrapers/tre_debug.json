@@ -1,0 +1,489 @@
+{
+  "props": {
+    "pageProps": {
+      "crumbs": [
+        {
+          "label": "Täckning och nät",
+          "linkProps": {
+            "href": "/varfor-tre/tackning"
+          }
+        },
+        {
+          "label": "Driftinformation",
+          "linkProps": {
+            "href": "/varfor-tre/tackning/driftstorningar"
+          }
+        }
+      ],
+      "footer": {
+        "contentType": "footer",
+        "contextType": "consumer",
+        "id": "65GXpfWNXDeimRJSICSg8B",
+        "sectionFourHeading": {
+          "id": "47vdm9AuIoYfYMna7wgOo6",
+          "text": "Hållbarhet"
+        },
+        "sectionFourItems": [
+          {
+            "href": "/varfor-tre/hos-tre/3atervinn",
+            "id": "5Qsf8Jwj7JGtG5sg8nZDaF",
+            "text": "Byt in din gamla mobil",
+            "type": "externalLink"
+          },
+          {
+            "href": "/handla/mobiltelefoner/begagnad",
+            "id": "5UzcWE6yka9WjFihmCQqC6",
+            "text": "Begagnade mobiler",
+            "type": "page"
+          },
+          {
+            "href": "/om-tre/hallbarhet",
+            "id": "4X9qtNJ22lB8Zyn5jKisct",
+            "text": "Vårt hållbarhetsarbete",
+            "type": "externalLink"
+          }
+        ],
+        "sectionOneHeading": {
+          "id": "U69X5VdmY9wkWM0WqFyRN",
+          "text": "Utvalt"
+        },
+        "sectionOneItems": [
+          {
+            "href": "/handla/erbjudanden",
+            "id": "2I50QO7vjEo9HfoZlVrYUn",
+            "text": "Se alla erbjudanden",
+            "type": "page"
+          },
+          {
+            "href": "/handla/mobilabonnemang/familjeabonnemang",
+            "id": "4hpqboTkzZLacCRrlAS9uN",
+            "text": "Familjeabonnemang",
+            "type": "page"
+          },
+          {
+            "href": "/blogg",
+            "id": "1ynun0GpCdqmz3bMh1BuAt",
+            "text": "Mobilnyheter och guider",
+            "type": "page"
+          },
+          {
+            "href": "/support/mitt3",
+            "id": "5ARy5CxLGmQWJBT7BSCo3R",
+            "text": "Ladda ned Mitt3-appen",
+            "type": "page"
+          }
+        ],
+        "sectionThreeHeading": {
+          "id": "3LUJqGbtzt9USnSkdDDWue",
+          "text": "Om Tre"
+        },
+        "sectionThreeItems": [
+          {
+            "href": "/varfor-tre/tackning/5g",
+            "id": "5jEsz3dwvViR17yI6rbxLG",
+            "text": "5G",
+            "type": "externalLink"
+          },
+          {
+            "href": "/om-tre/karriar",
+            "id": "3ew5PBsg4PX3323YsKxQyM",
+            "text": "Jobba hos oss",
+            "type": "page"
+          },
+          {
+            "href": "/om-tre",
+            "id": "3rhB3FiExA4EwS10yST95t",
+            "text": "Om Tre",
+            "type": "page"
+          },
+          {
+            "href": "/om-tre/tillganglighet",
+            "id": "4OqAacsbPuHGDpE0RTM7OS",
+            "text": "Tillgänglighet",
+            "type": "page"
+          },
+          {
+            "href": "/om-tre/sakerhet",
+            "id": "638qYpISbyE2i2yq5aDRYh",
+            "text": "Säkerhet",
+            "type": "page"
+          },
+          {
+            "href": "/om-tre/kontakt/butiker",
+            "id": "6HHu5tvM6lG0Q4ZrpQhReF",
+            "text": "Butiker",
+            "type": "page"
+          }
+        ],
+        "sectionTwoHeading": {
+          "id": "3jsGmNXfci4SROTkbCRFvk",
+          "text": "Support"
+        },
+        "sectionTwoItems": [
+          {
+            "href": "/support",
+            "id": "njE08MdCC2rkzyRBxIOwV",
+            "text": "Vanliga frågor och svar",
+            "type": "page"
+          },
+          {
+            "href": "/varfor-tre/tackning",
+            "id": "JU6Zxz40071ZHFeru3APg",
+            "text": "Täckning och driftinformation",
+            "type": "page"
+          },
+          {
+            "href": "/whistleblowing",
+            "id": "2D1rqVS86J1Q050RD6mXf9",
+            "text": "Whistleblowing",
+            "type": "page"
+          },
+          {
+            "href": "/support/kopinformation",
+            "id": "3edtxIAZMgqYOuJ0Ns3iZZ",
+            "text": "Köpinformation",
+            "type": "page"
+          },
+          {
+            "href": "/support/kontaktinformation-dsa",
+            "id": "4xld5fSOAG8GfSlGuQn9hF",
+            "text": "Kontaktinformation – DSA",
+            "type": "page"
+          },
+          {
+            "href": "https://community.tre.se/",
+            "id": "72HisAhAHlKs8yqdjCAe3v",
+            "text": "3Community",
+            "type": "externalLink"
+          }
+        ],
+        "title": "Footer - Privat"
+      },
+      "headers": [
+        {
+          "contentType": "header",
+          "contextLink": {
+            "href": "/treforetag",
+            "id": "2xQQge92rtppOk1SayY8mq",
+            "text": "Företag",
+            "type": "page"
+          },
+          "contextType": "consumer",
+          "id": "3tNPyOxlRxKlfir4m2wRqA",
+          "menuItems": [
+            {
+              "href": "/handla/mobiltelefoner",
+              "iconName": "NewMobileDeviceIcon",
+              "id": "12yPgIk6a5B1eXnO6OWWUW",
+              "text": "Mobiler",
+              "type": "page"
+            },
+            {
+              "href": "/handla/mobilabonnemang",
+              "iconName": "NewSimCardIcon",
+              "id": "7czojMJmhfUIXubaRusJQM",
+              "text": "Mobilabonnemang",
+              "type": "page"
+            },
+            {
+              "href": "/handla/bredband",
+              "iconName": "NewWifiIcon",
+              "id": "7z56o6Fr01kv3GAP8HPYxy",
+              "text": "Bredband",
+              "type": "page"
+            },
+            {
+              "href": "/tillbehor",
+              "iconName": "NewSmartWatchIcon",
+              "id": "ocUJxw2N7vzHkg72Zdby4",
+              "text": "Surfplattor och prylar",
+              "type": "page"
+            }
+          ],
+          "searchSuggestions": [
+            {
+              "href": "/handla/mobiltelefoner/apple",
+              "id": "4OdtCXJTavpTrQ3Bg5dibp",
+              "text": "iPhone - se alla modeller",
+              "type": "externalLink"
+            },
+            {
+              "href": "/support",
+              "id": "1dpxylZfU8BvqyRPq7694s",
+              "text": "Hur överlåter jag ett abonnemang?",
+              "type": "externalLink"
+            },
+            {
+              "href": "/handla/surfplattor",
+              "id": "6dHwcFIljeLn9Gc8JK7gGo",
+              "text": "iPad och surfplattor",
+              "type": "externalLink"
+            },
+            {
+              "href": "/support#kontaktaoss",
+              "id": "6e3u4j0T7WlIzAqGlz8gJX",
+              "text": "Kontakta Tre",
+              "type": "externalLink"
+            },
+            {
+              "href": "https://community.tre.se/faktura-50",
+              "id": "5EVvuB629seXXArkqjmOTe",
+              "text": "Faktura och betalning",
+              "type": "externalLink"
+            },
+            {
+              "href": "/varfor-tre/teknik/esim",
+              "id": "5fdpvj82rP4lANi9tijMI2",
+              "text": "eSIM till mobilen",
+              "type": "externalLink"
+            },
+            {
+              "href": "/handla/tjanster/3trygg",
+              "id": "6zsbCBYjG2bcF7n9JWO5TF",
+              "text": "3Trygg - Försäkring till mobilen",
+              "type": "externalLink"
+            },
+            {
+              "href": "/handla/varumarken/samsung",
+              "id": "7zQtCOtYy5DdCOcT0YJA1K",
+              "text": "Samsung Galaxy - se alla modeller",
+              "type": "externalLink"
+            },
+            {
+              "href": "/handla/horlurar",
+              "id": "1IomNBy2jpQ3kppd1ZimLj",
+              "text": "Hörlurar från Apple och Samsung",
+              "type": "externalLink"
+            }
+          ],
+          "title": "New Header - privat"
+        },
+        {
+          "contentType": "header",
+          "contextLink": {
+            "href": "/",
+            "iconName": "HomeIcon",
+            "id": "2aKkv0AmtRGlB9WmnKLElU",
+            "text": "Privat",
+            "type": "page"
+          },
+          "contextType": "business",
+          "id": "6Nhlwkt7HtCE3l6peSAgIz",
+          "menuItems": [
+            {
+              "href": "/treforetag/handla/mobiltelefoner",
+              "iconName": "NewMobileDeviceIcon",
+              "id": "6vnJRLj3MHesJVXTxkNDoY",
+              "text": "Företagsmobiler",
+              "type": "page"
+            },
+            {
+              "href": "/treforetag/handla/foretagsabonnemang",
+              "iconName": "NewSimCardIcon",
+              "id": "1ktdjHRqBXcTXGIYfVNdft",
+              "text": "Företagsabonnemang",
+              "type": "page"
+            },
+            {
+              "href": "/treforetag/handla/bredband",
+              "iconName": "NewWifiIcon",
+              "id": "nPyu0VYBWVJU73FKHLCaN",
+              "text": "Bredband",
+              "type": "page"
+            },
+            {
+              "href": "/treforetag/handla/tjanster",
+              "iconName": "NewBusinessServicesIcon",
+              "id": "4gTjdZ64wk3VrNJYwEwSCc",
+              "text": "Tjänster",
+              "type": "page"
+            }
+          ],
+          "searchSuggestions": [
+            {
+              "href": "/treforetag/erbjudanden/nya-iphone",
+              "id": "1kkV5GnheoP7cRoMWc71LA",
+              "text": "iPhone till jobbet",
+              "type": "externalLink"
+            },
+            {
+              "href": "/utland",
+              "id": "51jx4kilBfamwZaQxwALLU",
+              "text": "Täckning när du är ute till sjöss eller i luften",
+              "type": "externalLink"
+            },
+            {
+              "href": "/treforetag/handla/surfplattor",
+              "id": "6VNlJr7pN86IuKme2SjJbu",
+              "text": "iPad och surfplattor",
+              "type": "externalLink"
+            },
+            {
+              "href": "/varfor-tre/teknik/esim",
+              "id": "4fMlm35yq3cPixuWbNMkPE",
+              "text": "e-SIM till mobilen",
+              "type": "externalLink"
+            },
+            {
+              "href": "https://www.tre.se/treforetag/support#kontaktaoss",
+              "id": "7jKb3NNZQTYQ6836nISNHx",
+              "text": "Kontakta Tre",
+              "type": "externalLink"
+            },
+            {
+              "href": "/handla/tjanster/3trygg",
+              "id": "424tlCouhrmtRGMryOuloa",
+              "text": "Försäkring till mobilen",
+              "type": "externalLink"
+            }
+          ],
+          "title": "New Header - företag"
+        }
+      ],
+      "isPreview": false,
+      "page": {
+        "blocks": [
+          {
+            "contentType": "row",
+            "desktopColumns": 1,
+            "id": "7LULISa5mF3W0UQCuMwFW4",
+            "items": [
+              {
+                "contentType": "card",
+                "headingSize": "H3",
+                "id": "3xVc71ZEPAaKNgmkCujAYY",
+                "imageAbove": true,
+                "invertTheme": false,
+                "cardActionType": "link",
+                "notificationMessage": "### Driftstörning i Norra Sverige\n\nSenast uppdaterat: 2025-12-27 kl 16:15\n\nBeskrivning: Just nu har vi driftstörningar i delar av norra Sverige pga rådande väder.\n\n*Det här påverkar även dig som är kund hos vår systeroperatör hallon*",
+                "notificationType": "warning",
+                "title": "Driftstörning i  Norra Sverige"
+              }
+            ],
+            "laptopColumns": 1,
+            "mobileColumns": 1,
+            "tabletColumns": 1,
+            "title": "B2C/B2B - Driftinformation - Aktuell info"
+          },
+          {
+            "contentType": "heading",
+            "id": "4WnS3s6rEW4RcUZeXS0jOg",
+            "size": "H1",
+            "text": "Driftinformation",
+            "title": "B2C/B2B - Driftinformation - Rubrik"
+          },
+          {
+            "contentType": "row",
+            "desktopColumns": 3,
+            "hasBackground": true,
+            "headingSize": "H2",
+            "headingText": "Behöver du hjälp? ",
+            "id": "3KGXaxlxLLVFmm2qtns3ye",
+            "items": [
+              {
+                "content": "Har du några __driftstörningar på din adress__? Se det på vår __täckningskarta__ där du även kan se hur det går med våra utbyggnader!",
+                "contentType": "card",
+                "headingSize": "H3",
+                "headingText": "Spana in nätet på din adress",
+                "id": "6JkQnYsb0s7SGDt5EgZj8P",
+                "imageAbove": true,
+                "invertTheme": false,
+                "cardActionType": "link",
+                "link": {
+                  "href": "/varfor-tre/tackning/tackningskarta",
+                  "id": "6urfNzAJnnIAWL8kPcr9v1",
+                  "text": "Se täckningen där du bor",
+                  "type": "externalLink"
+                },
+                "title": "B2C - Puff till täckningskartan"
+              },
+              {
+                "content": "Här hittar du svar på vanliga frågor, mobilguider och våra kontaktuppgifter. Tips! Chatta med vår digitala kollega Trelin för snabb hjälp!",
+                "contentType": "card",
+                "headingSize": "H3",
+                "headingText": "Support",
+                "id": "39GgKt2fODAskCqvOwpgwU",
+                "imageAbove": true,
+                "invertTheme": false,
+                "cardActionType": "link",
+                "link": {
+                  "href": "/support?utm_source=internal&utm_medium=tre.se&utm_campaign=v%C3%A4lkommen%20till%20tre&utm_content=ny%20landningssida",
+                  "id": "2byv8SX39jHvm8Qamiq4cL",
+                  "text": "Till vår Support",
+                  "type": "externalLink"
+                },
+                "title": "B2C - Puff till vår Support"
+              },
+              {
+                "content": "I vårt community med 20 000 användare hjälps vi åt att reda ut stort som smått. Kanske har någon redan tagit fram svaret på just det du undrar.",
+                "contentType": "card",
+                "headingSize": "H3",
+                "headingText": "Nörda ner dig i vårt community",
+                "id": "29h4ZFKKdcvwpPOI1AN03E",
+                "imageAbove": true,
+                "invertTheme": false,
+                "cardActionType": "link",
+                "link": {
+                  "href": "https://community.tre.se/",
+                  "id": "4KM8iGGogrA3UmJ4DgUsWN",
+                  "text": "Djupdyk i vårt community",
+                  "type": "externalLink"
+                },
+                "title": "Fråga alla - 3Community"
+              }
+            ],
+            "laptopColumns": 3,
+            "mobileColumns": 1,
+            "tabletColumns": 3,
+            "title": "B2C Puff för community, support och täckningskarta"
+          }
+        ],
+        "breadcrumbIsToggled": true,
+        "breadcrumbLabel": "Driftinformation",
+        "canonicalUrl": "https://www.tre.se/varfor-tre/tackning/driftstorningar",
+        "contentType": "page",
+        "hasBackground": true,
+        "id": "75U5ZYOOKILp4BRqIB8Mg6",
+        "index": true,
+        "menuTitle": "Driftinformation",
+        "metaDescription": "Information om aktuella driftstörningar, planerade arbeten och annat som kan påverka täckning och hastighet i Tres mobilnät.",
+        "ogDescription": "Information om aktuella driftstörningar, planerade arbeten och annat som kan påverka täckning och hastighet i Tres mobilnät.",
+        "ogImage": {
+          "alt": "Bild på en telefonmast mot en molnig himmel.",
+          "height": 1080,
+          "id": "1GsliHIRMBNlqRh0dnNhj0",
+          "size": 1045907,
+          "src": "https://images.ctfassets.net/vsfvlfn4iu1r/1GsliHIRMBNlqRh0dnNhj0/1532c9bd6a187ef23e1301db9ad08732/iot_1920x1080_1.jpg",
+          "width": 1920,
+          "useContentfulLoader": true
+        },
+        "ogTitle": "Driftinformation och störningar i Tres mobilnät",
+        "ogUrl": "https://www.tre.se/varfor-tre/tackning/driftstorningar",
+        "pageTitle": "Driftinformation och störningar i Tres mobilnät",
+        "slug": "/varfor-tre/tackning/driftstorningar",
+        "title": "B2C/B2B - Driftinformation (huvudsida)",
+        "urlRegex": "/varfor-tre/tackning/driftstorningar"
+      }
+    },
+    "__N_SSG": true
+  },
+  "page": "/[[...slug]]",
+  "query": {
+    "slug": [
+      "varfor-tre",
+      "tackning",
+      "driftstorningar"
+    ]
+  },
+  "buildId": "MhMZUqcHCjVAof6eovNcC",
+  "isFallback": false,
+  "dynamicIds": [
+    30150,
+    11162,
+    91287,
+    99910,
+    89098
+  ],
+  "gsp": true,
+  "scriptLoader": []
+}

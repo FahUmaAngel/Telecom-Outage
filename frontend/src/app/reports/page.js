@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function ReportsPage() {
+function ReportsContent() {
     const { lang, t } = useLanguage();
     const [outages, setOutages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [serviceFilter, setServiceFilter] = useState("all");
+    const searchParams = useSearchParams();
+    const initialStatus = searchParams.get("status") || "all";
+    const [statusFilter, setStatusFilter] = useState(initialStatus);
 
     useEffect(() => {
         const fetchOutages = async () => {
@@ -31,9 +36,33 @@ export default function ReportsPage() {
         const location = (o.location || "").toLowerCase();
         const searchTerm = search.toLowerCase();
 
-        return title.includes(searchTerm) ||
+        const matchesSearch = title.includes(searchTerm) ||
             operator.includes(searchTerm) ||
             location.includes(searchTerm);
+
+        if (!matchesSearch) return false;
+
+        // Service Filter
+        if (serviceFilter !== "all") {
+            const services = o.affected_services || [];
+            const lowerServices = services.map(s => s.toLowerCase());
+
+            let matchesService = false;
+            if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
+            else if (serviceFilter === "4g") matchesService = lowerServices.includes("4g");
+            else if (serviceFilter === "voice") matchesService = lowerServices.some(s => s.includes("voice") || s.includes("samtal") || s.includes("telefoni"));
+            else if (serviceFilter === "data") matchesService = lowerServices.some(s => s.includes("data") || s.includes("surf") || s.includes("internet"));
+
+            if (!matchesService) return false;
+        }
+
+        // Status Filter
+        if (statusFilter !== "all") {
+            if (statusFilter === "active" && o.status === "resolved") return false;
+            if (statusFilter === "resolved" && o.status !== "resolved") return false;
+        }
+
+        return true;
     });
 
     if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
@@ -49,13 +78,37 @@ export default function ReportsPage() {
                         {lang === "sv" ? "Komplett lista över nätverksstörningar" : "Comprehensive database of network disruptions"}
                     </p>
                 </div>
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        placeholder={lang === "sv" ? "Sök på operatör, plats..." : "Search operator, location..."}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+                <div className="filters-container">
+                    <div className="filter-group">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="service-select"
+                        >
+                            <option value="all">{lang === "sv" ? "Alla Status" : "All Status"}</option>
+                            <option value="active">{lang === "sv" ? "Aktiva" : "Active"}</option>
+                            <option value="resolved">{lang === "sv" ? "Lösta" : "Resolved"}</option>
+                        </select>
+                        <select
+                            value={serviceFilter}
+                            onChange={(e) => setServiceFilter(e.target.value)}
+                            className="service-select"
+                        >
+                            <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
+                            <option value="5g">5G</option>
+                            <option value="4g">4G</option>
+                            <option value="data">{lang === "sv" ? "Mobildata (Surf)" : "Mobile Data"}</option>
+                            <option value="voice">{lang === "sv" ? "Röstsamtal" : "Voice Calls"}</option>
+                        </select>
+                    </div>
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            placeholder={lang === "sv" ? "Sök på operatör, plats..." : "Search operator, location..."}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -122,10 +175,33 @@ export default function ReportsPage() {
                     align-items: flex-end;
                     margin-bottom: 32px;
                     gap: 24px;
+                    flex-wrap: wrap;
                 }
                 .header-content h1 { font-size: 1.8rem; margin-bottom: 4px; }
                 .subtitle { color: var(--text-muted); font-size: 0.95rem; }
                 
+                .filters-container {
+                    display: flex;
+                    gap: 12px;
+                    align-items: center;
+                }
+                
+                .service-select {
+                    padding: 10px 16px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border-color);
+                    background: var(--surface-color);
+                    color: var(--text-primary);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: var(--transition-base);
+                }
+                .service-select:focus {
+                    outline: none;
+                    border-color: var(--accent-primary);
+                    box-shadow: 0 0 0 3px var(--accent-glow);
+                }
+
                 .search-bar input {
                     padding: 10px 16px;
                     border-radius: 8px;
@@ -214,5 +290,13 @@ export default function ReportsPage() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function ReportsPage() {
+    return (
+        <Suspense fallback={<div className="loading-container"><div className="spinner"></div></div>}>
+            <ReportsContent />
+        </Suspense>
     );
 }

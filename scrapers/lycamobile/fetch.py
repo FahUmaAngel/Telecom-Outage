@@ -18,7 +18,7 @@ LYCA_BASE = "https://mboss.telenor.se/coverageportal"
 
 class LycamobileFetcher(EnghouseFetcher):
     def __init__(self):
-        super().__init__(LYCA_BASE, OperatorEnum.LYCAMOBILE)
+        super().__init__(LYCA_BASE, OperatorEnum.LYCAMOBILE, token_param='rt')
     
     def fetch_all(self):
         all_outages = []
@@ -32,9 +32,8 @@ class LycamobileFetcher(EnghouseFetcher):
             'llx': 10.0, 'lly': 55.0,
             'urx': 25.0, 'ury': 70.0
         }
-        # Telenor Services (guessed/standard)
-        # Using typical Enghouse service names found in other implementations
-        services = 'GSM_VOICE,GSM_DATA,UMTS_VOICE,UMTS_DATA,LTE_VOICE,LTE_DATA,5G_DATA'
+        # Telenor Services
+        services = 'GSM_VOICE,GSM_DATA,UMTS_VOICE,UMTS_DATA,LTE_VOICE,LTE_DATA,5G_DATA,VoLTE'
         all_outages.extend(self.get_area_tickets(sweden_bbox, services))
         
         return all_outages

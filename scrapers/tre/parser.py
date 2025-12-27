@@ -29,8 +29,12 @@ def parse_tre_outages(raw_outages: List) -> List[Dict]:
                     items = block.get('items', [])
                     for item in items:
                         text = item.get('text', '')
-                        if text and ('Arbete startar' in text or 'påverka täckning' in text):
+                        if not text:
+                            text = item.get('notificationMessage', '')
+                        
+                        if text and ('Arbete startar' in text or 'påverka täckning' in text or 'Driftstörning' in text or 'Senast uppdaterat' in text):
                             # This is likely the planned works block
+                            logger.info("Found matching Tre text block, parsing details...")
                             parsed.extend(parse_markdown_text(text))
                             
             except Exception as e:
@@ -85,6 +89,10 @@ def parse_markdown_text(text: str) -> List[Dict]:
                 elif 'Arbete klart:' in clean_line:
                     time_str = clean_line.split('Arbete klart:')[1].strip()
                     outage['end_time'] = parse_tre_date(time_str)
+                elif 'Senast uppdaterat:' in clean_line:
+                    time_str = clean_line.split('Senast uppdaterat:')[1].strip()
+                    # Use update time as start time for these warnings
+                    outage['start_time'] = parse_tre_date(time_str)
                 elif 'Beskrivning:' in clean_line:
                     desc_text = clean_line.split('Beskrivning:')[1].strip()
                     outage['description'] = desc_text
@@ -103,9 +111,10 @@ def parse_markdown_text(text: str) -> List[Dict]:
                     if not services: services.append('Mobile Network')
                     outage['affected_services'] = list(set(services))
             
-            if outage.get('location') and outage.get('start_time'):
+            if outage.get('location') and (outage.get('start_time') or outage.get('end_time')):
                 # Generate an ID based on location and time
-                outage['id'] = f"tre_{outage['location']}_{outage['start_time'].replace(' ','_')}"
+                t_val = outage.get('start_time') or outage.get('end_time')
+                outage['id'] = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
                 outages.append(outage)
                 
         except Exception as e:
@@ -116,10 +125,11 @@ def parse_markdown_text(text: str) -> List[Dict]:
 def parse_tre_date(date_str: str) -> Optional[str]:
     # Format: 2025-12-15 Kl 00:00
     try:
-        # Remove 'Kl' and extra spaces
-        clean = date_str.replace('Kl', '').strip()
+        # Remove 'Kl' and extra spaces, case insensitive
+        clean = date_str.lower().replace('kl', '').strip()
         # Parse
         dt = datetime.strptime(clean, "%Y-%m-%d %H:%M")
         return dt.isoformat()
-    except:
+    except Exception as e:
+        logger.warning(f"Failed to parse date '{date_str}': {e}")
         return None

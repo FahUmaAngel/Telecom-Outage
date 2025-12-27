@@ -1,23 +1,22 @@
 from scrapers.db.connection import SessionLocal
-from scrapers.db.models import Outage, Region
-import json
+from scrapers.db.models import Outage, Operator
+from sqlalchemy import func
 
 def inspect_db():
     db = SessionLocal()
     try:
-        outages = db.query(Outage).all()
-        print(f"Total Outages: {len(outages)}")
-        if outages:
-            o = outages[0]
-            print(f"Outage ID: {o.id}")
-            print(f"Title type: {type(o.title)}")
-            print(f"Title content: {o.title}")
+        # Check specifically for Tre outages
+        tre_outages = db.query(Outage).join(Operator).filter(Operator.name == 'tre').all()
+        print(f"\n--- Tre Outages Found: {len(tre_outages)} ---")
+        for o in tre_outages:
+            title_sv = o.title.get('sv', 'No SV Title') if isinstance(o.title, dict) else str(o.title)
+            print(f"- Title: {title_sv}")
+            print(f"  Updated: {o.updated_at}")
+            print(f"  Desc: {str(o.description)[:50]}...")
+            print("")
             
-            if o.region:
-                print(f"Region Name type: {type(o.region.name)}")
-                print(f"Region Name content: {o.region.name}")
-            else:
-                print("No region linked.")
+        print("\n---------------------------------")
+        
     finally:
         db.close()
 

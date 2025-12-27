@@ -37,7 +37,7 @@ class TeliaFetcher(EnghouseFetcher):
             'urx': 25.0, 'ury': 70.0
         }
         # Telia Services
-        services = 'LTE700_DATA,LTE800_DATA,LTE900_DATA,LTE1800_DATA,LTE2100_DATA,LTE2600_DATA'
+        services = 'GSM_VOICE,GSM_DATA,UMTS_VOICE,UMTS_DATA,LTE_VOICE,LTE_DATA,5G_DATA,VoLTE'
         all_outages.extend(self.get_area_tickets(sweden_bbox, services))
         
         # 2. Fixed Outages (GLUP - Custom Logic)

@@ -11,7 +11,10 @@ from common.models import OperatorEnum, RawOutage
 
 logger = logging.getLogger(__name__)
 
-TRE_URL = "https://www.tre.se/varfor-tre/tackning/driftstorningar"
+TRE_URLS = [
+    "https://www.tre.se/varfor-tre/tackning/driftstorningar",
+    "https://www.tre.se/varfor-tre/tackning/tackningskarta"
+]
 
 class TreFetcher:
     def __init__(self):
@@ -22,30 +25,31 @@ class TreFetcher:
         
     def fetch_all(self):
         outages = []
-        try:
-            logger.info(f"[Tre] Fetching {TRE_URL}...")
-            response = self.session.get(TRE_URL, timeout=15)
-            
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                next_data = soup.find('script', id='__NEXT_DATA__')
+        for url in TRE_URLS:
+            try:
+                logger.info(f"[Tre] Fetching {url}...")
+                response = self.session.get(url, timeout=15)
                 
-                if next_data:
-                    logger.info("[Tre] Found __NEXT_DATA__")
-                    data = json.loads(next_data.string)
-                    outages.append(RawOutage(
-                        operator=OperatorEnum.TRE,
-                        source_url=TRE_URL,
-                        raw_data=data,
-                        scraped_at=datetime.now()
-                    ))
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    next_data = soup.find('script', id='__NEXT_DATA__')
+                    
+                    if next_data:
+                        logger.info(f"[Tre] Found __NEXT_DATA__ on {url}")
+                        data = json.loads(next_data.string)
+                        outages.append(RawOutage(
+                            operator=OperatorEnum.TRE,
+                            source_url=url,
+                            raw_data=data,
+                            scraped_at=datetime.utcnow()
+                        ))
+                    else:
+                        logger.warning(f"[Tre] No __NEXT_DATA__ found on {url}")
                 else:
-                    logger.warning("[Tre] No __NEXT_DATA__ found")
-            else:
-                logger.warning(f"[Tre] Failed to fetch page: {response.status_code}")
-                
-        except Exception as e:
-            logger.error(f"[Tre] Error fetching: {e}")
+                    logger.warning(f"[Tre] Failed to fetch page {url}: {response.status_code}")
+                    
+            except Exception as e:
+                logger.error(f"[Tre] Error fetching {url}: {e}")
             
         return outages
 

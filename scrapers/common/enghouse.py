@@ -1,12 +1,9 @@
-"""
-Shared logic for Enghouse Networks Coverage Portals.
-Used by Telia and Lycamobile (via Telenor).
-"""
 import requests
 import logging
 import re
 from typing import List, Dict, Optional, Any
 from datetime import datetime
+from urllib.parse import unquote
 from .models import RawOutage, OperatorEnum
 
 logger = logging.getLogger(__name__)
@@ -14,37 +11,73 @@ logger = logging.getLogger(__name__)
 class EnghouseFetcher:
     """Base fetcher for Enghouse Networks Coverage Portals."""
     
-    def __init__(self, base_url: str, operator: OperatorEnum):
+    def __init__(self, base_url: str, operator: OperatorEnum, token_param: str = 'ert'):
         self.base_url = base_url.rstrip('/')
         self.operator = operator
+        self.token_param = token_param
         self.session = requests.Session()
         self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "application/json, text/plain, */*",
         })
         self._token: Optional[str] = None
 
     def get_token(self) -> Optional[str]:
-        """Extract session token (ert) from the portal."""
+        """Extract session token (ert or rt) from the portal."""
         try:
             # Usually the token is in the main page or in cookies/local storage logic
             # For Enghouse, it's often passed as a query param 'ert' or found in source
             url = f"{self.base_url}?appmode=outage"
-            response = self.session.get(url, timeout=10)
+            logger.info(f"[{self.operator}] Fetching token from {url}")
+            response = self.session.get(url, timeout=10, allow_redirects=True)
             
             if response.status_code == 200:
-                # Regex to find 'ert' assignment
-                match = re.search(r'ert["\']?\s*[:=]\s*["\']([^"\']+)["\']', response.text)
-                if match:
-                    self._token = match.group(1)
-                    return self._token
+                # 0. Check for <input id="csrft" value="...">
+                match = re.search(r'id=["\']csrft["\']\s+value=["\']([^"\']+)["\']', response.text)
+                if not match:
+                    match = re.search(r'value=["\']([^"\']+)["\']\s+id=["\']csrft["\']', response.text)
                 
-                # Check cookies
-                if 'ert' in response.cookies:
-                    self._token = response.cookies['ert']
+                if match:
+                    self._token = unquote(match.group(1))
+                    logger.info(f"[{self.operator}] Found token in hidden input 'csrft'")
                     return self._token
+
+                # 1. Check current URL query params (some sites redirect to a URL with the token)
+                for param in ['ert', 'rt']:
+                    match = re.search(f'[?&]{param}=([^&#]+)', response.url)
+                    if match:
+                        self._token = unquote(match.group(1))
+                        self.token_param = param
+                        logger.info(f"[{self.operator}] Found token '{self._token}' in URL param '{param}'")
+                        return self._token
+
+                # 2. Regex to find assignment in source code: var ert = '...'; or obj.rt = '...';
+                for param in ['ert', 'rt']:
+                    match = re.search(rf'{param}["\']?\s*[:=]\s*["\']([^"\']+)["\']', response.text)
+                    if match:
+                        self._token = unquote(match.group(1))
+                        self.token_param = param
+                        logger.info(f"[{self.operator}] Found token in source code for param '{param}'")
+                        return self._token
+                
+                # 3. Check for URLs containing the token in the source (found in scripts)
+                for param in ['ert', 'rt']:
+                    match = re.search(rf'[?&]{param}=([^"\'&>]+)', response.text)
+                    if match:
+                        self._token = unquote(match.group(1))
+                        self.token_param = param
+                        logger.info(f"[{self.operator}] Found token in source URL for param '{param}'")
+                        return self._token
+
+                # 4. Check cookies
+                for param in ['ert', 'rt']:
+                    if param in response.cookies:
+                        self._token = response.cookies[param]
+                        self.token_param = param
+                        logger.info(f"[{self.operator}] Found token in cookie '{param}'")
+                        return self._token
                     
-            logger.warning(f"[{self.operator}] Could not extract session token")
+            logger.warning(f"[{self.operator}] Could not extract session token from {response.url}")
             return None
             
         except Exception as e:
@@ -55,6 +88,8 @@ class EnghouseFetcher:
         """Get important messages (usually doesn't require token)."""
         outages = []
         try:
+            # Note: /ImportantMessages/GetMessages usually doesn't need a token
+            # But we check if it's needed based on operator if we fail
             url = f"{self.base_url}/ImportantMessages/GetMessages"
             response = self.session.get(url, timeout=10)
             
@@ -69,7 +104,7 @@ class EnghouseFetcher:
                             scraped_at=datetime.now()
                         ))
             else:
-                logger.warning(f"[{self.operator}] Failed to get messages: {response.status_code}")
+                logger.warning(f"[{self.operator}] Failed to get messages from {url}: {response.status_code}")
                 
         except Exception as e:
             logger.error(f"[{self.operator}] Error fetching messages: {e}")
@@ -79,7 +114,7 @@ class EnghouseFetcher:
     def get_area_tickets(self, bbox: Dict[str, float], services: str) -> List[RawOutage]:
         """Get area tickets (outages) for a bounding box."""
         outages = []
-        # Try to get token, but proceed even if it fails as some endpoints might work without it
+        # Try to get token, but proceed if we already have one
         token = self._token or self.get_token()
         
         if not token:
@@ -92,12 +127,12 @@ class EnghouseFetcher:
                 'services': services
             }
             if token:
-                params['ert'] = token # Only add if we have it
+                params[self.token_param] = token
             
-            response = self.session.get(url, params=params, timeout=10)
+            logger.debug(f"[{self.operator}] Fetching tickets from {url} with params {params.keys()}")
+            response = self.session.get(url, params=params, timeout=15)
             
             if response.status_code == 200:
-                # Handle cases where response might be empty or invalid JSON
                 if not response.text.strip():
                      logger.warning(f"[{self.operator}] Empty response from AreaTicketList")
                      return outages
@@ -105,6 +140,7 @@ class EnghouseFetcher:
                 try:
                     tickets = response.json()
                     if isinstance(tickets, list):
+                        logger.info(f"[{self.operator}] Found {len(tickets)} tickets")
                         for ticket in tickets:
                             outages.append(RawOutage(
                                 operator=self.operator,
@@ -113,11 +149,12 @@ class EnghouseFetcher:
                                 scraped_at=datetime.now()
                             ))
                 except ValueError: # JSONDecodeError
-                    logger.warning(f"[{self.operator}] Invalid JSON from AreaTicketList")
+                    logger.warning(f"[{self.operator}] Invalid JSON from AreaTicketList: {response.text[:100]}...")
             else:
-                logger.warning(f"[{self.operator}] Failed to get area tickets: {response.status_code}")
+                logger.warning(f"[{self.operator}] Failed to get area tickets from {url}: {response.status_code}")
                 
         except Exception as e:
             logger.error(f"[{self.operator}] Error fetching area tickets: {e}")
             
         return outages
+
