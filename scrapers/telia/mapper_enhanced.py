@@ -37,25 +37,36 @@ def map_services(services: List[str]) -> List[ServiceType]:
     """Map service strings to ServiceType enums."""
     service_map = {
         'mobile network': ServiceType.MOBILE,
+        'mobilnät': ServiceType.MOBILE,
+        'mobiltelefoni': ServiceType.MOBILE,
         '5g': ServiceType.MOBILE_5G,
         '4g': ServiceType.MOBILE_4G,
         'lte': ServiceType.MOBILE_4G,
         '3g': ServiceType.MOBILE_3G,
         '2g': ServiceType.MOBILE_2G,
         'data': ServiceType.MOBILE_DATA,
+        'surf': ServiceType.MOBILE_DATA,
+        'internet': ServiceType.MOBILE_DATA,
         'voice calls': ServiceType.VOICE,
         'telephony': ServiceType.VOICE,
+        'samtal': ServiceType.VOICE,
+        'röst': ServiceType.VOICE,
         'sms': ServiceType.SMS,
         'mms': ServiceType.MMS,
         'broadband': ServiceType.BROADBAND,
+        'bredband': ServiceType.BROADBAND,
         'fiber': ServiceType.FIBER,
+        'tv': ServiceType.TV,
     }
     
     mapped = []
     for service in services:
         service_lower = service.lower()
-        if service_lower in service_map:
-            mapped.append(service_map[service_lower])
+        # Simple substring match for robustness
+        for key, value in service_map.items():
+            if key in service_lower:
+                if value not in mapped:
+                    mapped.append(value)
     
     return mapped if mapped else [ServiceType.MOBILE]
 

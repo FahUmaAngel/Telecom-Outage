@@ -86,7 +86,22 @@ def parse_markdown_text(text: str) -> List[Dict]:
                     time_str = clean_line.split('Arbete klart:')[1].strip()
                     outage['end_time'] = parse_tre_date(time_str)
                 elif 'Beskrivning:' in clean_line:
-                    outage['description'] = clean_line.split('Beskrivning:')[1].strip()
+                    desc_text = clean_line.split('Beskrivning:')[1].strip()
+                    outage['description'] = desc_text
+                    
+                    # Extract affected services from text
+                    services = []
+                    lower_desc = desc_text.lower()
+                    if '5g' in lower_desc: services.append('5G')
+                    if '4g' in lower_desc: services.append('4G')
+                    if '3g' in lower_desc: services.append('3G')
+                    if '2g' in lower_desc: services.append('2G')
+                    if 'data' in lower_desc or 'surf' in lower_desc or 'internet' in lower_desc: services.append('Mobile Data')
+                    if 'samtal' in lower_desc or 'röst' in lower_desc or 'telefoni' in lower_desc: services.append('Voice')
+                    if 'sms' in lower_desc: services.append('SMS')
+                    
+                    if not services: services.append('Mobile Network')
+                    outage['affected_services'] = list(set(services))
             
             if outage.get('location') and outage.get('start_time'):
                 # Generate an ID based on location and time

@@ -38,10 +38,16 @@ def detect_hotspots(db: Session) -> List[Dict]:
             region = db.query(Region).filter(Region.id == region_id).first()
             operator = db.query(Operator).filter(Operator.id == op_id).first()
             
+            # Calculate centroid
+            avg_lat = sum(r.latitude for r in group) / len(group)
+            avg_lon = sum(r.longitude for r in group) / len(group)
+            
             hotspots.append({
                 "operator_name": operator.name if operator else "Unknown",
                 "region_id": region_id,
                 "region_name": region.name if region else create_bilingual_text("Everywhere"),
+                "latitude": avg_lat,
+                "longitude": avg_lon,
                 "report_count": len(group),
                 "type": "USER_CLUSTER",
                 "detected_at": datetime.utcnow()
@@ -62,6 +68,8 @@ def aggregate_external_signals() -> List[Dict]:
         results.append({
             "operator_name": s.operator,
             "region_name": create_bilingual_text(s.region_name) if s.region_name else None,
+            "latitude": s.latitude,
+            "longitude": s.longitude,
             "report_count": s.count,
             "type": "EXTERNAL_SIGNAL",
             "source": s.source_name,

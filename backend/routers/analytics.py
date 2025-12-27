@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 from ..dependencies import get_db
-from ..schemas import MTTRResponse, ReliabilityResponse
+from ..schemas import MTTRResponse, ReliabilityResponse, HistoricalTrendResponse, DailyTrend
 from scrapers.db.models import Outage, Operator
 from datetime import datetime, timedelta
 
@@ -77,3 +77,35 @@ def get_reliability(db: Session = Depends(get_db)):
         ))
         
     return results
+
+@router.get("/history", response_model=HistoricalTrendResponse)
+def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
+    """Get aggregated outage counts per day for the last X days."""
+    since_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Query all outages created in the last X days
+    outages = db.query(Outage).filter(Outage.created_at >= since_date).all()
+    
+    # Simple aggregation in memory for SQLite compatibility and ease of logic
+    counts_by_date = {}
+    
+    # Initialize all dates in range with 0
+    for i in range(days + 1):
+        d = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
+        counts_by_date[d] = 0
+        
+    for o in outages:
+        d = o.created_at.strftime("%Y-%m-%d")
+        if d in counts_by_date:
+            counts_by_date[d] += 1
+            
+    # Sort by date
+    sorted_trend = [
+        DailyTrend(date=d, count=c) 
+        for d, c in sorted(counts_by_date.items())
+    ]
+    
+    return HistoricalTrendResponse(
+        total_count=len(outages),
+        trend=sorted_trend
+    )

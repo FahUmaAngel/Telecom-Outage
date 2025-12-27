@@ -16,8 +16,9 @@ class OutageStatus(str, Enum):
     scheduled = "scheduled"
 
 class SeverityLevel(str, Enum):
-    minor = "minor"
-    major = "major"
+    low = "low"
+    medium = "medium"
+    high = "high"
     critical = "critical"
     unknown = "unknown"
 
@@ -86,6 +87,14 @@ class ReliabilityResponse(BaseModel):
     outage_count: int
     total_downtime_hours: float
 
+class DailyTrend(BaseModel):
+    date: str # YYYY-MM-DD
+    count: int
+
+class HistoricalTrendResponse(BaseModel):
+    total_count: int
+    trend: List[DailyTrend]
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -112,6 +121,8 @@ class UserResponse(UserBase):
 class HotspotResponse(BaseModel):
     operator_name: str
     region_name: Optional[Dict[str, str]]
+    latitude: float
+    longitude: float
     report_count: int
     type: str # USER_CLUSTER, EXTERNAL_SIGNAL
     source: Optional[str] = None

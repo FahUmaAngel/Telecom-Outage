@@ -9,6 +9,8 @@ from pydantic import BaseModel
 class CrowdSignal(BaseModel):
     operator: str
     region_name: Optional[str] = None
+    latitude: float
+    longitude: float
     count: int
     source_name: str
     detected_at: datetime = datetime.utcnow()

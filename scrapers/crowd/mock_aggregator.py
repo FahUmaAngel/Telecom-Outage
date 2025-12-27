@@ -17,12 +17,16 @@ class MockAggregator(BaseCrowdAggregator):
             CrowdSignal(
                 operator="telia",
                 region_name="Stockholms län",
+                latitude=59.3293,
+                longitude=18.0686,
                 count=random.randint(50, 200),
                 source_name=self.name
             ),
             CrowdSignal(
                 operator="tre",
                 region_name="Västra Götalands län",
+                latitude=57.7089,
+                longitude=11.9746,
                 count=random.randint(10, 30),
                 source_name=self.name
             )
