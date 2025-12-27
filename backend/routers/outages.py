@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
-from scrapers.db.models import Outage, Operator
+from scrapers.db.models import Outage, Operator, Region
 import math
 from datetime import datetime, timedelta
 
@@ -48,7 +48,9 @@ def get_outage_history(
             latitude=o.latitude,
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at
+            updated_at=o.updated_at,
+            region_id=o.region_id,
+            region_name=o.region.name if o.region else None
         )
         for o in outages
     ]
@@ -110,7 +112,9 @@ def get_outages(
             latitude=o.latitude,
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at
+            updated_at=o.updated_at,
+            region_id=o.region_id,
+            region_name=o.region.name if o.region else None
         ))
         
     return response_list
@@ -136,7 +140,9 @@ def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
             latitude=outage.latitude,
             longitude=outage.longitude,
             affected_services=outage.affected_services if outage.affected_services else [],
-            updated_at=outage.updated_at
+            updated_at=outage.updated_at,
+            region_id=outage.region_id,
+            region_name=outage.region.name if outage.region else None
         )
 
 def haversine(lat1, lon1, lat2, lon2):

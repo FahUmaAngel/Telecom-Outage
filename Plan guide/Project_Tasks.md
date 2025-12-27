@@ -69,7 +69,7 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [ ] **Crowd**: Listener for user reports and 3rd party aggregators
 - [x] **Processing Pipeline**
   - [x] Implement Data Normalizer (Standardize formats)
-  - [ ] Implement Identity Mapping (Link raw data to known operators/locations)
+  - [x] Implement Identity Mapping (Link raw data to known operators/locations)
   - [x] Set up Immutable Raw Data storage
 - [x] **Orchestration**
   - [x] Create the main Scraper Runner script

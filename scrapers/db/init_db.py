@@ -3,8 +3,9 @@ Database initialization script.
 Creates tables and seeds initial data.
 """
 from .connection import engine, Base, SessionLocal
-from .models import Operator
+from .models import Operator, Region
 from ..common.models import OperatorEnum
+from ..common.translation import SWEDISH_COUNTIES, create_bilingual_text
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +25,19 @@ def init_db():
                 logger.info(f"Seeding operator: {name}")
                 op = Operator(name=name)
                 db.add(op)
+        
+        # Seed Regions
+        for county in SWEDISH_COUNTIES:
+            # county format: "Stockholms län"
+            # Create bilingual name
+            bilingual_name = create_bilingual_text(county)
+            # Check if exists by Swedish name (key 'sv')
+            existing = db.query(Region).filter(Region.name["sv"].as_string() == county).first()
+            if not existing:
+                logger.info(f"Seeding region: {county}")
+                region = Region(name=bilingual_name)
+                db.add(region)
+                
         db.commit()
         logger.info("Database initialized successfully.")
     except Exception as e:

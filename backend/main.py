@@ -3,7 +3,7 @@ FastAPI Entry Point.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import outages, operators, reports, analytics, auth
+from .routers import outages, operators, reports, analytics, auth, regions
 from .middleware import LoggingMiddleware
 
 app = FastAPI(
@@ -31,6 +31,7 @@ app.include_router(outages.router)
 app.include_router(operators.router)
 app.include_router(reports.router)
 app.include_router(analytics.router)
+app.include_router(regions.router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():

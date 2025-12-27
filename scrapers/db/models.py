@@ -17,6 +17,16 @@ class Operator(Base):
     
     outages = relationship("Outage", back_populates="operator")
 
+class Region(Base):
+    __tablename__ = "regions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(JSON) # Bilingual {"sv": "...", "en": "..."}
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    outages = relationship("Outage", back_populates="region")
+    user_reports = relationship("UserReport", back_populates="region")
+
 class RawData(Base):
     __tablename__ = "raw_data"
     
@@ -34,6 +44,7 @@ class Outage(Base):
     id = Column(Integer, primary_key=True, index=True)
     incident_id = Column(String, index=True) # Operator specific ID
     operator_id = Column(Integer, ForeignKey("operators.id"))
+    region_id = Column(Integer, ForeignKey("regions.id"), nullable=True)
     raw_data_id = Column(Integer, ForeignKey("raw_data.id"))
     
     title = Column(JSON) # Bilingual {"sv": "...", "en": "..."}
@@ -58,6 +69,7 @@ class Outage(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     operator = relationship("Operator", back_populates="outages")
+    region = relationship("Region", back_populates="outages")
     raw_data = relationship("RawData", back_populates="outages")
 
 class UserReport(Base):
@@ -65,6 +77,7 @@ class UserReport(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     operator_id = Column(Integer, ForeignKey("operators.id"), nullable=True)
+    region_id = Column(Integer, ForeignKey("regions.id"), nullable=True)
     
     title = Column(String)
     description = Column(Text, nullable=True)
@@ -77,6 +90,7 @@ class UserReport(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     operator = relationship("Operator")
+    region = relationship("Region", back_populates="user_reports")
 
 class User(Base):
     __tablename__ = "users"

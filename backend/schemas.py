@@ -21,10 +21,20 @@ class SeverityLevel(str, Enum):
     critical = "critical"
     unknown = "unknown"
 
+class RegionResponse(BaseModel):
+    id: int
+    name: Dict[str, str]
+    outage_count: Optional[int] = 0
+    
+    class Config:
+        from_attributes = True
+
 class OutageResponse(BaseModel):
     id: int
     incident_id: Optional[str]
     operator_name: str
+    region_id: Optional[int] = None
+    region_name: Optional[Dict[str, str]] = None
     
     title: Dict[str, str] # Bilingual
     description: Optional[Dict[str, str]]

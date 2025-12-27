@@ -2,8 +2,10 @@
 Database CRUD operations.
 """
 from sqlalchemy.orm import Session
-from .models import Outage, RawData, Operator
+from .models import Outage, RawData, Operator, Region
 from ..common.models import NormalizedOutage, OperatorEnum
+from ..common.translation import SWEDISH_COUNTIES
+from ..common.engine import extract_region_from_text
 from datetime import datetime
 import json
 
@@ -31,25 +33,30 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
     db.add(raw_entry)
     db.flush() # Get ID
     
-    # Check if outage already exists (by incident_id or similar)
-    # Using incident_id if available, otherwise might need other logic
+    # Look up Region
+    region_id = None
+    lookup_text = f"{normalized.title.get('sv', '')} {normalized.location or ''}"
+    county_name = extract_region_from_text(lookup_text, SWEDISH_COUNTIES)
+    
+    if county_name:
+        region = db.query(Region).filter(Region.name["sv"].as_string() == county_name).first()
+        if region:
+            region_id = region.id
+            
+    # Check if outage already exists
     existing = None
     if normalized.incident_id:
         existing = db.query(Outage).filter(
             Outage.operator_id == operator_id,
             Outage.incident_id == normalized.incident_id
         ).first()
-    
-    # If not found by ID, maybe check by Title + StartTime + Operator?
-    # For now relying on incident_id which we generate in mapper if missing
-    
+        
     affected_services_json = [s.value for s in normalized.affected_services]
     
     if existing:
         # Status Change Detection
         if existing.status != normalized.status:
             print(f"INFO: Outage {existing.incident_id} changed status from {existing.status} to {normalized.status}")
-            # Here we could log to a dedicated 'incident_history' table if desired
         
         # Update existing
         existing.status = normalized.status
@@ -60,12 +67,14 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.updated_at = datetime.utcnow()
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
+        existing.region_id = region_id # Update region if detected
         return existing
     else:
         # Create new
         new_outage = Outage(
             incident_id=normalized.incident_id,
             operator_id=operator_id,
+            region_id=region_id,
             raw_data_id=raw_entry.id,
             title=normalized.title,
             description=normalized.description,

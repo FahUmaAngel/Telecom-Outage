@@ -33,3 +33,22 @@ def calculate_severity_score(severity: SeverityLevel, affected_services: List[Se
     # Max out at 10.0
     score = (base_weight * service_multiplier) * 5.0
     return min(10.0, score)
+
+def extract_region_from_text(text: str, counties: List[str]) -> str:
+    """
+    Extract a region (county) from a text string.
+    Simple keyword matching for now.
+    """
+    if not text:
+        return None
+        
+    text_lower = text.lower()
+    
+    # Check for direct county matches
+    for county in counties:
+        # county is usually "Stockholms län" -> check "stockholm" or "stockholms län"
+        base_name = county.replace(" län", "").lower()
+        if base_name in text_lower or county.lower() in text_lower:
+            return county
+            
+    return None
