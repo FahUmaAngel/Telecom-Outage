@@ -28,14 +28,14 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [x] `GET /api/analytics/reliability` - Operator reliability comparison
   - [x] `POST /api/reports` - Crowdsourced report submission
   - [x] Auth Endpoints (CORS & Base setup done)
-- [ ] **Core Engine Services**
+- [x] **Core Engine Services**
   - [x] Implement Deduplication logic
-  - [ ] Implement Severity Scoring engine
-  - [ ] Implement Incident Status Change detection
+  - [x] Implement Severity Scoring engine
+  - [x] Implement Incident Status Change detection
   - [x] Geocoding service for user reports (Haversine logic implemented)
 - [x] **Background Tasks**
   - [x] Set up Scheduler (Cron/Celery) (APScheduler implemented)
-  - [ ] Implement Database cleanup tasks
+  - [x] Implement Database cleanup tasks
 
 ## 🌐 Frontend Development (React / Next.js)
 - [ ] **Setup & UI Kit**
