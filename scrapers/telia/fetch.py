@@ -8,7 +8,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-TELIA_OUTAGE_URL = "https://www.telia.se/foretag/support/driftinformation?category=mobila-natet"
+# NOTE: Telia loads outage data via an iframe that requires JavaScript rendering
+# Main page: https://www.telia.se/foretag/support/driftinformation?category=mobila-natet
+# Actual data source (iframe): https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage
+TELIA_OUTAGE_URL = "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

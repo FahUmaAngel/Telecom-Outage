@@ -1,0 +1,13 @@
+{
+  "outages": [
+    {
+      "incident_id": "INCSE0342620",
+      "date_info": "2018-09-01",
+      "operator": "Telia",
+      "source": "coverage_portal"
+    }
+  ],
+  "regions": [],
+  "timestamp": "2025-12-28T00:02:13.550844",
+  "success": true
+}

@@ -6,9 +6,10 @@ import logging
 import sys
 import os
 
-from scrapers.telia.fetch_enhanced import scrape_telia_outages
-from scrapers.telia.parser_enhanced import parse_telia_outages
-from scrapers.telia.mapper_enhanced import map_telia_outages
+# Telia scraper now uses telia_scraper.py with fallback
+# from scrapers.telia.fetch_enhanced import scrape_telia_outages
+# from scrapers.telia.parser_enhanced import parse_telia_outages
+# from scrapers.telia.mapper_enhanced import map_telia_outages
 
 from scrapers.lycamobile.fetch import scrape_lyca_outages
 from scrapers.lycamobile.parser import parse_lyca_outages
@@ -32,27 +33,56 @@ def run_scrapers():
     db = SessionLocal()
     
     try:
-        # 1. Telia
+        # 1. Telia (with automatic fallback)
         try:
-            logger.info("Running Telia...")
-            raw = scrape_telia_outages()
-            parsed = parse_telia_outages(raw)
-            mapped = map_telia_outages(parsed)
+            logger.info("Running Telia (Selenium V3 with Playwright fallback)...")
+            from scrapers.telia_scraper import scrape_telia_with_fallback
+            from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
             
-            for item in mapped:
-                # Find corresponding raw data dict
-                # In a real scenario we'd map this better, for now just using empty dict or trying to pass it through
-                # The mapper consumes raw_data but doesn't output it directly
-                # We'll save the normalized object, raw_data handling might need refactoring to pass through
-                # For Phase 1, we store the full raw response in CRUD if we can, 
-                # but our `save_outage` expects a dict.
-                # Let's just store a simple metadata dict for now if unavailable
-                save_outage(db, item, {"source": "telia_scraper"})
+            telia_result = scrape_telia_with_fallback()
+            
+            if telia_result['success']:
+                logger.info(f"✓ Telia scraper succeeded using {telia_result['method']}")
+                logger.info(f"  Fallback used: {telia_result['fallback_used']}")
+                logger.info(f"  Found {len(telia_result['outages'])} outages")
                 
-            db.commit()
-            logger.info(f"Telia: processed {len(mapped)} outages")
+                # Save each outage to database
+                for outage in telia_result['outages']:
+                    # Create NormalizedOutage object
+                    normalized = NormalizedOutage(
+                        operator=OperatorEnum.TELIA,
+                        incident_id=outage['incident_id'],
+                        title={
+                            "sv": f"Incident {outage['incident_id']}",
+                            "en": f"Incident {outage['incident_id']}"
+                        },
+                        description={
+                            "sv": f"Incident ID: {outage['incident_id']}",
+                            "en": f"Incident ID: {outage['incident_id']}"
+                        },
+                        location=outage.get('location', 'Unknown'),
+                        status=OutageStatus.ACTIVE,
+                        severity=SeverityLevel.MEDIUM,
+                        affected_services=[ServiceType.MOBILE],
+                        source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
+                    )
+                    
+                    raw_data = {
+                        'source': telia_result['method'],
+                        'fallback_used': telia_result['fallback_used'],
+                        'raw_outage': outage
+                    }
+                    
+                    save_outage(db, normalized, raw_data)
+                
+                db.commit()
+                logger.info(f"Telia: saved {len(telia_result['outages'])} outages to database")
+            else:
+                logger.error(f"✗ Telia scraper failed completely")
+                logger.error(f"  Errors: {telia_result.get('errors', [])}")
+                
         except Exception as e:
-            logger.error(f"Telia failed: {e}")
+            logger.error(f"Telia failed with exception: {e}", exc_info=True)
             db.rollback()
 
         # 2. Lycamobile

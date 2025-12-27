@@ -1,0 +1,205 @@
+{
+  "outages": [
+    {
+      "incident_id": "INCSE0424929",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424222",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425089",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424369",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424922",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424847",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0403082",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424841",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424931",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425211",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0375087",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424836",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425235",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425251",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424277",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425305",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424894",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0408937",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425212",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0342620",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425250",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0418951",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0418257",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0423706",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0411855",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0424535",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425351",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425061",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425201",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0417331",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425048",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0425200",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    },
+    {
+      "incident_id": "INCSE0382662",
+      "operator": "Telia",
+      "source": "coverage_portal",
+      "status": "active"
+    }
+  ],
+  "timestamp": "2025-12-28T00:07:50.037179",
+  "success": true,
+  "method": "playwright"
+}
