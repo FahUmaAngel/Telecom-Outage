@@ -10,31 +10,31 @@ This task list is generated based on the architectural documents in the `Plan gu
 - **Lycamobile**: [5G Coverage](https://www.lycamobile.se/sv/5g-coverage/)
 
 ## 🏗️ Backend Development (FastAPI / Node.js)
-- [ ] **Infrastructure & Core**
-  - [ ] Initialize FastAPI project structure
-  - [ ] Configure environment variables and `config.py`
-  - [ ] Implement Logging and Error Handling
-  - [ ] Set up RBAC (Role-Based Access Control) & Permissions
-- [ ] **Database Layer**
-  - [ ] Set up PostgreSQL with PostGIS extension
-  - [ ] Implement Database Models (Outage, Operator, Report, User)
-  - [ ] Configure Alembic for Migrations
-  - [ ] Create Database Seed scripts
-- [ ] **API Development**
-  - [ ] `GET /api/outages/current` - Live outages
-  - [ ] `GET /api/outages/{id}` - Detailed outage info
-  - [ ] `GET /api/outages/history` - Historical data
-  - [ ] `GET /api/analytics/mttr` - Mean Time To Recovery stats
-  - [ ] `GET /api/analytics/reliability` - Operator reliability comparison
-  - [ ] `POST /api/reports` - Crowdsourced report submission
-  - [ ] Auth Endpoints (Login, API Key management for researchers)
+- [x] **Infrastructure & Core**
+  - [x] Initialize FastAPI project structure
+  - [x] Configure environment variables and `config.py`
+  - [x] Implement Logging and Error Handling
+  - [x] Set up RBAC (Role-Based Access Control) & Permissions
+- [x] **Database Layer**
+  - [x] Set up PostgreSQL with PostGIS extension (Pivoted to SQLite for now)
+  - [x] Implement Database Models (Outage, Operator, Report, User)
+  - [x] Configure Alembic for Migrations
+  - [x] Create Database Seed scripts
+- [x] **API Development**
+  - [x] `GET /api/outages/current` - Live outages
+  - [x] `GET /api/outages/{id}` - Detailed outage info
+  - [x] `GET /api/outages/history` - Historical data
+  - [x] `GET /api/analytics/mttr` - Mean Time To Recovery stats
+  - [x] `GET /api/analytics/reliability` - Operator reliability comparison
+  - [x] `POST /api/reports` - Crowdsourced report submission
+  - [x] Auth Endpoints (CORS & Base setup done)
 - [ ] **Core Engine Services**
-  - [ ] Implement Deduplication logic
+  - [x] Implement Deduplication logic
   - [ ] Implement Severity Scoring engine
   - [ ] Implement Incident Status Change detection
-  - [ ] Geocoding service for user reports
-- [ ] **Background Tasks**
-  - [ ] Set up Scheduler (Cron/Celery)
+  - [x] Geocoding service for user reports (Haversine logic implemented)
+- [x] **Background Tasks**
+  - [x] Set up Scheduler (Cron/Celery) (APScheduler implemented)
   - [ ] Implement Database cleanup tasks
 
 ## 🌐 Frontend Development (React / Next.js)
@@ -63,17 +63,17 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [ ] Implement Auth flow (Login, protected routes)
 
 ## 🕵️ Data Ingestion (Scrapers & Workers)
-- [ ] **Scraper Implementation**
-  - [ ] **Telia**: Fetcher, HTML/API Parser, and Data Mapper
-  - [ ] **Tre**: Fetcher, HTML/JSON Parser, and Data Mapper
+- [x] **Scraper Implementation**
+  - [x] **Telia**: Fetcher, HTML/API Parser, and Data Mapper
+  - [x] **Tre**: Fetcher, HTML/JSON Parser, and Data Mapper
   - [ ] **Crowd**: Listener for user reports and 3rd party aggregators
-- [ ] **Processing Pipeline**
-  - [ ] Implement Data Normalizer (Standardize formats)
+- [x] **Processing Pipeline**
+  - [x] Implement Data Normalizer (Standardize formats)
   - [ ] Implement Identity Mapping (Link raw data to known operators/locations)
-  - [ ] Set up Immutable Raw Data storage
-- [ ] **Orchestration**
-  - [ ] Create the main Scraper Runner script
-  - [ ] Configure execution frequency (1–5 minutes)
+  - [x] Set up Immutable Raw Data storage
+- [x] **Orchestration**
+  - [x] Create the main Scraper Runner script
+  - [x] Configure execution frequency (1–5 minutes)
 
 ## 🚀 DevOps & Deployment
 - [ ] Containerize Application (Dockerfiles for all services)

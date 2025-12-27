@@ -1,0 +1,496 @@
+[
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Göteborg",
+      "en": "Planned maintenance in Göteborg"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Göteborg",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.908928",
+    "updated_at": "2025-12-26 23:23:10.908928"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Linköping",
+      "en": "Planned maintenance in Linköping"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Linköping",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Haparanda",
+      "en": "Planned maintenance in Haparanda"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Haparanda",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 04:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Sundsvall",
+      "en": "Planned maintenance in Sundsvall"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Sundsvall",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Gällivare",
+      "en": "Planned maintenance in Gällivare"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Gällivare",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Gävle",
+      "en": "Planned maintenance in Gävle"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Gävle",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-15 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-15 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Göteborg",
+      "en": "Planned maintenance in Göteborg"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Göteborg",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-16 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-16 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Svenljunga",
+      "en": "Planned maintenance in Svenljunga"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Svenljunga",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-16 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-16 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Strömstad",
+      "en": "Planned maintenance in Strömstad"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Strömstad",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-16 11:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-16 20:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Motala",
+      "en": "Planned maintenance in Motala"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Motala",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Umeå",
+      "en": "Planned maintenance in Umeå"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Umeå",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Västra Götalands",
+      "en": "Planned maintenance in Västra Götalands"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Västra Götalands",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 11:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 20:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Kalmar",
+      "en": "Planned maintenance in Kalmar"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Kalmar",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909441",
+    "updated_at": "2025-12-26 23:23:10.909441"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Kalmar",
+      "en": "Planned maintenance in Kalmar"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Kalmar",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 12:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Motala",
+      "en": "Planned maintenance in Motala"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Motala",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-17 00:00:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-17 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Planerat arbete runt om i Sverige",
+      "en": "Planned maintenance in Planerat arbete runt om i Sverige"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Planerat arbete runt om i Sverige",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-18 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-18 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Stockholm",
+      "en": "Planned maintenance in Stockholm"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Stockholm",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-18 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-18 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Stockholm",
+      "en": "Planned maintenance in Stockholm"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Stockholm",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-19 00:01:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-19 06:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  },
+  {
+    "operator": "tre",
+    "incident_id": null,
+    "title": {
+      "sv": "Planerat arbete i Helsingborg",
+      "en": "Planned maintenance in Helsingborg"
+    },
+    "description": {
+      "sv": "Under denna period kan man uppleva problem med täckningen i ovan område.",
+      "en": "under denna period kan man uppleva problem med täckningen i ovan area."
+    },
+    "location": "Helsingborg",
+    "latitude": null,
+    "longitude": null,
+    "status": "scheduled",
+    "severity": "medium",
+    "started_at": "2025-12-20 07:15:00",
+    "resolved_at": null,
+    "estimated_fix_time": "2025-12-20 12:00:00",
+    "affected_services": [
+      "mobile"
+    ],
+    "source_url": null,
+    "created_at": "2025-12-26 23:23:10.909958",
+    "updated_at": "2025-12-26 23:23:10.909958"
+  }
+]

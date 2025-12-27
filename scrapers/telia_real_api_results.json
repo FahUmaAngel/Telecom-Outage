@@ -1,0 +1,19 @@
+{
+  "mobile": [],
+  "fixed": [
+    {
+      "type": "fixed",
+      "source": "affected_counties",
+      "data": "\t\t\n\n\n\n\n\n\n\n",
+      "timestamp": "2025-12-26T14:32:26.120681"
+    },
+    {
+      "type": "fixed",
+      "source": "important_info",
+      "data": "\t\n\n\n\n\n\n\n\n",
+      "timestamp": "2025-12-26T14:32:26.174423"
+    }
+  ],
+  "timestamp": "2025-12-26T14:32:25.873379",
+  "success": true
+}

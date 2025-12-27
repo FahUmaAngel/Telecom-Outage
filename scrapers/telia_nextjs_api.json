@@ -1,0 +1,195 @@
+{
+  "pageProps": {
+    "meta": {
+      "seoMetadata": {
+        "readableId": "/support/driftinformation",
+        "title": "Driftinformation – Telia Företag",
+        "description": "Här kan du som företagskund se driftstörningar för det mobila och fasta nätet i Sverige. Sök på en plats för att se täckning eller nätverksstatus.",
+        "keywords": [
+          "support",
+          "driftinformation"
+        ],
+        "socialMediaTitle": "Driftinformation",
+        "socialMediaDescription": "Här kan du se driftstörningar för det mobila och fasta nätet i Sverige. Kontrollera en specifik adress eller plats och se din nätverksstatus.",
+        "socialMediaSiteName": "TELIA.SE",
+        "socialMediaImage": {
+          "image": {
+            "url": "/images/i15skfqwpurk/5SbKfozu5zdt53lVcX5lub/ee07c0cdc24ab9b1b124eb14d595755e/femte-elementet-funktionsbild-5.jpg"
+          }
+        },
+        "hiddenFromSearchEngine": false,
+        "excludeLinksFromSearchRankings": false
+      }
+    },
+    "header": {
+      "teaserWrapper": {
+        "readableId": "b2b-support-driftinformation-hero-wrapper",
+        "name": null,
+        "teaserList": [
+          {
+            "title": "Driftinformation",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Här hittar du information om driftstörningar för det mobila och fasta nätet i Sverige. Om du upplever problem med bredband eller telefoni kan du söka i kartan eller i listan för att kontrollera nätverksstatus. \",\"marks\":[]}]}]}",
+            "primaryMediaImage": null,
+            "callToAction": []
+          }
+        ]
+      }
+    },
+    "promoBanner": {
+      "teaserWrapper": {
+        "readableId": "b2b-support-driftinformation-promotion-card-wrapper",
+        "name": null,
+        "teaserList": [
+          {
+            "title": "Hittar du inte informationen du söker? ",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"I MyBusiness kan du hitta information om din produkt och skapa supportärenden vid störningar. Kontakta ditt företags administratör om det finns ett konto men du saknar inloggningsuppgifter. \",\"marks\":[]}]}]}",
+            "callToAction": [
+              {
+                "text": "Logga in i MyBusiness",
+                "linkTrigger": "https://www.telia.se/mybusiness"
+              },
+              {
+                "text": "Kontakta oss",
+                "linkTrigger": "https://www.telia.se/foretag/support/kontakt"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "breadcrumbs": {
+      "microcopyResourceSets": {
+        "elements": [
+          {
+            "readableId": "b2b-support-breadcrumbs-driftinformation",
+            "resources": [
+              {
+                "key": "b2b.breadcrumbs.home",
+                "value": "Företag"
+              },
+              {
+                "key": "b2b.breadcrumbs.support",
+                "value": "Support"
+              },
+              {
+                "key": "b2b.breadcrumbs.driftinformation",
+                "value": "Driftinformation"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "articleCards": {
+      "teaserWrapper": {
+        "readableId": "b2b-support-driftinformation-article-card-wrapper",
+        "name": "Fler tips!",
+        "teaserList": [
+          {
+            "id": "52FNBxbff9Z7ersYeu9weg",
+            "title": "Täckningskarta",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Här hittar du information om täckning för samtal och surf i Sverige. Se vart du får den bästa mobilupplevelsen och vilka topphastigheter din uppkoppling kan leverera där du är.\",\"marks\":[]}]}]}",
+            "teaserUrl": "/foretag/support/tackningskarta",
+            "primaryMediaImage": {
+              "altText": "Här syns en mobilmast tillsammans med två medarbetare från Telia i blåställ någonstans i ett härligt vintrigt snölandskap med glänsande sol i fjällen.",
+              "image": {
+                "url": "/images/i15skfqwpurk/3zaXwe6JtjU6TCP5mrVuJH/339defc01a86268975262b1ab23eca66/Telia_Company_2023_21_mast_vinterlanmdskap_arbetare_2048x1366.jpg"
+              }
+            },
+            "callToAction": []
+          },
+          {
+            "id": "4aYy0o1g2AlstJiYG5ejxn",
+            "title": "Se era tjänster i MyBusiness",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"I MyBusiness kan du felsöka, skapa supportärenden, hantera fakturor och följa dina beställningar. Allt på en och samma plats.\",\"marks\":[]}]}]}",
+            "teaserUrl": "/foretag/mer-fran-telia/mybusiness",
+            "primaryMediaImage": {
+              "altText": "Konferensbord med arbetande människor och datorer sett ovanifrån.",
+              "image": {
+                "url": "/images/i15skfqwpurk/5CvINOqc7F79yTvFdpzz5Z/50f49b16aaf653aee58a95bb1771ed94/Telia_Company_Reinvention_39.jpg"
+              }
+            },
+            "callToAction": []
+          },
+          {
+            "id": "2GYb3o9TtE12DOkMjyxh5o",
+            "title": "IT-support för företag",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Behöver du tillfällig eller löpande IT-support? Våra IT-experter hjälper till med allt från cybersäkerhet till Microsoft 365.\",\"marks\":[]}]}]}",
+            "teaserUrl": "/foretag/it/it-tjanster",
+            "primaryMediaImage": {
+              "altText": "Kvinna som sitter framför dator och tittar på skärmen.",
+              "image": {
+                "url": "/images/i15skfqwpurk/Zzjsvm1NF4qgHI5xV4amN/26d2b336c14fc5ff463e7c34679a6c70/EDIT_Tired_mature_female_professional_staring_at_laptop_while_sitting_with_hand_on_chin_working_late_in_office.jpg"
+              }
+            },
+            "callToAction": []
+          }
+        ]
+      }
+    },
+    "faq": {
+      "qaWrapper": {
+        "readableId": "b2b-support-driftinformation-faq",
+        "title": "Vanliga frågor",
+        "type": "FAQ",
+        "questions": [
+          {
+            "title": "Jag har ingen anslutning med mitt bredband, vad gör jag?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Du kan börja med att testa starta om din router. En omstart av routern kan i många fall lösa problemet och det brukar inte ta längre än någon minut.\\n\\nOm det fortfarande inte fungerar kan du prova att återställa routern. En återställning görs genom att du håller in reset-knappen i ungefär 30 sekunder. \",\"marks\":[]}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"En indikation på att återställningen lyckades är att lamporna snabbt blinkar till eller att de slocknar för en kort stund. Vänta därefter 2–3 minuter medan utrustningen startar upp igen.\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Hur lägger jag en felanmälan?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Du kan skapa en \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"felanmälan i MyBusiness\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/mybusiness\"},{\"type\":\"text\",\"value\":\". Där kan du se status på din felanmälan, uppdatera ärendet med information när du vill och du bestämmer själv när ärendet är löst.\\n\\nHar du inte tillgång till MyBusiness går det självklart bra att felanmäla din tjänst genom att \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Jag kan inte ringa eller ta emot samtal, vad gör jag?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Börja med att starta om din mobiltelefon. Ofta löser en simpel omstart de flesta problemen. Du kan även kontrollera i vår driftkarta så att din tjänst inte berörs av en driftstörning där du befinner dig.\\n\\nOm det inte löste problemet kan det vara värt att kontrollera att det inte ligger någon tillagd samtalsspärr i din eller mottagarens enhet. Exempel på dessa kan vara nummerblockeringar och \\\"stör ej\\\"-funktioner.\\n\\nOm du vill gå vidare och göra en felanmälan skapar du den enklast i \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"MyBusiness\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/mybusiness\"},{\"type\":\"text\",\"value\":\". I MyBusiness ser du status på din felanmälan, du kan uppdatera ärendet med information när du vill och du bestämmer själv när ärendet är löst.\\n\\nHar du inte tillgång till MyBusiness går det självklart bra att felanmäla din tjänst genom att \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt?category=telefoni&sub-category=teknisk-support\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Varför fungerar inte min surf?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Börja med att starta om din mobiltelefon. Ofta löser en simpel omstart de flesta problemen. Kolla även in \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"driftinformation\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/driftinformation\"},{\"type\":\"text\",\"value\":\" så att din tjänst inte berörs av en driftstörning där du befinner dig.\\n\\nFelsökningstips:\\n\",\"marks\":[]}]},{\"type\":\"unordered-list\",\"content\":[{\"type\":\"list-item\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"\",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Kontrollera surfmängden\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/guider/mobiltelefoni/surfmangd\"},{\"type\":\"text\",\"value\":\". Om du surfat mer än vad du vanligtvis brukar göra eller om det närmar sig slutet av månaden kan det vara så att surfen tagit slut. \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Här kan du enkelt och smidig fylla på med extra surf.\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/telefoni/foretagsabonnemang/kop-mer-surf\"},{\"type\":\"text\",\"value\":\"\",\"marks\":[]}]}]},{\"type\":\"list-item\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Är mobildata aktiverat i din telefon? Hur du kontrollerar detta hittar du i våra \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"mobilguider\",\"marks\":[]}],\"uri\":\"https://www.telia.se/support/mobiltelefoni/mobilguider\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]},{\"type\":\"list-item\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Har du rätt surfinställningar i telefonen? Skicka ett sms till \",\"marks\":[]},{\"type\":\"text\",\"value\":\"4466 \",\"marks\":[\"bold\"]},{\"type\":\"text\",\"value\":\"med texten \",\"marks\":[]},{\"type\":\"text\",\"value\":\"surf \",\"marks\":[\"bold\"]},{\"type\":\"text\",\"value\":\"för att automatiskt ställa in rätt inställningar.\",\"marks\":[]}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"\\nOm du vill gå vidare och göra en felanmälan så skapar du den enklast i \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"MyBusiness\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/mybusiness\"},{\"type\":\"text\",\"value\":\". I MyBusiness ser du status på din felanmälan, du kan uppdatera ärendet med information när du vill och du bestämmer själv när ärendet är löst.\\n\\nHar du inte tillgång till MyBusiness går det självklart bra att felanmäla din tjänst genom att \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt?category=telefoni&sub-category=teknisk-support\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Mitt bredband är långsamt, vad kan vara fel?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Om du vanligtvis kopplar upp din enhet via wifi kan det vara värt att kontrollera vilket frekvensband du ansluter mot, om din router är optimalt placerad eller om du har rätt förutsättningar för en snabbare uppkoppling. I vår \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"wifi-guide\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/guider/bredband/forbattra-wifi-arbetsplatsen\"},{\"type\":\"text\",\"value\":\" hittar du information och tips om hur du med några enkla åtgärder kan förbättra din uppkoppling.\\n\\nUpplever du att ditt nätverk är långsamt när du kopplar upp dig med nätverkskabel beror det ofta på något mellan routern och enheten. Det kan vara en skadad nätverkskabel men det kan även bero på ”kringutrustning” i form av exempelvis en switch eller brandvägg som dämpar hastigheten. Prova gärna att koppla förbi dessa och gör en \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"hastighetsmätning på Bredbandskollen\",\"marks\":[]}],\"uri\":\"https://www.bredbandskollen.se/\"},{\"type\":\"text\",\"value\":\" när din enhet är kopplad direkt i routern.\\n\\nOm du vill gå vidare och göra en felanmälan så skapar du den enklast i \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"MyBusiness\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/mybusiness\"},{\"type\":\"text\",\"value\":\". I MyBusiness ser du status på din felanmälan, du kan uppdatera ärendet med information när du vill och du bestämmer själv när ärendet är löst.\\n\\nHar du inte tillgång till MyBusiness går det självklart bra att felanmäla din tjänst genom att \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt?category=broadband&sub-category=teknisk-support\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Jag har internetanslutning men min betalterminal fungerar inte, varför?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Börja med att kontrollera så att din betalterminal är korrekt inkopplad och ansluten mot ett fungerande nätverk. Ibland kan även en simpel omstart av routern och betalterminalen vara lösningen och tar inte längre än någon minut.\\n\\nEn del betalterminaler kan kräva att vissa portar i routern öppnas för att kunna släppa igenom trafik som krävs för att transaktioner ska kunna genomföras. Vilka portar som behöver öppnas kan du ta reda på genom leverantören av din betalterminal. Läs hur du själv kan göra en portöppning i guiden \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Öppna portar\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/guider/bredband/oppna-portar\"},{\"type\":\"text\",\"value\":\".\\n\\nÖnskar du få hjälp med detta? \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Låt vår IT-support hjälpa dig att öppna portar i din router\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/losningar/produkter-tjanster/teknikertjanster\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Hur får jag bättre wifi?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"För att ditt wifi ska fungera så bra som möjligt är det viktigt att din router är rätt placerad. En router som är gömd eller skymd tenderar att fungera mycket sämre och det påverkar både hastigheten och räckvidden.\\n\\nFörsök därför att placera din router så centralt det går – gärna någon meter från golvet med så fri sikt som möjligt. Då ger du din router de bästa förutsättningarna att förbättra din wifi-uppkoppling.\\n\\nVarje enhet som ansluts med kabel minskar belastningen på ditt wifi och kan göra att hastigheten till mobiler och laptops blir bättre. Försök därför att koppla in enheter med kabel om möjlighet finns istället för att ansluta dem trådlöst, då skapar du en jämnare fördelning och ditt wifi blir stabilare.\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Vad innebär Surfgaranti?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Surfgaranti innebär att du som kund har rätt till en tillfällig lösning om din bredbandstjänst skulle sluta fungera. Under åtgärdstiden har du möjlighet att hämta ut en mobil router och ett simkort med 300 GB surf i din närmaste Teliabutik. Surfmängden gäller i 31 dagar och är kostnadsfri.\\n\\nFör att hämta ut routern och simkortet i någon av våra butiker behöver du visa upp ett giltigt sms som du får av vår kundservice när du felanmäler din tjänst.\\n\\nSaknar du möjlighet att besöka en Teliabutik eller finns det ingen i närheten? \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt?category=broadband&sub-category=teknisk-support\"},{\"type\":\"text\",\"value\":\" så hjälper vi dig att hitta en annan lösning.\",\"marks\":[]}]}]}"
+          },
+          {
+            "title": "Jag kan inte skicka eller ta emot mms, vad är fel?",
+            "body": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Först bör du kontrollera att mobildata är påslaget på din telefon eller att du är ansluten mot wifi. För att kunna skicka och ta emot mms behöver du ha en fungerande internetanslutning. Upplever du även problem med din surf rekommenderar vi att du startar om din telefon. \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"Kontrollera att du har kvar surf på ditt abonnemang\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/guider/mobiltelefoni/surfmangd\"},{\"type\":\"text\",\"value\":\" om du inte ansluter telefonen mot wifi.\\n\\nDu kan även testa att skicka ett sms till \",\"marks\":[]},{\"type\":\"text\",\"value\":\"4466\",\"marks\":[\"bold\"]},{\"type\":\"text\",\"value\":\" med texten \",\"marks\":[]},{\"type\":\"text\",\"value\":\"mms \",\"marks\":[\"bold\"]},{\"type\":\"text\",\"value\":\"från din telefon. På så vis säkerställer du att telefonen har korrekta APN och mms-inställningar.\\n\\nOm du vill gå vidare och göra en felanmälan så skapar du den enklast i \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"MyBusiness\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/mybusiness\"},{\"type\":\"text\",\"value\":\". I MyBusiness ser du status på din felanmälan, du kan uppdatera ärendet med information när du vill och du bestämmer själv när ärendet är löst.\\n\\nHar du inte tillgång till MyBusiness går det självklart bra att felanmäla din tjänst genom att \",\"marks\":[]},{\"type\":\"hyperlink\",\"content\":[{\"type\":\"text\",\"value\":\"kontakta vår kundservice\",\"marks\":[]}],\"uri\":\"https://www.telia.se/foretag/support/kontakt?category=telefoni&sub-category=teknisk-support\"},{\"type\":\"text\",\"value\":\".\",\"marks\":[]}]}]}"
+          }
+        ]
+      }
+    },
+    "talkBanner": {
+      "teaserWrapper": {
+        "readableId": "b2b-support-driftinformation-talk-banner",
+        "name": null,
+        "teaserList": [
+          {
+            "title": "Vill du hellre prata med oss?",
+            "richPreamble": "{\"type\":\"rich-text-document\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"value\":\"Om du inte hittar det du söker, kan du slå en signal till oss istället. Vi finns här och svarar på dina frågor måndag till fredag klockan 08–18.\",\"marks\":[]}]}]}",
+            "callToAction": [
+              {
+                "text": "90 400",
+                "linkTrigger": "tel:90400"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "__N_SSG": true
+}
