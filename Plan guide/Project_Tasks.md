@@ -66,7 +66,7 @@ This task list is generated based on the architectural documents in the `Plan gu
 - [x] **Scraper Implementation**
   - [x] **Telia**: Fetcher, HTML/API Parser, and Data Mapper
   - [x] **Tre**: Fetcher, HTML/JSON Parser, and Data Mapper
-  - [ ] **Crowd**: Listener for user reports and 3rd party aggregators
+  - [x] **Crowd**: Listener for user reports and 3rd party aggregators
 - [x] **Processing Pipeline**
   - [x] Implement Data Normalizer (Standardize formats)
   - [x] Implement Identity Mapping (Link raw data to known operators/locations)

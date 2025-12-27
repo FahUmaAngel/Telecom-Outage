@@ -109,6 +109,14 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+class HotspotResponse(BaseModel):
+    operator_name: str
+    region_name: Optional[Dict[str, str]]
+    report_count: int
+    type: str # USER_CLUSTER, EXTERNAL_SIGNAL
+    source: Optional[str] = None
+    detected_at: datetime
+
 class OperatorResponse(BaseModel):
     id: int
     name: str

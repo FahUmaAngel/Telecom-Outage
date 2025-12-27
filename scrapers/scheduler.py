@@ -8,6 +8,7 @@ from config import settings
 import logging
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import cleanup_old_data
+from scrapers.common.crowd_engine import run_crowd_listener
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Scheduler")
@@ -22,6 +23,13 @@ def daily_cleanup():
     finally:
         db.close()
 
+def run_crowd_job():
+    db = SessionLocal()
+    try:
+        run_crowd_listener(db)
+    finally:
+        db.close()
+
 def start_scheduler():
     scheduler = BlockingScheduler()
     
@@ -31,6 +39,14 @@ def start_scheduler():
         'interval', 
         minutes=settings.SCRAPER_INTERVAL_MINUTES,
         id='scraper_job'
+    )
+
+    # Add crowd listener job
+    scheduler.add_job(
+        run_crowd_job,
+        'interval',
+        minutes=5,
+        id='crowd_listener_job'
     )
 
     # Add daily cleanup job
