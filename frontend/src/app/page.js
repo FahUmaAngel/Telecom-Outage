@@ -76,9 +76,9 @@ export default function Home() {
           };
           if (s.key === "mttr") return {
             ...s,
-            value: `${avgMttr}h`,
-            trend_sv: `Snitt över ${validMttr.length} operatörer`,
-            trend_en: `Avg across ${validMttr.length} operators`
+            value: avgMttr === "0" ? (lang === "sv" ? "Insamling..." : "Collecting...") : `${avgMttr}h`,
+            trend_sv: validMttr.length > 0 ? `Snitt över ${validMttr.length} operatörer` : "Ingen data för lösta avbrott",
+            trend_en: validMttr.length > 0 ? `Avg across ${validMttr.length} operators` : "No resolved outages yet"
           };
           if (s.key === "reports") return {
             ...s,

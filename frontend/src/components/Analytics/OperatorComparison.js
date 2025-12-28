@@ -80,36 +80,44 @@ export default function OperatorComparison({ mttrData, reliabilityData }) {
                 {/* MTTR Comparison */}
                 <div className="chart-section">
                     <h3>{lang === "sv" ? "Genomsnittlig reparationstid (MTTR)" : "Mean Time to Repair (MTTR)"}</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={comparisonData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
-                            <XAxis
-                                dataKey="name"
-                                stroke="var(--text-secondary)"
-                                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                            />
-                            <YAxis
-                                stroke="var(--text-secondary)"
-                                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                                label={{
-                                    value: lang === "sv" ? 'Timmar' : 'Hours',
-                                    angle: -90,
-                                    position: 'insideLeft',
-                                    style: { fill: 'var(--text-secondary)' }
-                                }}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar
-                                dataKey="mttr"
-                                fill="#f59e0b"
-                                name={lang === "sv" ? "MTTR (timmar)" : "MTTR (hours)"}
-                                radius={[8, 8, 0, 0]}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
-                    <p className="chart-note">
-                        {lang === "sv" ? "Lägre är bättre" : "Lower is better"}
-                    </p>
+                    {comparisonData.every(d => d.mttr === 0) ? (
+                        <div className="empty-chart glass" style={{ height: '250px' }}>
+                            <p>{lang === "sv" ? "Inga lösta avbrott hittades ännu" : "No resolved outages found yet"}</p>
+                        </div>
+                    ) : (
+                        <>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={comparisonData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="var(--text-secondary)"
+                                        tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                                    />
+                                    <YAxis
+                                        stroke="var(--text-secondary)"
+                                        tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                                        label={{
+                                            value: lang === "sv" ? 'Timmar' : 'Hours',
+                                            angle: -90,
+                                            position: 'insideLeft',
+                                            style: { fill: 'var(--text-secondary)' }
+                                        }}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                        dataKey="mttr"
+                                        fill="#f59e0b"
+                                        name={lang === "sv" ? "MTTR (timmar)" : "MTTR (hours)"}
+                                        radius={[8, 8, 0, 0]}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                            <p className="chart-note">
+                                {lang === "sv" ? "Lägre är bättre" : "Lower is better"}
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 {/* Outage Count Comparison */}

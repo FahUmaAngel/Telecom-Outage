@@ -85,20 +85,48 @@ def run_scrapers():
             logger.error(f"Telia failed with exception: {e}", exc_info=True)
             db.rollback()
 
-        # 2. Lycamobile
+        # 2. Lycamobile (Selenium)
         try:
-            logger.info("Running Lycamobile...")
-            raw = scrape_lyca_outages()
-            parsed = parse_lyca_outages(raw)
-            mapped = map_lyca_outages(parsed)
+            logger.info("Running Lycamobile (Selenium)...")
+            from scrapers.lyca_selenium_scraper import scrape_lyca_with_selenium
+            from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
             
-            for item in mapped:
-                save_outage(db, item, {"source": "lyca_scraper"})
+            lyca_result = scrape_lyca_with_selenium()
+            
+            if lyca_result['success']:
+                logger.info(f"✓ Lycamobile scraper succeeded")
+                logger.info(f"  Found {len(lyca_result['outages'])} outages")
                 
-            db.commit()
-            logger.info(f"Lycamobile: processed {len(mapped)} outages")
+                # Save each outage to database
+                for outage in lyca_result['outages']:
+                    # Create NormalizedOutage object
+                    normalized = NormalizedOutage(
+                        operator=OperatorEnum.LYCAMOBILE,
+                        incident_id=outage['incident_id'],
+                        title={
+                            "sv": f"Incident {outage['incident_id']}",
+                            "en": f"Incident {outage['incident_id']}"
+                        },
+                        description={
+                            "sv": outage.get('description', f"Incident ID: {outage['incident_id']}"),
+                            "en": outage.get('description', f"Incident ID: {outage['incident_id']}")
+                        },
+                        location=outage.get('location', 'Unknown'),
+                        status=OutageStatus.ACTIVE,
+                        severity=SeverityLevel.MEDIUM,
+                        affected_services=[ServiceType.MOBILE],
+                        source_url="https://mboss.telenor.se/coverageportal?appmode=outage"
+                    )
+                    
+                    save_outage(db, normalized, {"source": "lyca_selenium", "raw": outage})
+                
+                db.commit()
+                logger.info(f"Lycamobile: saved {len(lyca_result['outages'])} outages to database")
+            else:
+                logger.error(f"✗ Lycamobile scraper failed")
+                
         except Exception as e:
-            logger.error(f"Lycamobile failed: {e}")
+            logger.error(f"Lycamobile failed with exception: {e}", exc_info=True)
             db.rollback()
 
         # 3. Tre

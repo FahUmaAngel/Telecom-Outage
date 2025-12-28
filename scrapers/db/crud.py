@@ -80,7 +80,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
             description=normalized.description,
             status=normalized.status,
             severity=normalized.severity,
-            start_time=normalized.started_at,
+            start_time=normalized.started_at if normalized.started_at else datetime.utcnow(),
             estimated_fix_time=normalized.estimated_fix_time,
             location=normalized.location,
             affected_services=affected_services_json,

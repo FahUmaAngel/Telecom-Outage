@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
                     <div className="insights-list">
                         <div className="insight-item">
                             <span className="insight-label">Mean Time To Repair (MTTR)</span>
-                            <span className="insight-value">{avgMttr}h</span>
+                            <span className="insight-value">{avgMttr === "0" ? "-" : `${avgMttr}h`}</span>
                         </div>
                         <div className="insight-item">
                             <span className="insight-label">{lang === "sv" ? "Totala Incidenter" : "Total Incidents"}</span>

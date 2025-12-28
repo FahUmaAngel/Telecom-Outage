@@ -1,0 +1,602 @@
+{
+  "outages": [
+    {
+      "incident_id": "34097105",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097749",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33780328",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34042233",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097876",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097747",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097424",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097336",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097558",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33847277",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33888791",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097331",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097880",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096682",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097657",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34098022",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097793",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33857114",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097275",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33857894",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097357",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097707",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097715",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097734",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096681",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096847",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097633",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097773",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097460",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097730",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097554",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33780552",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097466",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097841",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097443",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097574",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33741289",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096732",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097723",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096164",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096909",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097518",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097432",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097868",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097465",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33998033",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097636",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097717",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33831935",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097470",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097855",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097851",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097459",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096718",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097718",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33971487",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097753",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096827",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097399",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097467",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33883425",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096837",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097674",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097046",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097719",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097386",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097330",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33928429",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097356",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097204",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097372",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097742",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33837778",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097816",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33976055",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097857",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097613",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33744253",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096417",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097754",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097407",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097325",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097930",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097069",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097958",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "20251227",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097757",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097716",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33821923",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097304",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34087618",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097398",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097329",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097728",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097085",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33832935",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34098081",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097746",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097197",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097804",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097815",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33992384",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34095150",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097886",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097745",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097808",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34098080",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097673",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097846",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097748",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097811",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "33857777",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097464",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097802",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097389",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097370",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097882",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34097096",
+      "operator": "Lycamobile",
+      "status": "active"
+    },
+    {
+      "incident_id": "34096906",
+      "operator": "Lycamobile",
+      "status": "active"
+    }
+  ],
+  "timestamp": "2025-12-28T00:36:23.464513",
+  "success": true,
+  "method": "selenium_lyca"
+}
