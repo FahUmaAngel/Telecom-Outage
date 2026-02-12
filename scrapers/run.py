@@ -21,6 +21,9 @@ from scrapers.tre.mapper import map_tre_outages
 
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import save_outage
+from scrapers.common.geocoding import get_county_coordinates
+from scrapers.common.translation import SWEDISH_COUNTIES
+from scrapers.common.engine import extract_region_from_text
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,6 +69,15 @@ def run_scrapers():
                         affected_services=[ServiceType.MOBILE],
                         source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
                     )
+                    
+                    # Geocoding fallback: use county coordinates if specific coords not available
+                    location_text = outage.get('location', '')
+                    county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
+                    if county_name:
+                        coords = get_county_coordinates(county_name)
+                        if coords:
+                            normalized.latitude, normalized.longitude = coords
+                            logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
                     raw_data = {
                         'source': telia_result['method'],
@@ -117,6 +129,15 @@ def run_scrapers():
                         affected_services=[ServiceType.MOBILE],
                         source_url="https://mboss.telenor.se/coverageportal?appmode=outage"
                     )
+                    
+                    # Geocoding fallback: use county coordinates if specific coords not available
+                    location_text = outage.get('location', '')
+                    county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
+                    if county_name:
+                        coords = get_county_coordinates(county_name)
+                        if coords:
+                            normalized.latitude, normalized.longitude = coords
+                            logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
                     save_outage(db, normalized, {"source": "lyca_selenium", "raw": outage})
                 

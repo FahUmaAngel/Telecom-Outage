@@ -68,6 +68,8 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
         existing.region_id = region_id # Update region if detected
+        existing.latitude = normalized.latitude
+        existing.longitude = normalized.longitude
         return existing
     else:
         # Create new
@@ -83,6 +85,8 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
             start_time=normalized.started_at if normalized.started_at else datetime.utcnow(),
             estimated_fix_time=normalized.estimated_fix_time,
             location=normalized.location,
+            latitude=normalized.latitude,
+            longitude=normalized.longitude,
             affected_services=affected_services_json,
         )
         db.add(new_outage)
