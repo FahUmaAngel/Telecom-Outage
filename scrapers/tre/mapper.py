@@ -40,10 +40,11 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
              title_en = f"Planned maintenance in {location}"
              status = OutageStatus.SCHEDULED
 
-        # Map services
-        raw_services = parsed_outage.get('affected_services', [])
-        affected_services = []
+        # Map services: Tre incidents are usually broad mobile network works
+        affected_services = [ServiceType.MOBILE]
         
+        # Still allow specific services if the parser found them
+        raw_services = parsed_outage.get('affected_services', [])
         service_map = {
             '5G': ServiceType.MOBILE_5G,
             '4G': ServiceType.MOBILE_4G,
@@ -57,10 +58,13 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         
         for s in raw_services:
             if s in service_map:
-                affected_services.append(service_map[s])
+                svc = service_map[s]
+                if svc not in affected_services:
+                    affected_services.append(svc)
         
-        if not affected_services:
-            affected_services = [ServiceType.MOBILE]
+        # Remove 'mobile' if we have more specific generations to keep it cleaner
+        # (Optional, but usually better if we have 5G etc.)
+        # However, user wants "mobile" specifically for Tre.
 
         normalized = NormalizedOutage(
             operator=OperatorEnum.TRE,
@@ -77,8 +81,7 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
             affected_services=affected_services,
             location=parsed_outage.get('location'),
             estimated_fix_time=parsed_outage.get('end_time'),
-            # Use started_at for start_time
-            start_time=parsed_outage.get('start_time')
+            started_at=parsed_outage.get('start_time')
         )
         return normalized
         

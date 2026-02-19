@@ -106,7 +106,9 @@ export default function AdminPage() {
                                                 {r.status}
                                             </span>
                                         </td>
-                                        <td className="date-cell">{new Date(r.created_at).toLocaleDateString()}</td>
+                                        <td className="date-cell">
+                                            {r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}
+                                        </td>
                                         <td className="actions-cell">
                                             {r.status === "pending" ? (
                                                 <div className="action-btns">

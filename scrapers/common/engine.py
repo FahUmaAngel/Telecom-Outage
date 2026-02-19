@@ -4,6 +4,61 @@ Core Engine Services: Severity Scoring and Analytics tools.
 from typing import List
 from .models import OutageStatus, SeverityLevel, ServiceType
 
+from datetime import datetime
+import re
+
+def parse_swedish_date(date_str: str) -> datetime:
+    """
+    Parse Swedish date strings into datetime objects.
+    Supported formats:
+    - 'ons 18.feb 14:55' (Telia)
+    - '2026-02-15 Kl 00:00' (Tre)
+    """
+    if not date_str:
+        return None
+        
+    date_str = date_str.lower().strip()
+    
+    # Tre Format: 2026-02-15 Kl 00:00
+    if 'kl' in date_str:
+        try:
+            clean = date_str.replace('kl', '').replace('  ', ' ').strip()
+            return datetime.strptime(clean, "%Y-%m-%d %H:%M")
+        except:
+            pass
+
+    # Telia/Lyca Format: 'ons 18.feb 14:55'
+    # Month mapping
+    months = {
+        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'maj': 5, 'jun': 6,
+        'jul': 7, 'aug': 8, 'sep': 9, 'okt': 10, 'nov': 11, 'dec': 12
+    }
+    
+    try:
+        # Match '18.feb 14:55' or similar
+        match = re.search(r'(\d{1,2})[\.\s]([a-z]{3})\s+(\d{1,2}:\d{2})', date_str)
+        if match:
+            day = int(match.group(1))
+            month_abbr = match.group(2)
+            time_part = match.group(3)
+            month = months.get(month_abbr)
+            
+            if month:
+                # Use current year as default
+                now = datetime.now()
+                dt_str = f"{now.year}-{month:02d}-{day:02d} {time_part}"
+                return datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+    except:
+        pass
+
+    # Basic ISO format fallback
+    try:
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+    except:
+        pass
+        
+    return None
+
 def calculate_severity_score(severity: SeverityLevel, affected_services: List[ServiceType]) -> float:
     """
     Calculate a normalized severity score (0.0 to 10.0).
@@ -52,3 +107,66 @@ def extract_region_from_text(text: str, counties: List[str]) -> str:
             return county
             
     return None
+
+
+def classify_services(text: str) -> List[ServiceType]:
+    """
+    Extract ServiceType enums from text based on keywords.
+    """
+    if not text:
+        return [ServiceType.MOBILE]
+
+    services = []
+    text_lower = text.lower()
+
+    # Specific mobile generations
+    if '5g' in text_lower: services.append(ServiceType.MOBILE_5G)
+    if '4g' in text_lower: services.append(ServiceType.MOBILE_4G)
+    if '3g' in text_lower: services.append(ServiceType.MOBILE_3G)
+    if '2g' in text_lower: services.append(ServiceType.MOBILE_2G)
+
+    # General categories
+    if any(k in text_lower for k in ['data', 'surf', 'internet', 'mobilsurf']):
+        services.append(ServiceType.MOBILE_DATA)
+    if any(k in text_lower for k in ['samtal', 'röst', 'voice', 'telefoni', 'mobilsamtal']):
+        services.append(ServiceType.VOICE)
+    if 'sms' in text_lower: services.append(ServiceType.SMS)
+    if 'mms' in text_lower: services.append(ServiceType.MMS)
+
+    # Non-mobile
+    if 'fiber' in text_lower: services.append(ServiceType.FIBER)
+    if any(k in text_lower for k in ['bredband', 'broadband', 'fixed line']):
+        services.append(ServiceType.BROADBAND)
+
+    # If it mentions "täckning" (coverage), "mobil", "nätverk", or "driftstörning",
+    # and no specific generation is found, we assume it affects 5G, 4G and Voice 
+    # as these are the core components of modern mobile coverage.
+    if not any(s in [ServiceType.MOBILE_5G, ServiceType.MOBILE_4G, ServiceType.MOBILE_3G, ServiceType.MOBILE_2G, ServiceType.VOICE, ServiceType.MOBILE_DATA] for s in services):
+        if any(k in text_lower for k in ['täckning', 'mobil', 'nätverk', 'network', 'driftstörning', 'underhåll', 'arbete']):
+             # If it's a mobile-related general term, add the main ones
+             if 'fiber' not in text_lower and 'bredband' not in text_lower:
+                services.extend([ServiceType.MOBILE_5G, ServiceType.MOBILE_4G, ServiceType.VOICE, ServiceType.MOBILE_DATA])
+
+    if not services:
+        services.append(ServiceType.MOBILE)
+
+    return list(set(services))
+
+
+def classify_status(text: str, current_status: OutageStatus = OutageStatus.ACTIVE) -> OutageStatus:
+    """
+    Determine OutageStatus based on text context.
+    """
+    if not text:
+        return current_status
+
+    text_lower = text.lower()
+
+    if any(k in text_lower for k in ['löst', 'resolved', 'åtgärdat', 'klart']):
+        return OutageStatus.RESOLVED
+    if any(k in text_lower for k in ['planerat', 'scheduled', 'kommande', 'underhåll']):
+        return OutageStatus.SCHEDULED
+    if any(k in text_lower for k in ['undersöker', 'investigating', 'felsökning', 'pågår']):
+        return OutageStatus.INVESTIGATING
+
+    return current_status

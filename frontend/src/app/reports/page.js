@@ -15,6 +15,20 @@ function ReportsContent() {
     const searchParams = useSearchParams();
     const initialStatus = searchParams.get("status") || "all";
     const [statusFilter, setStatusFilter] = useState(initialStatus);
+    const [operatorFilter, setOperatorFilter] = useState("all");
+    const [operators, setOperators] = useState([]);
+
+    useEffect(() => {
+        const fetchMetadata = async () => {
+            try {
+                const ops = await api.operators.list();
+                setOperators(ops);
+            } catch (err) {
+                console.error("Failed to fetch operators:", err);
+            }
+        };
+        fetchMetadata();
+    }, []);
 
     useEffect(() => {
         const fetchOutages = async () => {
@@ -42,28 +56,56 @@ function ReportsContent() {
 
         if (!matchesSearch) return false;
 
+        // Operator Filter
+        if (operatorFilter !== "all" && o.operator_name.toLowerCase() !== operatorFilter.toLowerCase()) {
+            return false;
+        }
+
         // Service Filter
         if (serviceFilter !== "all") {
             const services = o.affected_services || [];
             const lowerServices = services.map(s => s.toLowerCase());
 
             let matchesService = false;
+            // Precise matching for enum values
             if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
             else if (serviceFilter === "4g") matchesService = lowerServices.includes("4g");
-            else if (serviceFilter === "voice") matchesService = lowerServices.some(s => s.includes("voice") || s.includes("samtal") || s.includes("telefoni"));
-            else if (serviceFilter === "data") matchesService = lowerServices.some(s => s.includes("data") || s.includes("surf") || s.includes("internet"));
+            else if (serviceFilter === "3g") matchesService = lowerServices.includes("3g");
+            else if (serviceFilter === "2g") matchesService = lowerServices.includes("2g");
+            else if (serviceFilter === "data") matchesService = lowerServices.includes("data");
+            else if (serviceFilter === "voice") matchesService = lowerServices.includes("voice");
+            else if (serviceFilter === "sms") matchesService = lowerServices.includes("sms");
+            else if (serviceFilter === "mms") matchesService = lowerServices.includes("mms");
+            else if (serviceFilter === "fiber") matchesService = lowerServices.includes("fiber");
+            else if (serviceFilter === "broadband") matchesService = lowerServices.includes("broadband");
+            else if (serviceFilter === "mobile") matchesService = lowerServices.includes("mobile");
 
             if (!matchesService) return false;
         }
 
         // Status Filter
         if (statusFilter !== "all") {
-            if (statusFilter === "active" && o.status === "resolved") return false;
-            if (statusFilter === "resolved" && o.status !== "resolved") return false;
+            if (statusFilter.toLowerCase() !== o.status.toLowerCase()) return false;
         }
 
         return true;
+    }).sort((a, b) => {
+        const dateA = a.start_time ? new Date(a.start_time) : new Date(0);
+        const dateB = b.start_time ? new Date(b.start_time) : new Date(0);
+        return dateB - dateA;
     });
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "-";
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "-";
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}/${month}/${day}`;
+    };
 
     if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
 
@@ -81,12 +123,24 @@ function ReportsContent() {
                 <div className="filters-container">
                     <div className="filter-group">
                         <select
+                            value={operatorFilter}
+                            onChange={(e) => setOperatorFilter(e.target.value)}
+                            className="service-select"
+                        >
+                            <option value="all">{lang === "sv" ? "Alla Operatörer" : "All Operators"}</option>
+                            {operators.map(op => (
+                                <option key={op.id} value={op.name.toLowerCase()}>{op.name.charAt(0).toUpperCase() + op.name.slice(1)}</option>
+                            ))}
+                        </select>
+                        <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Status" : "All Status"}</option>
                             <option value="active">{lang === "sv" ? "Aktiva" : "Active"}</option>
+                            <option value="investigating">{lang === "sv" ? "Undersöker" : "Investigating"}</option>
+                            <option value="scheduled">{lang === "sv" ? "Planerat" : "Scheduled"}</option>
                             <option value="resolved">{lang === "sv" ? "Lösta" : "Resolved"}</option>
                         </select>
                         <select
@@ -95,10 +149,17 @@ function ReportsContent() {
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
+                            <option value="mobile">{lang === "sv" ? "Mobil" : "Mobile"}</option>
                             <option value="5g">5G</option>
                             <option value="4g">4G</option>
-                            <option value="data">{lang === "sv" ? "Mobildata (Surf)" : "Mobile Data"}</option>
+                            <option value="3g">3G</option>
+                            <option value="2g">2G</option>
+                            <option value="data">{lang === "sv" ? "Mobildata" : "Mobile Data"}</option>
                             <option value="voice">{lang === "sv" ? "Röstsamtal" : "Voice Calls"}</option>
+                            <option value="sms">SMS</option>
+                            <option value="mms">MMS</option>
+                            <option value="fiber">{lang === "sv" ? "Fiber" : "Fiber"}</option>
+                            <option value="broadband">{lang === "sv" ? "Bredband" : "Broadband"}</option>
                         </select>
                     </div>
                     <div className="search-bar">
@@ -146,7 +207,9 @@ function ReportsContent() {
                                     </div>
                                 </td>
                                 <td className="location-cell">{outage.location || "Sweden"}</td>
-                                <td className="date-cell">{new Date(outage.start_time).toLocaleDateString()}</td>
+                                <td className="date-cell">
+                                    {formatDate(outage.start_time)}
+                                </td>
                                 <td className="actions-cell">
                                     <Link href={`/outages/${outage.id}`} className="view-link">
                                         {lang === "sv" ? "Visa" : "View"}

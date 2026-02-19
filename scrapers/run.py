@@ -36,11 +36,12 @@ def run_scrapers():
     db = SessionLocal()
     
     try:
-        # 1. Telia (with automatic fallback)
+            # 1. Telia (with automatic fallback)
         try:
             logger.info("Running Telia (Selenium V3 with Playwright fallback)...")
             from scrapers.telia_scraper import scrape_telia_with_fallback
             from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
+            from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
             
             telia_result = scrape_telia_with_fallback()
             
@@ -51,27 +52,35 @@ def run_scrapers():
                 
                 # Save each outage to database
                 for outage in telia_result['outages']:
+                    # Extract info from whatever we have
+                    location_text = outage.get('location', '')
+                    context_text = f"{outage.get('incident_id', '')} {location_text} {outage.get('title', '')} {outage.get('description', '')}"
+                    
+                    save_title = outage.get('title')
+                    save_desc = outage.get('description')
+                    
                     # Create NormalizedOutage object
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.TELIA,
                         incident_id=outage['incident_id'],
                         title={
-                            "sv": f"Incident {outage['incident_id']}",
-                            "en": f"Incident {outage['incident_id']}"
+                            "sv": save_title or f"Incident {outage['incident_id']}",
+                            "en": save_title or f"Incident {outage['incident_id']}"
                         },
                         description={
-                            "sv": f"Incident ID: {outage['incident_id']}",
-                            "en": f"Incident ID: {outage['incident_id']}"
+                            "sv": save_desc or f"Incident ID: {outage['incident_id']}",
+                            "en": save_desc or f"Incident ID: {outage['incident_id']}"
                         },
-                        location=outage.get('location', 'Unknown'),
-                        status=OutageStatus.ACTIVE,
+                        location=location_text or 'Unknown',
+                        status=classify_status(context_text, OutageStatus.ACTIVE),
                         severity=SeverityLevel.MEDIUM,
-                        affected_services=[ServiceType.MOBILE],
-                        source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
+                        affected_services=classify_services(context_text),
+                        source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+                        started_at=parse_swedish_date(outage.get('start_time')),
+                        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
                     )
                     
                     # Geocoding fallback: use county coordinates if specific coords not available
-                    location_text = outage.get('location', '')
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
                         coords = get_county_coordinates(county_name)
@@ -102,6 +111,7 @@ def run_scrapers():
             logger.info("Running Lycamobile (Selenium)...")
             from scrapers.lyca_selenium_scraper import scrape_lyca_with_selenium
             from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
+            from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
             
             lyca_result = scrape_lyca_with_selenium()
             
@@ -111,27 +121,33 @@ def run_scrapers():
                 
                 # Save each outage to database
                 for outage in lyca_result['outages']:
+                    location_text = outage.get('location', '')
+                    desc_text = outage.get('description', '')
+                    title_text = outage.get('title', f"Incident {outage['incident_id']}")
+                    context_text = f"{location_text} {desc_text} {title_text}"
+                    
                     # Create NormalizedOutage object
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.LYCAMOBILE,
                         incident_id=outage['incident_id'],
                         title={
-                            "sv": f"Incident {outage['incident_id']}",
-                            "en": f"Incident {outage['incident_id']}"
+                            "sv": title_text,
+                            "en": title_text
                         },
                         description={
-                            "sv": outage.get('description', f"Incident ID: {outage['incident_id']}"),
-                            "en": outage.get('description', f"Incident ID: {outage['incident_id']}")
+                            "sv": desc_text or f"Incident ID: {outage['incident_id']}",
+                            "en": desc_text or f"Incident ID: {outage['incident_id']}"
                         },
-                        location=outage.get('location', 'Unknown'),
-                        status=OutageStatus.ACTIVE,
+                        location=location_text or 'Unknown',
+                        status=classify_status(context_text, OutageStatus.ACTIVE),
                         severity=SeverityLevel.MEDIUM,
-                        affected_services=[ServiceType.MOBILE],
-                        source_url="https://mboss.telenor.se/coverageportal?appmode=outage"
+                        affected_services=classify_services(context_text),
+                        source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
+                        started_at=parse_swedish_date(outage.get('start_time')),
+                        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
                     )
                     
                     # Geocoding fallback: use county coordinates if specific coords not available
-                    location_text = outage.get('location', '')
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
                         coords = get_county_coordinates(county_name)

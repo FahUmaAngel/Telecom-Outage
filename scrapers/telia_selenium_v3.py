@@ -26,38 +26,70 @@ logger = logging.getLogger(__name__)
 COVERAGE_PORTAL_URL = "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
 
 
+from bs4 import BeautifulSoup
+
 def extract_incidents_from_source(page_source: str) -> List[Dict]:
-    """Extract all incident information from page source."""
+    """Extract all incident information from page source using BeautifulSoup."""
     incidents = []
+    soup = BeautifulSoup(page_source, 'html.parser')
     
-    # Find all INCSE incident IDs
-    incident_ids = re.findall(r'INCSE\d+', page_source)
-    incident_ids = list(set(incident_ids))
+    # Find all table rows
+    rows = soup.find_all('tr')
     
-    for inc_id in incident_ids:
-        incident = {
-            'incident_id': inc_id,
-            'operator': 'Telia',
-            'source': 'coverage_portal',
-            'status': 'active'
-        }
-        
-        # Try to find context around this incident
-        pattern = rf'{inc_id}[^<]*(?:<[^>]+>[^<]*)*?(?:(?:Sat|Sun|Mon|Tue|Wed|Thu|Fri)[^<]*\d{{2}}:\d{{2}})'
-        matches = re.findall(pattern, page_source, re.DOTALL)
-        
-        if matches:
-            context = matches[0][:300]
-            # Extract dates
-            date_pattern = r'((?:Sat|Sun|Mon|Tue|Wed|Thu|Fri),?\s+\w+\s+\d+,?\s+\d{2}:\d{2})'
-            dates = re.findall(date_pattern, context)
-            if dates:
-                incident['start_time'] = dates[0]
-                if len(dates) > 1:
-                    incident['estimated_end'] = dates[1]
-        
-        incidents.append(incident)
+    for row in rows:
+        cells = row.find_all('td')
+        # Typical Telia row has at least 4 cells: ID, Description, Start, End
+        # If the first cell contains INCSE, it's an incident row
+        if len(cells) >= 4:
+            id_cell = cells[0].get_text(strip=True)
+            if 'INCSE' in id_cell:
+                # Extract clean INCSE ID
+                inc_id_match = re.search(r'INCSE\d+', id_cell)
+                if not inc_id_match: continue
+                inc_id = inc_id_match.group(0)
+                
+                # Description
+                desc_cell = cells[1].get_text(strip=True)
+                # Remove "Beskrivning" label if present
+                desc = desc_cell.replace('Beskrivning', '').strip()
+                
+                # Dates
+                start_cell = cells[2].get_text(strip=True).replace('Starttid', '').strip()
+                end_cell = cells[3].get_text(strip=True).replace('Sluttid', '').strip()
+                
+                incident = {
+                    'incident_id': inc_id,
+                    'operator': 'Telia',
+                    'source': 'coverage_portal',
+                    'status': 'active',
+                    'description': desc,
+                    'start_time': start_cell,
+                    'estimated_end': end_cell
+                }
+                
+                # Determine title from ID and first bit of description
+                # e.g., "Telia Incident INCSE123: Just nu..."
+                if desc:
+                    # Clean up common generic desc: "Just nu har vi en driftstörning..."
+                    short_desc = desc[:60] + "..." if len(desc) > 60 else desc
+                    incident['title'] = f"{inc_id}: {short_desc}"
+                else:
+                    incident['title'] = f"Incident {inc_id}"
+                
+                incidents.append(incident)
     
+    # Fallback to regex if BS finds nothing (rare, but good for safety)
+    if not incidents:
+        incident_ids = re.findall(r'INCSE\d+', page_source)
+        for inc_id in list(set(incident_ids)):
+            incidents.append({
+                'incident_id': inc_id,
+                'operator': 'Telia',
+                'source': 'coverage_portal_regex',
+                'status': 'active',
+                'title': f"Incident {inc_id}"
+            })
+            
     return incidents
 
 

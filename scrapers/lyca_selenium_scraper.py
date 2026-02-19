@@ -161,21 +161,30 @@ def scrape_lyca_with_selenium() -> Dict:
                                 incident = {
                                     'incident_id': incident_id,
                                     'operator': 'Lycamobile',
-                                    'location': county['name'],
+                                    'location': county_text,
                                     'description': description,
                                     'start_time': started_at,
                                     'estimated_end': est_end,
                                     'status': 'active'
                                 }
                                 
+                                # Better title
+                                if description:
+                                    # Use city and a bit of description
+                                    # e.g., "Göteborg: Driftstörning i mobilnätet"
+                                    short_desc = description[:60] + "..." if len(description) > 60 else description
+                                    incident['title'] = f"{county_text}: {short_desc}"
+                                else:
+                                    incident['title'] = f"Lycamobile Incident {incident_id} ({county_text})"
+                                
                                 # Prevent duplicates
                                 existing_ids = {o['incident_id'] for o in results['outages']}
                                 if incident_id not in existing_ids:
                                     results['outages'].append(incident)
-                                    logger.info(f"  + Added incident {incident_id}")
+                                    logger.info(f"  + Added incident {incident_id} in {county_text}")
                 
                 except Exception as e:
-                    logger.warning(f"  Error processing county {county['name']}: {e}")
+                    logger.warning(f"  Error processing county {county_text}: {e}")
                     continue
                     
         except Exception as e:
