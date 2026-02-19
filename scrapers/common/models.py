@@ -17,6 +17,7 @@ class OperatorEnum(str, Enum):
 class ServiceType(str, Enum):
     """Telecom service types."""
     MOBILE = "mobile"
+    MOBILE_5G_PLUS = "5g+"
     MOBILE_5G = "5g"
     MOBILE_4G = "4g"
     MOBILE_3G = "3g"

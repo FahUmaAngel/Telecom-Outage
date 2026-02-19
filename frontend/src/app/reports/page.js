@@ -68,7 +68,8 @@ function ReportsContent() {
 
             let matchesService = false;
             // Precise matching for enum values
-            if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
+            if (serviceFilter === "5g+") matchesService = lowerServices.includes("5g+");
+            else if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
             else if (serviceFilter === "4g") matchesService = lowerServices.includes("4g");
             else if (serviceFilter === "3g") matchesService = lowerServices.includes("3g");
             else if (serviceFilter === "2g") matchesService = lowerServices.includes("2g");
@@ -150,6 +151,7 @@ function ReportsContent() {
                         >
                             <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
                             <option value="mobile">{lang === "sv" ? "Mobil" : "Mobile"}</option>
+                            <option value="5g+">5G+</option>
                             <option value="5g">5G</option>
                             <option value="4g">4G</option>
                             <option value="3g">3G</option>
@@ -198,12 +200,25 @@ function ReportsContent() {
                                 <td className="title-cell">{t(outage.title)}</td>
                                 <td className="services-cell">
                                     <div className="service-tags-mini">
-                                        {outage.affected_services?.slice(0, 3).map((s, i) => (
-                                            <span key={i} className="mini-tag">{s}</span>
-                                        ))}
-                                        {outage.affected_services?.length > 3 && (
-                                            <span className="mini-tag more">+{outage.affected_services.length - 3}</span>
-                                        )}
+                                        {(() => {
+                                            const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
+                                            const sorted = [...(outage.affected_services || [])].sort((a, b) => {
+                                                const idxA = priority.indexOf(a.toLowerCase());
+                                                const idxB = priority.indexOf(b.toLowerCase());
+                                                return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                                            });
+                                            const displayLimit = 5;
+                                            return (
+                                                <>
+                                                    {sorted.slice(0, displayLimit).map((s, i) => (
+                                                        <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
+                                                    ))}
+                                                    {sorted.length > displayLimit && (
+                                                        <span className="mini-tag more">+{sorted.length - displayLimit}</span>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </td>
                                 <td className="location-cell">{outage.location || "Sweden"}</td>
@@ -324,6 +339,12 @@ function ReportsContent() {
                 .status-badge-mini.active { color: var(--status-critical); border: 1px solid var(--status-critical); }
                 .status-badge-mini.resolved { color: var(--status-success); border: 1px solid var(--status-success); }
                 .status-badge-mini.investigating { color: var(--status-warning); border: 1px solid var(--status-warning); }
+                
+                .mini-tag.mobile {
+                    background: rgba(0, 243, 255, 0.1);
+                    color: #00f3ff;
+                    border-color: #00f3ff;
+                }
 
                 .view-link {
                     color: var(--accent-primary);

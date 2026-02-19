@@ -40,27 +40,11 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
              title_en = f"Planned maintenance in {location}"
              status = OutageStatus.SCHEDULED
 
-        # Map services: Tre incidents are usually broad mobile network works
-        affected_services = [ServiceType.MOBILE]
+        from common.engine import classify_services
         
-        # Still allow specific services if the parser found them
-        raw_services = parsed_outage.get('affected_services', [])
-        service_map = {
-            '5G': ServiceType.MOBILE_5G,
-            '4G': ServiceType.MOBILE_4G,
-            '3G': ServiceType.MOBILE_3G,
-            '2G': ServiceType.MOBILE_2G,
-            'Mobile Data': ServiceType.MOBILE_DATA,
-            'Voice': ServiceType.VOICE,
-            'SMS': ServiceType.SMS,
-            'Mobile Network': ServiceType.MOBILE
-        }
-        
-        for s in raw_services:
-            if s in service_map:
-                svc = service_map[s]
-                if svc not in affected_services:
-                    affected_services.append(svc)
+        # Build context for classification
+        context_text = f"{location} {desc_sv} {title_sv}"
+        affected_services = classify_services(context_text)
         
         # Remove 'mobile' if we have more specific generations to keep it cleaner
         # (Optional, but usually better if we have 5G etc.)

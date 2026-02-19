@@ -119,36 +119,58 @@ def classify_services(text: str) -> List[ServiceType]:
     services = []
     text_lower = text.lower()
 
-    # Specific mobile generations
-    if '5g' in text_lower: services.append(ServiceType.MOBILE_5G)
-    if '4g' in text_lower: services.append(ServiceType.MOBILE_4G)
-    if '3g' in text_lower: services.append(ServiceType.MOBILE_3G)
-    if '2g' in text_lower: services.append(ServiceType.MOBILE_2G)
+    # Specific mobile generations (Order matters for 5G+ vs 5G)
+    if '5g+' in text_lower or '5g plus' in text_lower: services.append(ServiceType.MOBILE_5G_PLUS)
+    if '5g' in text_lower and ServiceType.MOBILE_5G_PLUS not in services: 
+        services.append(ServiceType.MOBILE_5G)
+    
+    if '4g' in text_lower or 'lte' in text_lower: services.append(ServiceType.MOBILE_4G)
+    if '3g' in text_lower or 'umts' in text_lower: services.append(ServiceType.MOBILE_3G)
+    if '2g' in text_lower or 'gsm' in text_lower: services.append(ServiceType.MOBILE_2G)
 
     # General categories
-    if any(k in text_lower for k in ['data', 'surf', 'internet', 'mobilsurf']):
+    if any(k in text_lower for k in ['data', 'surf', 'internet', 'mobilsurf', 'browsing', 'low speed']):
         services.append(ServiceType.MOBILE_DATA)
-    if any(k in text_lower for k in ['samtal', 'röst', 'voice', 'telefoni', 'mobilsamtal']):
+    if any(k in text_lower for k in ['samtal', 'röst', 'voice', 'telefoni', 'mobilsamtal', 'calling']):
         services.append(ServiceType.VOICE)
-    if 'sms' in text_lower: services.append(ServiceType.SMS)
+    if 'sms' in text_lower or 'text message' in text_lower: services.append(ServiceType.SMS)
     if 'mms' in text_lower: services.append(ServiceType.MMS)
 
     # Non-mobile
-    if 'fiber' in text_lower: services.append(ServiceType.FIBER)
-    if any(k in text_lower for k in ['bredband', 'broadband', 'fixed line']):
+    if 'fiber' in text_lower or 'stadsnät' in text_lower: services.append(ServiceType.FIBER)
+    if any(k in text_lower for k in ['bredband', 'broadband', 'fixed line', 'adsl', 'vDSL']):
         services.append(ServiceType.BROADBAND)
 
-    # If it mentions "täckning" (coverage), "mobil", "nätverk", or "driftstörning",
-    # and no specific generation is found, we assume it affects 5G, 4G and Voice 
-    # as these are the core components of modern mobile coverage.
-    if not any(s in [ServiceType.MOBILE_5G, ServiceType.MOBILE_4G, ServiceType.MOBILE_3G, ServiceType.MOBILE_2G, ServiceType.VOICE, ServiceType.MOBILE_DATA] for s in services):
-        if any(k in text_lower for k in ['täckning', 'mobil', 'nätverk', 'network', 'driftstörning', 'underhåll', 'arbete']):
-             # If it's a mobile-related general term, add the main ones
+    # If it mentions generic mobile terms and no specific generation is found
+    if not any(s in [ServiceType.MOBILE_5G_PLUS, ServiceType.MOBILE_5G, ServiceType.MOBILE_4G, ServiceType.MOBILE_3G, ServiceType.MOBILE_2G, ServiceType.VOICE, ServiceType.MOBILE_DATA] for s in services):
+        mobile_keywords = ['täckning', 'mobil', 'nätverk', 'network', 'driftstörning', 'underhåll', 'arbete', 'coverage', 'störning']
+        if any(k in text_lower for k in mobile_keywords):
+             # If it's a mobile-related general term, add the core standard modern generations
+             # 5G+ is ONLY added if explicitly detected in the first pass
              if 'fiber' not in text_lower and 'bredband' not in text_lower:
-                services.extend([ServiceType.MOBILE_5G, ServiceType.MOBILE_4G, ServiceType.VOICE, ServiceType.MOBILE_DATA])
+                services.extend([
+                    ServiceType.MOBILE_5G, 
+                    ServiceType.MOBILE_4G, 
+                    ServiceType.VOICE, 
+                    ServiceType.MOBILE_DATA
+                ])
 
-    if not services:
-        services.append(ServiceType.MOBILE)
+    # If the list is empty or only contains generic 'mobile', expand it
+    # Note: We NO LONGER add 5G+ as a default fallback to avoid inaccuracy
+    if not services or (len(services) == 1 and services[0] == ServiceType.MOBILE):
+        if 'fiber' not in text_lower and 'bredband' not in text_lower:
+            return [
+                ServiceType.MOBILE_5G, 
+                ServiceType.MOBILE_4G, 
+                ServiceType.VOICE, 
+                ServiceType.MOBILE_DATA
+            ]
+        elif not services:
+            return [ServiceType.MOBILE]
+
+    # Filter out the generic 'mobile' if we have specific generations
+    if len(services) > 1 and ServiceType.MOBILE in services:
+        services.remove(ServiceType.MOBILE)
 
     return list(set(services))
 
