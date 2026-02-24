@@ -161,7 +161,7 @@ def scrape_lyca_with_selenium() -> Dict:
                                 incident = {
                                     'incident_id': incident_id,
                                     'operator': 'Lycamobile',
-                                    'location': county_text,
+                                    'location': county_text or 'Sverige',
                                     'description': description,
                                     'start_time': started_at,
                                     'estimated_end': est_end,
@@ -190,7 +190,7 @@ def scrape_lyca_with_selenium() -> Dict:
         except Exception as e:
             logger.error(f"Error iterating counties: {e}")
         
-        # 4. Fallback: Parse whole page for incident IDs if table logic failed
+        # 4. Fallback: Parse whole page for incident IDs ONLY IF table logic failed completely
         if not results['outages']:
             logger.info("Table extraction failed, falling back to regex extraction...")
             page_text = driver.page_source
@@ -199,6 +199,7 @@ def scrape_lyca_with_selenium() -> Dict:
                 results['outages'].append({
                     'incident_id': id_str,
                     'operator': 'Lycamobile',
+                    'location': 'Sverige',
                     'status': 'active'
                 })
         

@@ -28,7 +28,7 @@ COVERAGE_PORTAL_URL = "https://coverage.ddc.teliasonera.net/coverageportal_se?ap
 
 from bs4 import BeautifulSoup
 
-def extract_incidents_from_source(page_source: str) -> List[Dict]:
+def extract_incidents_from_source(page_source: str, location: Optional[str] = None) -> List[Dict]:
     """Extract all incident information from page source using BeautifulSoup."""
     incidents = []
     soup = BeautifulSoup(page_source, 'html.parser')
@@ -63,6 +63,7 @@ def extract_incidents_from_source(page_source: str) -> List[Dict]:
                     'source': 'coverage_portal',
                     'status': 'active',
                     'description': desc,
+                    'location': location or 'Sverige',
                     'start_time': start_cell,
                     'estimated_end': end_cell
                 }
@@ -85,6 +86,7 @@ def extract_incidents_from_source(page_source: str) -> List[Dict]:
             incidents.append({
                 'incident_id': inc_id,
                 'operator': 'Telia',
+                'location': location or 'Sverige',
                 'source': 'coverage_portal_regex',
                 'status': 'active',
                 'title': f"Incident {inc_id}"
@@ -165,6 +167,17 @@ def scrape_with_selenium_v3() -> Dict:
                     
                     # Scroll to button and click
                     button = buttons[attempt]
+                    # Extract region name from parent or button text before clicking
+                    try:
+                        # Often the region name is next to the button or in the row above
+                        region_name = button.text.replace('Visa område', '').strip()
+                        if not region_name:
+                            # Try to find a header or row text that might contain the region
+                            row = button.find_element(By.XPATH, "./ancestor::tr")
+                            region_name = row.text.replace('Visa', '').strip()
+                    except:
+                        region_name = None
+                        
                     driver.execute_script("arguments[0].scrollIntoView(true);", button)
                     time.sleep(0.5)
                     button.click()
@@ -172,7 +185,7 @@ def scrape_with_selenium_v3() -> Dict:
                     
                     # Extract new incidents
                     new_source = driver.page_source
-                    new_incidents = extract_incidents_from_source(new_source)
+                    new_incidents = extract_incidents_from_source(new_source, location=region_name)
                     
                     # Add only new incidents (avoid duplicates)
                     existing_ids = {o['incident_id'] for o in results['outages']}

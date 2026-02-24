@@ -113,15 +113,50 @@ def create_bilingual_text(swedish: str, english: str = None) -> dict:
     }
 
 
-# Swedish city names (for location extraction)
-SWEDISH_CITIES = [
-    "Stockholm", "Göteborg", "Malmö", "Uppsala", "Västerås",
-    "Örebro", "Linköping", "Helsingborg", "Jönköping", "Norrköping",
-    "Lund", "Umeå", "Gävle", "Borås", "Södertälje", "Eskilstuna",
-    "Karlstad", "Täby", "Växjö", "Halmstad", "Sundsvall", "Luleå",
-    "Trollhättan", "Östersund", "Borlänge", "Falun", "Kalmar",
-    "Kristianstad", "Karlskrona", "Skellefteå", "Uddevalla", "Skövde"
-]
+# Swedish cities and their counties for better location extraction
+CITY_TO_COUNTY = {
+    "Stockholm": "Stockholms län",
+    "Haninge": "Stockholms län",
+    "Södertälje": "Stockholms län",
+    "Täby": "Stockholms län",
+    "Solna": "Stockholms län",
+    "Bromma": "Stockholms län",
+    "Göteborg": "Västra Götalands län",
+    "Borås": "Västra Götalands län",
+    "Trollhättan": "Västra Götalands län",
+    "Uddevalla": "Västra Götalands län",
+    "Skövde": "Västra Götalands län",
+    "Malmö": "Skåne län",
+    "Helsingborg": "Skåne län",
+    "Lund": "Skåne län",
+    "Kristianstad": "Skåne län",
+    "Uppsala": "Uppsala län",
+    "Västerås": "Västmanlands län",
+    "Örebro": "Örebro län",
+    "Linköping": "Östergötlands län",
+    "Norrköping": "Östergötlands län",
+    "Jönköping": "Jönköpings län",
+    "Umeå": "Västerbottens län",
+    "Skellefteå": "Västerbottens län",
+    "Gävle": "Gävleborgs län",
+    "Karlstad": "Värmlands län",
+    "Växjö": "Kronobergs län",
+    "Halmstad": "Hallands län",
+    "Sundsvall": "Västernorrlands län",
+    "Luleå": "Norrbottens län",
+    "Östersund": "Jämtlands län",
+    "Borlänge": "Dalarnas län",
+    "Falun": "Dalarnas län",
+    "Kalmar": "Kalmar län",
+    "Karlskrona": "Blekinge län",
+    "Nyköping": "Södermanlands län",
+    "Eskilstuna": "Södermanlands län",
+    "Gotland": "Gotlands län",
+    "Visby": "Gotlands län",
+}
+
+# List of Swedish cities for general reference
+SWEDISH_CITIES = list(CITY_TO_COUNTY.keys())
 
 # Swedish counties (län)
 SWEDISH_COUNTIES = [
