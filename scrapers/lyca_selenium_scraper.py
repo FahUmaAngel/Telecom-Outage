@@ -61,9 +61,9 @@ def scrape_lyca_with_selenium() -> Dict:
         # 1. Expand the "I följande län har vi för närvarande störningar" accordion
         try:
             logger.info("Looking for disturbances accordion...")
-            # Try multiple selectors for the accordion
+            # Use specific XPath that checks all inner text for the target string
             accordion = None
-            for selector in [".accordion-button", "//button[contains(text(), 'I följande län')]", "//*[@id='headingOne']/button"]:
+            for selector in ["//button[contains(., 'I följande län')]", "//*[@id='headingOne']/button"]:
                 try:
                     if selector.startswith("//") or selector.startswith("/*"):
                         accordion = wait.until(EC.element_to_be_clickable((By.XPATH, selector)))
@@ -90,106 +90,119 @@ def scrape_lyca_with_selenium() -> Dict:
         except Exception as e:
             logger.warning(f"Error handling accordion: {e}")
         
-        # 2. Find all county rows
+        # 2. Find all county rows and save their names to process decoupled
         try:
-            logger.info("Looking for county rows...")
-            # Wait for the table to be visible after expansion
+            logger.info("Looking for county rows to expand...")
             time.sleep(2)
             
-            # Find all rows that contain "län"
-            rows = driver.find_elements(By.XPATH, "//tr[contains(., 'län')]")
-            counties_data = []
-            
-            for row in rows:
+            # Fetch the names of all counties currently experiencing disturbances
+            county_rows = driver.find_elements(By.XPATH, "//tr[contains(., 'län')]")
+            county_names = []
+            for r in county_rows:
                 try:
-                    # Look for the magnifying glass in this row
-                    zoom_icon = row.find_element(By.CSS_SELECTOR, "i.fa-search, .fa-search")
-                    county_text = row.text.strip()
-                    # Extract the county name (usually the first part before any numbers/icons)
-                    county_name = county_text.split('\n')[0].replace('Visa', '').strip()
-                    
-                    counties_data.append({
-                        'name': county_name,
-                        'element': zoom_icon
-                    })
-                    logger.info(f"Detected county: {county_name}")
-                except Exception as row_e:
-                    continue
-            
-            if not counties_data:
-                logger.warning("No counties detected in the table.")
+                    name = r.text.strip().split('\n')[0].replace('Visa', '').strip()
+                    if name: county_names.append(name)
+                except: pass
+                
+            num_counties = len(county_names)
+            if num_counties == 0:
+                logger.warning("No counties detected.")
             else:
-                logger.info(f"Found {len(counties_data)} counties with disturbances")
-            
-            # 3. Iterate through counties and extract specific incidents
-            num_counties = len(counties_data)
-            for i in range(num_counties):
+                logger.info(f"Found {num_counties} counties. Processing via absolute isolated unrolling...")
+                
+            for i, county_text in enumerate(county_names):
                 try:
-                    # Re-find the county rows to avoid stale elements
-                    rows = driver.find_elements(By.XPATH, "//tr[contains(., 'län')]")
-                    if i >= len(rows): break
-                    
-                    row = rows[i]
-                    zoom_icon = row.find_element(By.CSS_SELECTOR, "i.fa-search, .fa-search")
-                    county_text = row.text.strip().split('\n')[0].replace('Visa', '').strip()
-                    
                     logger.info(f"Processing county {i+1}/{num_counties}: {county_text}")
+                    # Hard reset state for absolute reliability on SAP SPA
+                    driver.get(LYCA_BASE_URL)
+                    time.sleep(6) # Wait for map
                     
-                    # Scroll and click zoom icon
+                    # Re-open accordion
+                    accordion = None
+                    for selector in ["//button[contains(., 'I följande län')]", "//*[@id='headingOne']/button"]:
+                        try:
+                            accordion = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH if selector.startswith("//") else By.CSS_SELECTOR, selector)))
+                            if accordion: break
+                        except: continue
+                        
+                    if accordion:
+                        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", accordion)
+                        driver.execute_script("arguments[0].click();", accordion)
+                        time.sleep(2)
+                    
+                    # Target specific county row
+                    target_row = driver.find_elements(By.XPATH, f"//tr[contains(., '{county_text}')]")
+                    if not target_row:
+                        logger.warning(f"  Could not find {county_text} after reset")
+                        continue
+                        
+                    zoom_icon = target_row[0].find_element(By.CSS_SELECTOR, "i.fa-search, .fa-search")
+                    
+                    # Scroll and click
                     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", zoom_icon)
                     time.sleep(1)
                     driver.execute_script("arguments[0].click();", zoom_icon)
-                    logger.info(f"  Wait for incident table for {county_text}...")
-                    time.sleep(6) # Wait for incidents table to populate
                     
-                    # Extract incidents from the newly populated table "Alla aktuella störningar i området"
-                    incident_table_rows = driver.find_elements(By.XPATH, "//h6[contains(text(), 'Alla aktuella störningar i området')]/following-sibling::div//table/tbody/tr")
+                    logger.info(f"  Wait for incidents to load for {county_text}...")
+                    time.sleep(5)
                     
-                    if not incident_table_rows:
-                        # Fallback to general table search if structure is slightly different
-                        incident_table_rows = driver.find_elements(By.CSS_SELECTOR, ".table-responsive table tbody tr")
+                    # Fetch incident rows dynamically rendered below
+                    incident_rows = driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
+                    found_for_county = 0
                     
-                    for row in incident_table_rows:
-                        cells = row.find_elements(By.TAG_NAME, "td")
+                    for ir in incident_rows:
+                        cells = ir.find_elements(By.TAG_NAME, "td")
+                        
+                        # Incidents typically have 5 cols
                         if len(cells) >= 4:
-                            incident_id = cells[0].text.strip()
-                            if re.match(r'^\d{8}$', incident_id): # Telenor IDs are 8 digits
-                                description = cells[1].text.strip()
-                                started_at = cells[2].text.strip()
-                                est_end = cells[3].text.strip()
+                            incident_id = None
+                            desc_idx = 2
+                            start_idx = 3
+                            end_idx = 4
+                            
+                            # Validate 8-digit Telenor IDs
+                            if re.match(r'^\d{8}$', cells[0].text.strip()):
+                                incident_id = cells[0].text.strip()
+                                desc_idx, start_idx, end_idx = 1, 2, 3
+                            elif len(cells) >= 5 and re.match(r'^\d{8}$', cells[1].text.strip()):
+                                incident_id = cells[1].text.strip()
+                                desc_idx, start_idx, end_idx = 2, 3, 4
+                                
+                            if incident_id:
+                                description = cells[desc_idx].text.strip() if desc_idx < len(cells) else ""
+                                started_at = cells[start_idx].text.strip() if start_idx < len(cells) else ""
+                                est_end = cells[end_idx].text.strip() if end_idx < len(cells) else ""
                                 
                                 incident = {
                                     'incident_id': incident_id,
                                     'operator': 'Lycamobile',
-                                    'location': county_text or 'Sverige',
+                                    'location': county_text,
                                     'description': description,
                                     'start_time': started_at,
                                     'estimated_end': est_end,
                                     'status': 'active'
                                 }
                                 
-                                # Better title
-                                if description:
-                                    # Use city and a bit of description
-                                    # e.g., "Göteborg: Driftstörning i mobilnätet"
-                                    short_desc = description[:60] + "..." if len(description) > 60 else description
-                                    incident['title'] = f"{county_text}: {short_desc}"
-                                else:
-                                    incident['title'] = f"Lycamobile Incident {incident_id} ({county_text})"
+                                short_desc = description[:60] + "..." if len(description) > 60 else description
+                                incident['title'] = f"{county_text}: {short_desc}" if description else f"Lycamobile Incident {incident_id} ({county_text})"
                                 
                                 # Prevent duplicates
                                 existing_ids = {o['incident_id'] for o in results['outages']}
                                 if incident_id not in existing_ids:
                                     results['outages'].append(incident)
+                                    found_for_county += 1
                                     logger.info(f"  + Added incident {incident_id} in {county_text}")
-                
+                                    
+                    if found_for_county == 0:
+                        logger.info(f"  No new incidents found in DOM for {county_text}")
+                        
                 except Exception as e:
                     logger.warning(f"  Error processing county {county_text}: {e}")
                     continue
                     
         except Exception as e:
             logger.error(f"Error iterating counties: {e}")
-        
+            
         # 4. Fallback: Parse whole page for incident IDs ONLY IF table logic failed completely
         if not results['outages']:
             logger.info("Table extraction failed, falling back to regex extraction...")

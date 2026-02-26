@@ -197,7 +197,11 @@ function ReportsContent() {
                                     </span>
                                 </td>
                                 <td className="operator-cell">{outage.operator_name}</td>
-                                <td className="title-cell">{t(outage.title)}</td>
+                                <td className="title-cell">
+                                    {outage.incident_id
+                                        ? `Incident ${outage.incident_id}`
+                                        : (t(outage.title) || "-")}
+                                </td>
                                 <td className="services-cell">
                                     <div className="service-tags-mini">
                                         {(() => {

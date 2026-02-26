@@ -83,6 +83,7 @@ def run_scrapers():
                     # Geocoding fallback: use county coordinates if specific coords not available
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
+                        normalized.location = county_name  # Ensure DB holds exact standardization
                         coords = get_county_coordinates(county_name)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
@@ -150,6 +151,7 @@ def run_scrapers():
                     # Geocoding fallback: use county coordinates if specific coords not available
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
+                        normalized.location = county_name  # Ensure DB holds exact standardization
                         coords = get_county_coordinates(county_name)
                         if coords:
                             normalized.latitude, normalized.longitude = coords

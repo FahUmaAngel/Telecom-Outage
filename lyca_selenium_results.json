@@ -1,0 +1,257 @@
+{
+  "outages": [
+    {
+      "incident_id": "34460502",
+      "operator": "Lycamobile",
+      "location": "Blekinge län",
+      "description": "Underhållsarbete",
+      "start_time": "tors 26.feb 11:17",
+      "estimated_end": "tors 26.feb 23:00",
+      "status": "active",
+      "title": "Blekinge län: Underhållsarbete"
+    },
+    {
+      "incident_id": "34435644",
+      "operator": "Lycamobile",
+      "location": "Blekinge län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 23.feb 09:22",
+      "estimated_end": "fre 27.feb 13:00",
+      "status": "active",
+      "title": "Blekinge län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34243713",
+      "operator": "Lycamobile",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 22.jan 00:49",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Dalarnas län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34426340",
+      "operator": "Lycamobile",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 19.feb 19:10",
+      "estimated_end": "fre 27.feb 13:00",
+      "status": "active",
+      "title": "Dalarnas län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34461695",
+      "operator": "Lycamobile",
+      "location": "Gävleborgs län",
+      "description": "Felsökning pågår",
+      "start_time": "sön 07.dec 08:41",
+      "estimated_end": "fre 27.feb 01:00",
+      "status": "active",
+      "title": "Gävleborgs län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34465671",
+      "operator": "Lycamobile",
+      "location": "Gävleborgs län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 17.dec 16:19",
+      "estimated_end": "fre 27.feb 01:28",
+      "status": "active",
+      "title": "Gävleborgs län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34216621",
+      "operator": "Lycamobile",
+      "location": "Gävleborgs län",
+      "description": "Felsökning pågår",
+      "start_time": "sön 18.jan 19:29",
+      "estimated_end": "fre 27.feb 11:00",
+      "status": "active",
+      "title": "Gävleborgs län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34462475",
+      "operator": "Lycamobile",
+      "location": "Gävleborgs län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 20.feb 05:13",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Gävleborgs län: Felsökning pågår"
+    },
+    {
+      "incident_id": "33927511",
+      "operator": "Lycamobile",
+      "location": "Hallands län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 29.nov 12:00",
+      "estimated_end": "fre 27.feb 11:00",
+      "status": "active",
+      "title": "Hallands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34456852",
+      "operator": "Lycamobile",
+      "location": "Jämtlands län",
+      "description": "Felsökning pågår",
+      "start_time": "sön 22.feb 17:03",
+      "estimated_end": "fre 27.feb 13:00",
+      "status": "active",
+      "title": "Jämtlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34260228",
+      "operator": "Lycamobile",
+      "location": "Jönköpings län",
+      "description": "Underhållsarbete",
+      "start_time": "mån 26.jan 00:14",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Jönköpings län: Underhållsarbete"
+    },
+    {
+      "incident_id": "34306693",
+      "operator": "Lycamobile",
+      "location": "Jönköpings län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 31.jan 11:20",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Jönköpings län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34465551",
+      "operator": "Lycamobile",
+      "location": "Östergötlands län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 20.feb 05:10",
+      "estimated_end": "tors 26.feb 22:53",
+      "status": "active",
+      "title": "Östergötlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34458196",
+      "operator": "Lycamobile",
+      "location": "Östergötlands län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 26.feb 07:43",
+      "estimated_end": "fre 27.feb 13:00",
+      "status": "active",
+      "title": "Östergötlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34414801",
+      "operator": "Lycamobile",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 26.feb 21:05",
+      "estimated_end": "fre 27.feb 02:00",
+      "status": "active",
+      "title": "Södermanlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34465280",
+      "operator": "Lycamobile",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 26.feb 16:20",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Södermanlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34456853",
+      "operator": "Lycamobile",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "sön 22.feb 23:14",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Södermanlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34279896",
+      "operator": "Lycamobile",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 24.jan 17:18",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Södermanlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34280539",
+      "operator": "Lycamobile",
+      "location": "Stockholms län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 28.jan 01:40",
+      "estimated_end": "tors 26.feb 22:00",
+      "status": "active",
+      "title": "Stockholms län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34464794",
+      "operator": "Lycamobile",
+      "location": "Uppsala län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 28.jan 11:21",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Uppsala län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34464704",
+      "operator": "Lycamobile",
+      "location": "Uppsala län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 18.feb 15:23",
+      "estimated_end": "fre 27.feb 12:00",
+      "status": "active",
+      "title": "Uppsala län: Felsökning pågår"
+    },
+    {
+      "incident_id": "33883425",
+      "operator": "Lycamobile",
+      "location": "Värmlands län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 24.nov 12:42",
+      "estimated_end": "fre 27.feb 14:00",
+      "status": "active",
+      "title": "Värmlands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34457974",
+      "operator": "Lycamobile",
+      "location": "Västernorrland län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 26.feb 00:54",
+      "estimated_end": "tors 26.feb 22:00",
+      "status": "active",
+      "title": "Västernorrland län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34452401",
+      "operator": "Lycamobile",
+      "location": "Västra Götalands län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 25.feb 11:00",
+      "estimated_end": "tors 26.feb 23:00",
+      "status": "active",
+      "title": "Västra Götalands län: Felsökning pågår"
+    },
+    {
+      "incident_id": "34096059",
+      "operator": "Lycamobile",
+      "location": "Västra Götalands län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 26.dec 02:33",
+      "estimated_end": "fre 27.feb 13:00",
+      "status": "active",
+      "title": "Västra Götalands län: Felsökning pågår"
+    }
+  ],
+  "timestamp": "2026-02-26T21:41:26.580346",
+  "success": true,
+  "method": "selenium_lyca"
+}

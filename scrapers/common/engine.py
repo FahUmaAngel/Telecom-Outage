@@ -92,7 +92,7 @@ def calculate_severity_score(severity: SeverityLevel, affected_services: List[Se
 def extract_region_from_text(text: str, counties: List[str]) -> str:
     """
     Extract a region (county) from a text string.
-    Uses direct matching and city-to-county mapping.
+    Uses direct matching, base name matching (handling possessive 's'), and city-to-county mapping.
     """
     if not text:
         return None
@@ -101,8 +101,16 @@ def extract_region_from_text(text: str, counties: List[str]) -> str:
     
     # 1. Check for direct county matches (e.g. "Stockholms län")
     for county in counties:
+        # Check exact lower match first
+        if county.lower() in text_lower:
+            return county
+            
         base_name = county.replace(" län", "").lower()
-        if base_name in text_lower or county.lower() in text_lower:
+        # Handle Swedish possessive 's' (e.g., "Västernorrlands" vs "Västernorrland")
+        base_name_no_s = base_name.rstrip('s')
+        
+        # Match if the base name (with or without 's') is in the text
+        if base_name in text_lower or base_name_no_s in text_lower:
             return county
             
     # 2. Check for city matches using CITY_TO_COUNTY mapping
