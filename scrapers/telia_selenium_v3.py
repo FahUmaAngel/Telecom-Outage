@@ -169,12 +169,13 @@ def scrape_with_selenium_v3() -> Dict:
                     button = buttons[attempt]
                     # Extract region name from parent or button text before clicking
                     try:
-                        # Often the region name is next to the button or in the row above
-                        region_name = button.text.replace('Visa område', '').strip()
-                        if not region_name:
-                            # Try to find a header or row text that might contain the region
-                            row = button.find_element(By.XPATH, "./ancestor::tr")
-                            region_name = row.text.replace('Visa', '').strip()
+                        # Often the region name is in the first cell of the row
+                        row = button.find_element(By.XPATH, "./ancestor::tr")
+                        cells = row.find_elements(By.TAG_NAME, "td")
+                        if cells:
+                            region_name = cells[0].text.strip()
+                        else:
+                            region_name = button.text.replace('Visa område', '').strip()
                     except:
                         region_name = None
                         

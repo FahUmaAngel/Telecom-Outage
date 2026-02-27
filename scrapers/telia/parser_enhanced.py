@@ -59,6 +59,9 @@ def parse_mobile_outage(data: Dict) -> Optional[Dict]:
         location = extract_location_from_text(text)
         if location:
             outage['location'] = location
+        elif '_region_name' in data:
+            # Fallback to tagged region name from the fetcher
+            outage['location'] = data['_region_name']
         
         # Determine severity from text
         outage['severity'] = determine_severity_from_text(text)
