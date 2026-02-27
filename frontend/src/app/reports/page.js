@@ -184,7 +184,8 @@ function ReportsContent() {
                             <th>{lang === "sv" ? "Händelse" : "Incident"}</th>
                             <th>{lang === "sv" ? "Tjänster" : "Services"}</th>
                             <th>{lang === "sv" ? "Plats" : "Location"}</th>
-                            <th>{lang === "sv" ? "Datum" : "Date"}</th>
+                            <th>{lang === "sv" ? "Startdatum" : "Start date"}</th>
+                            <th>{lang === "sv" ? "Slutdatum" : "End date"}</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -228,6 +229,9 @@ function ReportsContent() {
                                 <td className="location-cell">{outage.location || "Sweden"}</td>
                                 <td className="date-cell">
                                     {formatDate(outage.start_time)}
+                                </td>
+                                <td className="date-cell">
+                                    {formatDate(outage.end_time)}
                                 </td>
                                 <td className="actions-cell">
                                     <Link href={`/outages/${outage.id}`} className="view-link">
