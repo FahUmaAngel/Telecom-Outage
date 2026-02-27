@@ -46,7 +46,17 @@ def parse_swedish_date(date_str: str) -> datetime:
             if month:
                 # Use current year as default
                 now = datetime.now()
-                dt_str = f"{now.year}-{month:02d}-{day:02d} {time_part}"
+                year = now.year
+                
+                # Logic to handle year rollover: 
+                # if we are in Jan/Feb and see dates from Nov/Dec, 
+                # and no year was specified, it's likely previous year.
+                # Specifically: if the parsed date is > 1 month in the future, it's likely last year.
+                test_dt = datetime(year, month, day)
+                if test_dt > now + timedelta(days=30):
+                    year -= 1
+                
+                dt_str = f"{year}-{month:02d}-{day:02d} {time_part}"
                 return datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
     except:
         pass
