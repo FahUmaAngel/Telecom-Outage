@@ -63,6 +63,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.severity = normalized.severity
         existing.title = normalized.title
         existing.description = normalized.description
+        existing.location = normalized.location
         existing.end_time = normalized.estimated_fix_time
         existing.updated_at = datetime.utcnow()
         existing.raw_data_id = raw_entry.id

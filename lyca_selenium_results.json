@@ -121,16 +121,6 @@
       "title": "Jönköpings län: Felsökning pågår"
     },
     {
-      "incident_id": "34465551",
-      "operator": "Lycamobile",
-      "location": "Östergötlands län",
-      "description": "Felsökning pågår",
-      "start_time": "fre 20.feb 05:10",
-      "estimated_end": "tors 26.feb 22:53",
-      "status": "active",
-      "title": "Östergötlands län: Felsökning pågår"
-    },
-    {
       "incident_id": "34458196",
       "operator": "Lycamobile",
       "location": "Östergötlands län",
@@ -141,12 +131,22 @@
       "title": "Östergötlands län: Felsökning pågår"
     },
     {
+      "incident_id": "34465551",
+      "operator": "Lycamobile",
+      "location": "Östergötlands län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 20.feb 05:10",
+      "estimated_end": "fre 27.feb 14:00",
+      "status": "active",
+      "title": "Östergötlands län: Felsökning pågår"
+    },
+    {
       "incident_id": "34414801",
       "operator": "Lycamobile",
       "location": "Södermanlands län",
       "description": "Felsökning pågår",
-      "start_time": "tors 26.feb 21:05",
-      "estimated_end": "fre 27.feb 02:00",
+      "start_time": "tors 26.feb 22:13",
+      "estimated_end": "fre 27.feb 03:00",
       "status": "active",
       "title": "Södermanlands län: Felsökning pågår"
     },
@@ -186,7 +186,7 @@
       "location": "Stockholms län",
       "description": "Felsökning pågår",
       "start_time": "ons 28.jan 01:40",
-      "estimated_end": "tors 26.feb 22:00",
+      "estimated_end": "fre 27.feb 11:00",
       "status": "active",
       "title": "Stockholms län: Felsökning pågår"
     },
@@ -226,7 +226,7 @@
       "location": "Västernorrland län",
       "description": "Felsökning pågår",
       "start_time": "tors 26.feb 00:54",
-      "estimated_end": "tors 26.feb 22:00",
+      "estimated_end": "fre 27.feb 13:00",
       "status": "active",
       "title": "Västernorrland län: Felsökning pågår"
     },
@@ -251,7 +251,7 @@
       "title": "Västra Götalands län: Felsökning pågår"
     }
   ],
-  "timestamp": "2026-02-26T21:41:26.580346",
+  "timestamp": "2026-02-26T22:54:19.117653",
   "success": true,
   "method": "selenium_lyca"
 }

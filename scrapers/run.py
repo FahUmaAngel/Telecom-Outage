@@ -84,7 +84,7 @@ def run_scrapers():
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
                         normalized.location = county_name  # Ensure DB holds exact standardization
-                        coords = get_county_coordinates(county_name)
+                        coords = get_county_coordinates(county_name, jitter=True)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
                             logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
@@ -152,7 +152,7 @@ def run_scrapers():
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
                         normalized.location = county_name  # Ensure DB holds exact standardization
-                        coords = get_county_coordinates(county_name)
+                        coords = get_county_coordinates(county_name, jitter=True)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
                             logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
