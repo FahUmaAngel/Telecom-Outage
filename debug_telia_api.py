@@ -1,74 +1,46 @@
 import requests
 import json
-from datetime import datetime
-import time
+import re
 
-# Extract token from the portal
-print("Fetching portal to get token...")
-r = requests.get('https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage')
-html = r.text
-token = None
-for line in html.split('\n'):
-    if "var token =" in line or "__token__ =" in line or "token:" in line:
-        try:
-            token = line.split("'")[1]
-            break
-        except: pass
-
-if not token:
-    print("Could not find token in HTML.")
-    # Look for it in iframe source
-    iframe_src = None
-    for line in html.split('\n'):
-        if "<iframe" in line and "src=" in line:
-            iframe_src = line.split('src="')[1].split('"')[0]
-            break
-            
-    if iframe_src:
-        r2 = requests.get(iframe_src)
-        for line in r2.text.split('\n'):
-            if "token:" in line or "token =" in line or "__token__ =" in line:
-                try:
-                    token = line.split("'")[1]
-                    break
-                except: pass
-
-if not token:
-    print("Still no token! Aborting.")
-else:
-    print(f"Got token: {token[:10]}...")
+def get_telia_sample():
+    s = requests.Session()
+    base = 'https://coverage.ddc.teliasonera.net/coverageportal_se'
     
-    # Try the API
-    url = f"https://pebbles.teliasonera.net/pebbles/api/coverage2/GetFaultTimeline"
+    # 1. Get Token
+    r = s.get(f'{base}?appmode=outage')
+    m = re.search(r'id=["\']csrft["\']\s+value=["\']([^"\']+)["\']', r.text)
+    token = m.group(1) if m else None
+    print(f"Token: {token}")
     
-    payload = {
-        "culture": "sv-SE",
-        "dateRange": {
-            "from": "2025-01-01T00:00:00",
-            "to": "2025-01-31T23:59:59"
-        }
-    }
+    # 2. Get Areas
+    r_areas = s.get(f'{base}/Fault/AdminAreaList')
+    if r_areas.status_code != 200:
+        print(f"Failed to get areas: {r_areas.status_code}")
+        return
     
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Origin": "https://coverage.ddc.teliasonera.net",
-        "Referer": "https://coverage.ddc.teliasonera.net/"
-    }
+    areas = r_areas.json()
+    print(f"Found {len(areas)} areas")
     
-    print("Calling GetFaultTimeline for Jan 2025...")
-    try:
-        resp = requests.post(url, json=payload, headers=headers)
-        print(f"Status Code: {resp.status_code}")
-        if resp.status_code == 200:
-            data = resp.json()
-            events = data.get('events', [])
-            print(f"Found {len(events)} events!")
-            if events:
-                print("First event preview:")
-                print(json.dumps(events[0], indent=2)[:300])
+    # 3. Get Faults for each area
+    results = {}
+    for area in areas[:5]: # Check first 5 areas
+        name = area.get('Name')
+        aid = area.get('Id')
+        print(f"Fetching faults for {name} (ID: {aid})...")
+        
+        r_faults = s.post(f'{base}/Fault/RegionFaultList', data={'regionId': aid, 'ert': token})
+        if r_faults.status_code == 200:
+            try:
+                faults = r_faults.json()
+                results[name] = faults
+                print(f"  Found {len(faults)} faults")
+            except:
+                print(f"  Failed to parse JSON for {name}")
         else:
-            print(f"Error: {resp.text[:200]}")
-    except Exception as e:
-        print(f"Exception: {e}")
+            print(f"  Error: {r_faults.status_code}")
+            
+    with open('telia_api_debug_results.json', 'w', encoding='utf-8') as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+
+if __name__ == "__main__":
+    get_telia_sample()
