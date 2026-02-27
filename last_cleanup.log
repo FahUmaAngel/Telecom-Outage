@@ -1,0 +1,22 @@
+﻿python : 2026-02-27 21:12:49,423 INFO Starting 
+final database cleanup and jittering...
+At line:1 char:22
++ $env:PYTHONPATH="."; python 
+final_db_cleanup.py 2>&1 | Out-File -File ...
++                      
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (20 
+   26-02-27 21:1...nd jittering...:String) [],  
+   RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+2026-02-27 21:12:49,423 INFO Skipping 
+aggressive deduplication to prevent collapsing 
+Tre records.
+2026-02-27 21:12:49,423 INFO Applying jitter to 
+county-center coordinates...
+2026-02-27 21:12:49,427 INFO Applied jitter to 
+0 records.
+2026-02-27 21:12:49,427 INFO Final total 
+outages: 688
