@@ -1,0 +1,820 @@
+{
+  "perf_log_hits": [
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+      "headers": {
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/Common/Font/less/font-awesome.css?v=1",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/Common/Lib/bootstrap-datepicker/bootstrap-datepicker3.min.css?v=1",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Styles/Content/css",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/cp.css?6.0.1881",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/NetworkEventsTimeline/Content/Css",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/api/js?&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&callback=onMapStartup&v=3&language=sv-SE&libraries=geometry,places,visualization&channel=TS_SE_CP",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Scripts/CP.lib.min.js?v=6.0.1881",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Scripts/CP.min.js?v=6.0.1881",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/NetworkEventsTimeline/Content/Script",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://fonts.googleapis.com/css?family=Outfit",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/Fonts/TeliaSans-Regular.otf",
+      "headers": {
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/cp.css?6.0.1881",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/Fonts/TeliaSans-Medium.otf",
+      "headers": {
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/cp.css?6.0.1881",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/favicon.ico",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/CET/TierTree?tierLevel=0",
+      "headers": {
+        "Accept": "*/*",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/predefinedlocations/list",
+      "headers": {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Area/GetPredefinedAreaDefinitions?_=1772219088777",
+      "headers": {
+        "Accept": "*/*",
+        "Content-Type": "application/json;charset=utf-8",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Fault/FaultsLastUpdatedInfo?ert=zDPM7MkxnWTcHmPA2Yj%252blnXoToVxQAtYt%252fP%252for45U1O2%252f8j79LD2ouJ%252b3wdMTua%252fISMrPb8dDJCq%252f3yWxSUFqF%252bnu1wnIA%252bIL6Vv%252bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%253d%253d",
+      "headers": {
+        "Accept": "*/*",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/ImportantMessages/GetMessages",
+      "headers": {
+        "Accept": "*/*",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/Common/Font/fonts/fa-solid-900.woff2",
+      "headers": {
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/Common/Font/less/font-awesome.css?v=1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/Fonts/TeliaSans-Bold.otf",
+      "headers": {
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/TeliaSonera_SE/cp.css?6.0.1881",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Fault/AdminAreaList?services=NR700_DATANSA%2CNR1800_DATANSA%2CNR2100_DATANSA%2CNR2600_DATANSA%2CNR3500_DATANSA%2CLTE700_DATA%2CLTE800_DATA%2CLTE900_DATA%2CLTE1800_DATA%2CLTE2100_DATA%2CLTE2600_DATA%2CGSM900_VOICE%2CGSM1800_VOICE&faultsLastUpdated=&cacheKey=&ert=zDPM7MkxnWTcHmPA2Yj%252blnXoToVxQAtYt%252fP%252for45U1O2%252f8j79LD2ouJ%252b3wdMTua%252fISMrPb8dDJCq%252f3yWxSUFqF%252bnu1wnIA%252bIL6Vv%252bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%253d%253d",
+      "headers": {
+        "Accept": "*/*",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Content/Common/Images/blank.gif",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,8766409.899970293,2504688.5428486555,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,8766409.899970293,1252344.2714243277,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,10018754.171394618,1252344.2714243277,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,10018754.171394618,2504688.5428486555,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,10018754.171394618,3757032.814272983,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,8766409.899970293,3757032.814272983,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,7514065.628545967,3757032.814272983,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,7514065.628545967,2504688.5428486555,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,7514065.628545967,1252344.2714243277,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,7514065.628545967,0,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,8766409.899970293,0,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,10018754.171394618,0,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/api/js/AuthenticationService.Authenticate?1shttps%3A%2F%2Fcoverage.ddc.teliasonera.net%2Fcoverageportal_se&3sTS_SE_CP&4sAIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&8b0&callback=_xdc_._fm8lvx&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=100325",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+      "headers": {
+        "Content-Type": "application/json+protobuf",
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-Goog-Api-Key": "AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4",
+        "X-Goog-Gmp-Client-Signals": "CAIqCDMuNjMuMTRkWg0SCwjR1YfNBhCA6uUY",
+        "X-Goog-Maps-API-Salt": "Mwbmqi0piV",
+        "X-Goog-Maps-API-Signature": "101914",
+        "X-Goog-Maps-Channel-Id": "TS_SE_CP",
+        "X-Goog-Maps-Session-Id": "1FE28A7A-6A42-4192-9254-E29186647EB3",
+        "X-User-Agent": "grpc-web-javascript/0.1",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": "[[[46.73946071488231,-35.562633152627846],[78.23779293578127,62.996664441797904]],5,null,\"sv-SE\",0,\"m@768000000\",0,0,null,null,null,1,\"https://coverage.ddc.teliasonera.net/coverageportal_se\",1,null,null,\"E55EBCEF-D0A3-433D-9857-BA3DA32456ED\"]"
+    },
+    {
+      "url": "https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+      "headers": {
+        "Accept": "*/*",
+        "Access-Control-Request-Headers": "content-type,x-goog-api-key,x-goog-gmp-client-signals,x-goog-maps-api-salt,x-goog-maps-api-signature,x-goog-maps-channel-id,x-goog-maps-session-id,x-user-agent",
+        "Access-Control-Request-Method": "POST",
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Sec-Fetch-Mode": "cors",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36"
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+      "headers": {
+        "Content-Type": "application/json+protobuf",
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-Goog-Api-Key": "AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4",
+        "X-Goog-Gmp-Client-Signals": "CAIqCDMuNjMuMTRkWg0SCwjR1YfNBhCAkc9F",
+        "X-Goog-Maps-API-Salt": "Mwbmqi0piV",
+        "X-Goog-Maps-API-Signature": "101914",
+        "X-Goog-Maps-Channel-Id": "TS_SE_CP",
+        "X-Goog-Maps-Session-Id": "1FE28A7A-6A42-4192-9254-E29186647EB3",
+        "X-User-Agent": "grpc-web-javascript/0.1",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": "[[[46.73946071488231,-35.562633152627846],[78.23779293578127,62.996664441797904]],5,null,\"sv-SE\",0,\"m@768000000\",0,0,null,null,null,2]"
+    },
+    {
+      "url": "https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+      "headers": {
+        "Accept": "*/*",
+        "Access-Control-Request-Headers": "content-type,x-goog-api-key,x-goog-gmp-client-signals,x-goog-maps-api-salt,x-goog-maps-api-signature,x-goog-maps-channel-id,x-goog-maps-session-id,x-user-agent",
+        "Access-Control-Request-Method": "POST",
+        "Origin": "https://coverage.ddc.teliasonera.net",
+        "Sec-Fetch-Mode": "cors",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36"
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/api/js/GeocodeService.Search?5m2&1d59.33615&2d18.07181&9ssv-SE&r_url=https%3A%2F%2Fcoverage.ddc.teliasonera.net%2Fcoverageportal_se&callback=_xdc_._8bbato&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=85896",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/Outage/GetLocationInfo?northing=59.33615&easting=18.07181&services=NR700_DATANSA%2CNR1800_DATANSA%2CNR2100_DATANSA%2CNR2600_DATANSA%2CNR3500_DATANSA%2CLTE700_DATA%2CLTE800_DATA%2CLTE900_DATA%2CLTE1800_DATA%2CLTE2100_DATA%2CLTE2600_DATA%2CGSM900_VOICE%2CGSM1800_VOICE&covQuality=1&faultCacheKeys=PW%2C240_PW_0227074400_639077750400000000%2C16%7CAF%2C240_TT_0227190223_639078157430000000%2C2&ert=zDPM7MkxnWTcHmPA2Yj%252blnXoToVxQAtYt%252fP%252for45U1O2%252f8j79LD2ouJ%252b3wdMTua%252fISMrPb8dDJCq%252f3yWxSUFqF%252bnu1wnIA%252bIL6Vv%252bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%253d%253d",
+      "headers": {
+        "Accept": "*/*",
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "X-KL-Ajax-Request": "Ajax_Request",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i17!3i8!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=119414",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i16!3i8!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=33467",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i16!3i7!4i256!2m3!1e0!2sm!3i768532286!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=24512",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i17!3i7!4i256!2m3!1e0!2sm!3i768532286!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=110459",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i18!3i7!4i256!2m3!1e0!2sm!3i768532286!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=65335",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i18!3i8!4i256!2m3!1e0!2sm!3i768532286!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=20131",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i18!3i9!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=29086",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i17!3i9!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=74210",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i16!3i9!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=119334",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i15!3i9!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=33387",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i15!3i8!4i256!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=78591",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i5!2i15!3i7!4i256!2m3!1e0!2sm!3i768532286!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e0!5m1!1e3!23i46991212!23i47054750!23i47083502&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=69636",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,8766409.899970293,2504688.5428486555,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,8766409.899970293,1252344.2714243277,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,10018754.171394618,1252344.2714243277,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,10018754.171394618,2504688.5428486555,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,10018754.171394618,3757032.814272983,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,8766409.899970293,3757032.814272983,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=2504688.5428486555,7514065.628545967,3757032.814272983,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=18&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=1252344.2714243277,7514065.628545967,2504688.5428486555,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=17&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=0,7514065.628545967,1252344.2714243277,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=16&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,7514065.628545967,0,8766409.899970293&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=9",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,8766409.899970293,0,10018754.171394618&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=8",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile?services=NR_DATANSA,LTE_DATA,GSM_VOICE&faultStatuses=&qualities=1&serviceGroup=disturbance&IsDisturbance=true&CountryId=SE_TELIASONERA-CP&ShowBackgroundCoverage=true&FaultCacheKeys=PLANNED,240_PW_0227074400_639077750400000000,16|ACTIVE,240_TT_0227190223_639078157430000000,2&ProxyCacheKey=&rt=zDPM7MkxnWTcHmPA2Yj%2blnXoToVxQAtYt%2fP%2for45U1O2%2f8j79LD2ouJ%2b3wdMTua%2fISMrPb8dDJCq%2f3yWxSUFqF%2bnu1wnIA%2bIL6Vv%2bFmzwHTSecuybyIFmEZzcyQ1fR4VuNi9WFgBWUDBYhg1x0gMKnbPdlpFkwBXQjnsaG2r22mRqOoexIYLSeMeLxPwAcw3ENhtK4gKlnI5IB2K8mdgjg%3d%3d&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:900913&BBOX=-1252344.2714243277,10018754.171394618,0,11271098.442818953&WIDTH=256&HEIGHT=256&ZOOM=5&X=15&Y=7",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/vt?pb=!1m4!1m3!1i5!2i15!3i7!1m4!1m3!1i5!2i15!3i8!1m4!1m3!1i5!2i15!3i9!1m4!1m3!1i5!2i16!3i7!1m4!1m3!1i5!2i17!3i7!1m4!1m3!1i5!2i18!3i7!1m4!1m3!1i5!2i16!3i8!1m4!1m3!1i5!2i16!3i9!1m4!1m3!1i5!2i17!3i8!1m4!1m3!1i5!2i17!3i9!1m4!1m3!1i5!2i18!3i8!1m4!1m3!1i5!2i18!3i9!2m3!1e0!2sm!3i768532310!3m18!2ssv-SE!3sUS!5e18!12m5!1e68!2m2!1sset!2sRoadmap!4e2!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcy50OjMzfHMuZTpsfHAudjpvZmYscy50OjUwfHMuZTpnfHAuYzojYmJiYmJiLHMudDo1MXxzLmU6Z3xwLmM6I2NjY2NjYyxzLnQ6NXxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDo2fHMuZTpnfHAubDo1MHxwLnM6LTEwMCxzLnQ6MnxzLmU6Z3xwLmw6MTAwfHAuczotMTAwLHMudDoyfHMuZTpsfHAudjpvZmY!4e3!12m1!5b1!23i46991212!23i47054750&callback=_xdc_._ash9iw&key=AIzaSyAGDMv44gwjtcZ9gIUmrVg9_E15W_1YRw4&channel=TS_SE_CP&token=29823",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://fonts.googleapis.com/css?family=Google+Sans+Text:400&text=%E2%86%90%E2%86%92%E2%86%91%E2%86%93&lang=sv",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    },
+    {
+      "url": "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700|Google+Sans+Text:400,500,700&lang=sv",
+      "headers": {
+        "Referer": "https://coverage.ddc.teliasonera.net/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "post_data": ""
+    }
+  ],
+  "js_intercepted": [],
+  "timestamp": "2026-02-27T20:05:14.107491"
+}
