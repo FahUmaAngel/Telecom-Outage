@@ -154,7 +154,7 @@ def scrape_with_selenium_v3() -> Dict:
             time.sleep(1)
             
             # Get all "Visa område" buttons
-            max_attempts = 5
+            max_attempts = 25
             for attempt in range(max_attempts):
                 try:
                     # Re-find buttons each time to avoid stale elements
