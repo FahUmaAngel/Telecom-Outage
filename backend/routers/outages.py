@@ -12,6 +12,14 @@ from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/v1/outages", tags=["outages"])
 
+def _safe_val(field, default="unknown"):
+    """Safely extract the string value from an Enum or plain string field."""
+    if field is None:
+        return default
+    if hasattr(field, 'value'):
+        return field.value
+    return str(field)
+
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
     db: Session = Depends(get_db),
@@ -39,8 +47,8 @@ def get_outage_history(
             operator_name=o.operator.name,
             title=o.title if o.title else {},
             description=o.description,
-            status=o.status.value if o.status else "unknown",
-            severity=o.severity.value if o.severity else "unknown",
+            status=_safe_val(o.status),
+            severity=_safe_val(o.severity),
             start_time=o.start_time,
             end_time=o.end_time,
             estimated_fix_time=o.estimated_fix_time,
@@ -103,8 +111,8 @@ def get_outages(
             operator_name=o.operator.name,
             title=o.title if o.title else {},
             description=o.description,
-            status=o.status.value if o.status else "unknown",
-            severity=o.severity.value if o.severity else "unknown",
+            status=_safe_val(o.status),
+            severity=_safe_val(o.severity),
             start_time=o.start_time,
             end_time=o.end_time,
             estimated_fix_time=o.estimated_fix_time,
@@ -131,8 +139,8 @@ def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
             operator_name=outage.operator.name,
             title=outage.title if outage.title else {},
             description=outage.description,
-            status=outage.status.value if outage.status else "unknown",
-            severity=outage.severity.value if outage.severity else "unknown",
+            status=_safe_val(outage.status),
+            severity=_safe_val(outage.severity),
             start_time=outage.start_time,
             end_time=outage.end_time,
             estimated_fix_time=outage.estimated_fix_time,
