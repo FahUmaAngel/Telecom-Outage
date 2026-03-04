@@ -45,8 +45,18 @@ export const api = {
     },
     admin: {
         scrapers: () => fetcher("/admin/scrapers"),
+        outages: {
+            list: (params = {}) => {
+                const query = new URLSearchParams(params).toString();
+                return fetcher(`/admin/outages${query ? `?${query}` : ""}`);
+            },
+            update: (id, data) => fetcher(`/admin/outages/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(data),
+            }),
+        },
         reports: {
-            list: () => fetcher("/reports"), // Use common reports list
+            list: () => fetcher("/reports"),
             verify: (id) => fetcher(`/admin/reports/${id}/verify`, { method: "POST" }),
             reject: (id) => fetcher(`/admin/reports/${id}/reject`, { method: "POST" }),
         }

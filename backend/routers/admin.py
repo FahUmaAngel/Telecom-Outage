@@ -1,12 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from ..dependencies import get_db
-from ..schemas import ReportResponse
-from scrapers.db.models import RawData, Operator, UserReport
+from ..schemas import ReportResponse, OutageResponse, OutageUpdate
+from scrapers.db.models import RawData, Operator, UserReport, Outage
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+
+def _safe_val(v):
+    """Safely extract the value from an Enum or return as is."""
+    if v is None:
+        return None
+    return v.value if hasattr(v, 'value') else v
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
 def get_scraper_status(db: Session = Depends(get_db)):
@@ -23,6 +29,91 @@ def get_scraper_status(db: Session = Depends(get_db)):
         {"operator": r.operator, "last_scraped_at": r.last_scraped_at}
         for r in results
     ]
+
+@router.get("/outages", response_model=List[OutageResponse])
+def admin_get_outages(
+    db: Session = Depends(get_db),
+    operator: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: Optional[int] = None
+):
+    """List all outages for administrative editing."""
+    query = db.query(Outage).join(Operator)
+    
+    if operator:
+        query = query.filter(Operator.name == operator.lower())
+    if status:
+        query = query.filter(Outage.status == status)
+        
+    query = query.options(joinedload(Outage.operator), joinedload(Outage.region)).order_by(Outage.updated_at.desc())
+    if limit:
+        query = query.limit(limit)
+    outages = query.all()
+    
+    return [
+        OutageResponse(
+            id=o.id,
+            incident_id=o.incident_id,
+            operator_id=o.operator_id,
+            operator_name=o.operator.name,
+            region_id=o.region_id,
+            region_name=o.region.name if o.region else None,
+            raw_data_id=o.raw_data_id,
+            title=o.title if o.title else {},
+            description=o.description,
+            status=_safe_val(o.status),
+            severity=_safe_val(o.severity),
+            start_time=o.start_time,
+            end_time=o.end_time,
+            estimated_fix_time=o.estimated_fix_time,
+            location=o.location,
+            latitude=o.latitude,
+            longitude=o.longitude,
+            affected_services=o.affected_services if o.affected_services else [],
+            updated_at=o.updated_at
+        )
+        for o in outages
+    ]
+
+@router.put("/outages/{outage_id}", response_model=OutageResponse)
+def update_outage(
+    outage_id: int, 
+    update_data: OutageUpdate,
+    db: Session = Depends(get_db)
+):
+    """Update an outage manually (Admin only)."""
+    outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
+    if not outage:
+        raise HTTPException(status_code=404, detail="Outage not found")
+    
+    # Update fields if provided
+    for field, value in update_data.model_dump(exclude_unset=True).items():
+        setattr(outage, field, value)
+    
+    db.commit()
+    db.refresh(outage)
+    
+    return OutageResponse(
+        id=outage.id,
+        incident_id=outage.incident_id,
+        operator_id=outage.operator_id,
+        operator_name=outage.operator.name,
+        region_id=outage.region_id,
+        region_name=outage.region.name if outage.region else None,
+        raw_data_id=outage.raw_data_id,
+        title=outage.title if outage.title else {},
+        description=outage.description,
+        status=_safe_val(outage.status),
+        severity=_safe_val(outage.severity),
+        start_time=outage.start_time,
+        end_time=outage.end_time,
+        estimated_fix_time=outage.estimated_fix_time,
+        location=outage.location,
+        latitude=outage.latitude,
+        longitude=outage.longitude,
+        affected_services=outage.affected_services if outage.affected_services else [],
+        updated_at=outage.updated_at
+    )
 
 @router.post("/reports/{report_id}/verify", response_model=ReportResponse)
 def verify_report(report_id: int, db: Session = Depends(get_db)):

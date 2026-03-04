@@ -2,7 +2,7 @@
 Outage endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
@@ -12,13 +12,11 @@ from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/v1/outages", tags=["outages"])
 
-def _safe_val(field, default="unknown"):
-    """Safely extract the string value from an Enum or plain string field."""
-    if field is None:
-        return default
-    if hasattr(field, 'value'):
-        return field.value
-    return str(field)
+def _safe_val(v):
+    """Safely extract the value from an Enum or return as is."""
+    if v is None:
+        return None
+    return v.value if hasattr(v, 'value') else v
 
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
@@ -38,13 +36,17 @@ def get_outage_history(
     if operator:
         query = query.filter(Operator.name == operator.lower())
         
-    outages = query.all()
+    outages = query.options(joinedload(Outage.operator), joinedload(Outage.region)).all()
     
     return [
         OutageResponse(
             id=o.id,
             incident_id=o.incident_id,
+            operator_id=o.operator_id,
             operator_name=o.operator.name,
+            region_id=o.region_id,
+            region_name=o.region.name if o.region else None,
+            raw_data_id=o.raw_data_id,
             title=o.title if o.title else {},
             description=o.description,
             status=_safe_val(o.status),
@@ -56,9 +58,7 @@ def get_outage_history(
             latitude=o.latitude,
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at,
-            region_id=o.region_id,
-            region_name=o.region.name if o.region else None
+            updated_at=o.updated_at
         )
         for o in outages
     ]
@@ -85,7 +85,7 @@ def get_outages(
         query = query.filter(Outage.status == status)
         
     # Execute query first, then filter geospatial in Python (SQLite limitation)
-    outages = query.all()
+    outages = query.options(joinedload(Outage.operator), joinedload(Outage.region)).all()
     
     results = []
     
@@ -102,13 +102,16 @@ def get_outages(
     else:
         results = outages
         
-    # Convert to Response Model
     response_list = []
     for o in results:
         response_list.append(OutageResponse(
             id=o.id,
             incident_id=o.incident_id,
+            operator_id=o.operator_id,
             operator_name=o.operator.name,
+            region_id=o.region_id,
+            region_name=o.region.name if o.region else None,
+            raw_data_id=o.raw_data_id,
             title=o.title if o.title else {},
             description=o.description,
             status=_safe_val(o.status),
@@ -120,38 +123,38 @@ def get_outages(
             latitude=o.latitude,
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at,
-            region_id=o.region_id,
-            region_name=o.region.name if o.region else None
+            updated_at=o.updated_at
         ))
         
     return response_list
 
 @router.get("/{outage_id}", response_model=OutageResponse)
 def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
-    outage = db.query(Outage).filter(Outage.id == outage_id).first()
+    outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
     if not outage:
         raise HTTPException(status_code=404, detail="Outage not found")
         
     return OutageResponse(
-            id=outage.id,
-            incident_id=outage.incident_id,
-            operator_name=outage.operator.name,
-            title=outage.title if outage.title else {},
-            description=outage.description,
-            status=_safe_val(outage.status),
-            severity=_safe_val(outage.severity),
-            start_time=outage.start_time,
-            end_time=outage.end_time,
-            estimated_fix_time=outage.estimated_fix_time,
-            location=outage.location,
-            latitude=outage.latitude,
-            longitude=outage.longitude,
-            affected_services=outage.affected_services if outage.affected_services else [],
-            updated_at=outage.updated_at,
-            region_id=outage.region_id,
-            region_name=outage.region.name if outage.region else None
-        )
+        id=outage.id,
+        incident_id=outage.incident_id,
+        operator_id=outage.operator_id,
+        operator_name=outage.operator.name,
+        region_id=outage.region_id,
+        region_name=outage.region.name if outage.region else None,
+        raw_data_id=outage.raw_data_id,
+        title=outage.title if outage.title else {},
+        description=outage.description,
+        status=_safe_val(outage.status),
+        severity=_safe_val(outage.severity),
+        start_time=outage.start_time,
+        end_time=outage.end_time,
+        estimated_fix_time=outage.estimated_fix_time,
+        location=outage.location,
+        latitude=outage.latitude,
+        longitude=outage.longitude,
+        affected_services=outage.affected_services if outage.affected_services else [],
+        updated_at=outage.updated_at
+    )
 
 def haversine(lat1, lon1, lat2, lon2):
     """

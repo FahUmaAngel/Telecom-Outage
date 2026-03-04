@@ -97,113 +97,173 @@ def sync_to_db(incidents: Dict):
     return ins, upd
 
 def scrape_portal_granular():
-    """Main function to run the portal scraper."""
-    logger.info("Starting Granular Telia Portal Scraper...")
+    """Main function to run the portal scraper by intercepting the internal Ticket API response."""
+    logger.info("Starting Intercepting Telia Portal Scraper (Interactive)...")
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1920, "height": 1080})
+        # Use a realistic user agent
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+        page = context.new_page()
+        
+        captured_data = []
+
+        # Intercept the API response
+        def handle_response(response):
+            # The URL might have query parameters, so we check if it contains the endpoint
+            if "AreaTicketList" in response.url and response.status == 200:
+                try:
+                    data = response.json()
+                    if isinstance(data, list) and len(data) > 0:
+                        logger.info(f"Intercepted API response with {len(data)} incidents from {response.url[:100]}...")
+                        captured_data.extend(data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse intercepted response: {e}")
+
+        page.on("response", handle_response)
         
         try:
             url = "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
-            page.goto(url, wait_until="networkidle", timeout=60000)
-            page.wait_for_timeout(3000)
+            logger.info(f"Navigating to {url}...")
+            page.goto(url, wait_until="networkidle", timeout=90000)
             
-            # Click "Fel" (Faults) button
+            # 1. Click "Fel" (Faults)
             fel_btn = page.locator("text=Fel").first
             if fel_btn.is_visible():
+                logger.info("Clicking 'Fel' button...")
                 fel_btn.click()
-                page.wait_for_timeout(2000)
-            else:
-                logger.error("Could not find 'Fel' button")
-                return
+                page.wait_for_timeout(3000)
             
-            # Find all region links
-            locs = page.locator("text=Visa område")
-            count = locs.count()
-            logger.info(f"Found {count} regions to process")
+            # 2. To trigger API calls, we might need to click some regions or "Visa område"
+            # Find a few "Visa område" links and click them
+            visa_links = page.locator("text=Visa område")
+            count = visa_links.count()
+            logger.info(f"Found {count} 'Visa område' links to interact with.")
             
-            total_ins, total_upd = 0, 0
-            
-            for i in range(count):
+            # Interact with the first 5 regions to trigger multiple API calls (various areas)
+            for i in range(min(count, 5)):
                 try:
-                    link = locs.nth(i)
-                    # Extract region name (e.g., Stockholms län)
-                    reg_name = link.evaluate("el => el.closest('tr').innerText.split('\\n')[0].trim()")
-                    if 'län' not in reg_name.lower(): 
-                        continue
-                    
-                    logger.info(f"[{i+1}/{count}] Processing {reg_name}...")
+                    link = visa_links.nth(i)
+                    logger.info(f"Interacting with region {i+1}...")
                     link.scroll_into_view_if_needed()
                     link.click()
-                    page.wait_for_timeout(4000)
-                    
-                    # Area Town identification
-                    area_town = reg_name
-                    h_text = page.evaluate('''() => {
-                        let h = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,div.table-title,span.table-title,p.table-title'));
-                        let t = h.find(el => el.innerText.includes('Störningar i') || el.innerText.includes('Disturbances in'));
-                        return t ? t.innerText : null;
-                    }''')
-                    if h_text:
-                        clean = h_text.replace('Störningar i', '').replace('Disturbances in', '').strip()
-                        if clean: area_town = f"{clean}, {reg_name}"
-
-                    # Sidebar details (Status & Services)
-                    sidebar = page.evaluate('''() => {
-                        let els = Array.from(document.querySelectorAll('.active-outage-info, .outage-info-container, div, span'));
-                        let status = els.find(el => el.innerText.match(/Reducerad kapacitet|Begränsad täckning|Ingen täckning/));
-                        let serv = els.find(el => el.innerText.includes('Påverkade tjänster'));
-                        return {
-                            status: status ? status.innerText.trim() : "active",
-                            servicesTxt: serv ? serv.parentElement.innerText : ""
-                        };
-                    }''')
-                    
-                    reg_incidents = {}
-                    # Scrape all incident rows in the expanded region
-                    rows = page.locator("tr").all()
-                    for row in rows:
-                        if row.locator("td[data-plot]").count() > 0:
-                            tds = row.locator("td").all_inner_texts()
-                            if len(tds) >= 4:
-                                mid = re.search(r'INCSE\d+', tds[0])
-                                if mid:
-                                    inc_id = mid.group()
-                                    desc_raw = tds[1].replace('Beskrivning', '').strip()
-                                    services = extract_services(desc_raw + " " + sidebar['servicesTxt'])
-                                    
-                                    reg_incidents[inc_id] = {
-                                        "location": area_town,
-                                        "county": reg_name,
-                                        "description": desc_raw,
-                                        "start": parse_swedish_date(tds[2].replace('Starttid', '')),
-                                        "end": parse_swedish_date(tds[3].replace('Sluttid', '')),
-                                        "services": services,
-                                        "nature": sidebar['status']
-                                    }
-                    
-                    if reg_incidents:
-                        ins, upd = sync_to_db(reg_incidents)
-                        total_ins += ins
-                        total_upd += upd
-                        logger.info(f"  -> {area_town}: {len(reg_incidents)} tickets (Synced: {ins} New, {upd} Upd)")
-                    
-                    # Refresh state for next region
-                    btn_fel = page.locator("text=Fel").first
-                    if btn_fel.is_visible():
-                        btn_fel.click()
-                        page.wait_for_timeout(1500)
-                        
+                    page.wait_for_timeout(3000)
+                    # Click "Fel" again to go back or keep it open
+                    if fel_btn.is_visible(): fel_btn.click()
                 except Exception as e:
-                    logger.error(f"Error processing region {i}: {e}")
-                    # Try to recover by going back to the main fault list
-                    page.goto(url)
-                    page.wait_for_timeout(2000)
-                    page.locator("text=Fel").first.click()
-                    page.wait_for_timeout(2000)
+                    logger.warning(f"Error during interaction {i}: {e}")
 
-            logger.info(f"Scrape completed. Total: {total_ins} Created, {total_upd} Updated.")
+            if not captured_data:
+                logger.info("Still no data. Trying one final wait...")
+                page.wait_for_timeout(10000)
+
+            if not captured_data:
+                logger.error("No incident data intercepted. The portal might be using a different API or blocking Playwright.")
+                return
+
+            # Deduplicate by ExternalId
+            unique_incidents = {}
+            for item in captured_data:
+                inc_id = item.get("ExternalId")
+                if inc_id and inc_id not in unique_incidents:
+                    unique_incidents[inc_id] = item
+
+            logger.info(f"Processing {len(unique_incidents)} unique incidents")
+            
+            incidents_to_sync = {}
+            for inc_id, item in unique_incidents.items():
+                # Extract coordinates from BBox
+                bbox = item.get("BBox", {})
+                ll = bbox.get("LL", {})
+                lat = ll.get("Northing") or item.get("Northing")
+                lon = ll.get("Easting") or item.get("Easting")
+                
+                # Metadata
+                desc_raw = item.get("Description") or item.get("Text") or ""
+                location_name = item.get("AreaName") or "Unknown"
+                county = item.get("CountyName") or "Unknown"
+                
+                # Parse dates
+                def clean_date(val):
+                    if not val: return None
+                    if isinstance(val, str) and "/Date(" in val:
+                        m = re.search(r'\d+', val)
+                        if m:
+                            ts = int(m.group()) / 1000
+                            return datetime.fromtimestamp(ts).isoformat() + "+01:00"
+                    if isinstance(val, str) and len(val) > 5:
+                        return parse_swedish_date(val)
+                    return None
+
+                start_time = clean_date(item.get("StartTimeStr") or item.get("EventTime"))
+                end_time = clean_date(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
+                
+                services_txt = item.get("AffectedServices", "")
+                services = extract_services(desc_raw + " " + services_txt)
+                
+                incidents_to_sync[inc_id] = {
+                    "location": f"{location_name}, {county}",
+                    "county": f"{county} län" if county != "Unknown" and 'län' not in county.lower() else county,
+                    "description": desc_raw,
+                    "latitude": lat,
+                    "longitude": lon,
+                    "start": start_time or datetime.now().isoformat(),
+                    "end": end_time,
+                    "services": services,
+                    "nature": item.get("FaultType") or "ACTIVE"
+                }
+
+            if incidents_to_sync:
+                db_path = get_db_path()
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                
+                cursor.execute("SELECT id FROM operators WHERE name = 'telia'")
+                res = cursor.fetchone()
+                if not res:
+                    logger.error("Telia operator not found")
+                    conn.close()
+                    return
+                telia_id = res[0]
+                
+                timestamp = datetime.now().isoformat()
+                ins, upd = 0, 0
+                
+                for inc_id, data in incidents_to_sync.items():
+                    lat, lon = data['latitude'], data['longitude']
+                    if not lat or not lon:
+                        coords = get_county_coordinates(data['county'], jitter=True)
+                        lat, lon = coords if coords else (58.0, 14.0)
+                    
+                    title_json = json.dumps({"sv": f"{inc_id}: {data['nature']}", "en": f"{inc_id}: {data['nature']}"})
+                    desc_json = json.dumps({"sv": data['description'], "en": data['description']})
+                    services_json = json.dumps(data['services'])
+                    
+                    cursor.execute("SELECT id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
+                    row = cursor.fetchone()
+                    
+                    if row:
+                        cursor.execute("""
+                            UPDATE outages SET location = ?, latitude = ?, longitude = ?, start_time = ?, estimated_fix_time = ?, 
+                                             description = ?, affected_services = ?, title = ?, updated_at = ?, status = 'ACTIVE'
+                            WHERE id = ?
+                        """, (data['location'], lat, lon, data['start'], data['end'], desc_json, services_json, title_json, timestamp, row[0]))
+                        upd += 1
+                    else:
+                        cursor.execute("""
+                            INSERT INTO outages (incident_id, operator_id, title, description, location, latitude, longitude, 
+                                               start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', 'MEDIUM', ?, ?, ?)
+                        """, (inc_id, telia_id, title_json, desc_json, data['location'], lat, lon, data['start'], data['end'], services_json, timestamp, timestamp))
+                        ins += 1
+                
+                conn.commit()
+                conn.close()
+                logger.info(f"Sync completed. Total: {ins} Created, {upd} Updated.")
+            else:
+                logger.warning("No incidents processed.")
 
         except Exception as e:
             logger.error(f"Fatal error in portal scraper: {e}")

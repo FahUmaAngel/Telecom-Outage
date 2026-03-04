@@ -33,15 +33,17 @@ class RegionResponse(BaseModel):
 class OutageResponse(BaseModel):
     id: int
     incident_id: Optional[str]
+    operator_id: Optional[int]
     operator_name: str
     region_id: Optional[int] = None
     region_name: Optional[Dict[str, str]] = None
+    raw_data_id: Optional[int] = None
     
     title: Dict[str, str] # Bilingual
     description: Optional[Dict[str, str]]
     
-    status: OutageStatus
-    severity: SeverityLevel
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
     
     start_time: Optional[datetime]
     end_time: Optional[datetime]
@@ -134,3 +136,20 @@ class OperatorResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class OutageUpdate(BaseModel):
+    incident_id: Optional[str] = None
+    operator_id: Optional[int] = None
+    region_id: Optional[int] = None
+    raw_data_id: Optional[int] = None
+    title: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    affected_services: Optional[List[str]] = None
