@@ -54,6 +54,7 @@ export const api = {
                 method: "PUT",
                 body: JSON.stringify(data),
             }),
+            resolvePlace: (query) => fetcher(`/admin/resolve-place`, { method: 'POST', body: JSON.stringify({ query }) }),
         },
         reports: {
             list: () => fetcher("/reports"),

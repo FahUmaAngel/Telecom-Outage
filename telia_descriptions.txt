@@ -1,0 +1,63 @@
+178x | Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt.
+40x | Just nu kan du uppleva störningar i mobilnätet som bland annat påverkar samtal, surf och andra mobila tjänster.
+2x | På grund av ett kabelfel i ditt område kan du uppleva störningar i mobilnätet som påverkar samtal, surf och andra mobila tjänster.
+1x | Incident ID: INCSE0424369
+1x | Incident ID: INCSE0425061
+1x | Incident ID: INCSE0424841
+1x | Incident ID: INCSE0375087
+1x | Incident ID: INCSE0424931
+1x | Incident ID: INCSE0418951
+1x | Incident ID: INCSE0425351
+1x | Incident ID: INCSE0424277
+1x | Incident ID: INCSE0425305
+1x | Incident ID: INCSE0425250
+1x | Incident ID: INCSE0424894
+1x | Incident ID: INCSE0423706
+1x | Incident ID: INCSE0425201
+1x | Incident ID: INCSE0342620
+1x | Incident ID: INCSE0411855
+1x | Incident ID: INCSE0424222
+1x | Incident ID: INCSE0418257
+1x | Incident ID: INCSE0425212
+1x | Incident ID: INCSE0425200
+1x | Incident ID: INCSE0425089
+1x | Incident ID: INCSE0417331
+1x | Incident ID: INCSE0424847
+1x | Incident ID: INCSE0403082
+1x | Incident ID: INCSE0424922
+1x | Incident ID: INCSE0425048
+1x | Incident ID: INCSE0424535
+1x | Incident ID: INCSE0424836
+1x | Incident ID: INCSE0424929
+1x | Incident ID: INCSE0425211
+1x | Incident ID: INCSE0425251
+1x | Incident ID: INCSE0425235
+1x | Incident ID: INCSE0467939
+1x | Incident ID: INCSE0469797
+1x | Incident ID: INCSE0470451
+1x | Incident ID: INCSE0469653
+1x | Historisk störning registrerad för Visbytrakten. Påverkar mobilnätets tjänster.
+1x | Nätverksstörning som påverkar regionala tjänster i Eskilstunaområdet.
+1x | Aktiv störning i Sölvesborg. Reducerad kapacitet för mobila tjänster.
+1x | Driftstörning som påverkar mobilnätet i Västra Götalands regionen.
+1x | Aktiv störning nära Visby. Reducerad kapacitet för 4G och 5G-mobilnät.
+1x | Historisk 2G/4G-störning i Vänersborgstrakten.
+1x | Nylig störning som påverkar Borås-området. Berör 2G, 4G och 5G.
+1x | Störning nära Kungälv/Göteborg som påverkar mobilnätets tjänster.
+1x | Kortvarig historisk störning i södra Göteborg.
+1x | Aktiv störning i Sundsvall som påverkar mobila nätverkstjänster.
+1x | Reducerad 5G-kapacitet i Tyresö, Stockholm.
+1x | Begränsad 5G-täckning i Sollentunaområdet.
+1x | Reducerad 5G-kapacitet i Stockholmsregionen. Tekniker arbetar med lösning.
+1x | Driftstörning registrerad i Uppsalaregionen. Kan påverka samtal och datatjänster.
+1x | Störning i mobilnätet som påverkar datatjänster och samtal för abonnenter i området.
+1x | Ytterligare störningsfall i Södermanland. Påverkar 4G och 5G-tjänster för mobila abonnenter.
+1x | Reducerad nätverkskapacitet i Örebrotrakten. Tekniker åtgärdar störningen.
+1x | Nätverksstörning som påverkar Hallandsregionen.
+1x | Äldre historisk störning i Skåneregionen. Registrerad i systemloggar.
+1x | Nätverksstörning i Gävleborgsregionen. Berör 4G och 5G-abonnenter.
+1x | Nätverksstörning i Norrbottens läns område. Påverkar mobilanvändare i regionen.
+1x | Äldre historisk störning i Småland/Jönköping. Registrerad i systemloggar.
+1x | Aktuell störning i Skåneregionen. Tekniker arbetar med att återställa tjänsterna.
+1x | Driftstörning i Värmlandsregionen. Påverkar mobila datatjänster och samtal.
+1x | Nätverksstörning i Västerås och omgivningar. Berör 4G och 5G-tjänster.

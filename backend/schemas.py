@@ -54,6 +54,7 @@ class OutageResponse(BaseModel):
     longitude: Optional[float]
     
     affected_services: List[str]
+    place: Optional[str] = None
     updated_at: Optional[datetime]
     
     @field_validator('status', mode='before')
@@ -165,6 +166,7 @@ class OutageUpdate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     affected_services: Optional[List[str]] = None
+    place: Optional[str] = None
 
     @field_validator('status', mode='before')
     @classmethod
@@ -177,3 +179,12 @@ class OutageUpdate(BaseModel):
     def normalize_severity(cls, v):
         if v is None: return v
         return str(v).lower()
+
+class ResolvePlaceRequest(BaseModel):
+    query: str
+
+class ResolvePlaceResponse(BaseModel):
+    latitude: float
+    longitude: float
+    display_name: str
+    region_id: Optional[int] = None

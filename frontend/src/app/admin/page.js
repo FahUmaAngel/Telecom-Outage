@@ -115,8 +115,26 @@ export default function AdminPage() {
             latitude: outage.latitude || "",
             longitude: outage.longitude || "",
             location: outage.location || "",
+            place: outage.place || "",
             affected_services: outage.affected_services || [],
         });
+    };
+
+    const handleResolvePlace = async () => {
+        if (!editForm.place) return;
+        try {
+            const data = await api.admin.outages.resolvePlace(editForm.place);
+            setEditForm(prev => ({
+                ...prev,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                location: data.display_name,
+                region_id: data.region_id || prev.region_id
+            }));
+            addToast(lang === "sv" ? "Plats identifierad" : "Place resolved", "success");
+        } catch (err) {
+            addToast(lang === "sv" ? "Kunde inte hitta platsen" : "Failed to resolve place", "error");
+        }
     };
 
     const handleUpdateOutage = async (e) => {
@@ -137,6 +155,7 @@ export default function AdminPage() {
                 latitude: editForm.latitude ? parseFloat(editForm.latitude) : null,
                 longitude: editForm.longitude ? parseFloat(editForm.longitude) : null,
                 location: editForm.location,
+                place: editForm.place,
                 affected_services: editForm.affected_services,
             };
             await api.admin.outages.update(editingOutage.id, payload);
@@ -437,6 +456,25 @@ export default function AdminPage() {
                             <div className="form-group">
                                 <label>Estimated Fix Time</label>
                                 <input type="datetime-local" value={editForm.estimated_fix_time} onChange={e => setEditForm({ ...editForm, estimated_fix_time: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Place (Plus Code or Address)</label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        style={{ flex: 1 }}
+                                        placeholder="Ex: M2GM+R6 Göteborg"
+                                        value={editForm.place}
+                                        onChange={e => setEditForm({ ...editForm, place: e.target.value })}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn-secondary"
+                                        style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}
+                                        onClick={handleResolvePlace}
+                                    >
+                                        {lang === "sv" ? "Hämta info" : "Resolve"}
+                                    </button>
+                                </div>
                             </div>
                             <div className="form-group">
                                 <label>Location Name</label>

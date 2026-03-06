@@ -62,6 +62,7 @@ class Outage(Base):
     # geom = Column(Geometry("POINT", srid=4326), nullable=True)
     
     affected_services = Column(JSON) # List of strings/enums
+    place = Column(String, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

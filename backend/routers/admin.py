@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Dict, Any, Optional
 from ..dependencies import get_db
-from ..schemas import ReportResponse, OutageResponse, OutageUpdate
+from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
+from ..utils.geocoding import resolve_place
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -85,6 +86,7 @@ def admin_get_outages(
             latitude=o.latitude,
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
+            place=o.place,
             updated_at=o.updated_at
         )
         for o in outages
@@ -127,6 +129,7 @@ def update_outage(
         latitude=outage.latitude,
         longitude=outage.longitude,
         affected_services=outage.affected_services if outage.affected_services else [],
+        place=outage.place,
         updated_at=outage.updated_at
     )
 
@@ -173,3 +176,51 @@ def reject_report(report_id: int, db: Session = Depends(get_db)):
         status=report.status,
         created_at=report.created_at
     )
+
+@router.post("/resolve-place", response_model=ResolvePlaceResponse)
+def admin_resolve_place(request: ResolvePlaceRequest, db: Session = Depends(get_db)):
+    """Resolve a place string to coordinates and Map to Region."""
+    from scrapers.db.models import Region
+    import json
+    
+    result = resolve_place(request.query)
+    if not result:
+        raise HTTPException(status_code=404, detail="Place not found")
+    
+    # Map county/region name to database ID
+    region_id = None
+    county_name = result.get('county')
+    
+    if county_name:
+        # Search in database. Region.name is a JSON field {"sv": "...", "en": "..."}
+        # We try to match either sv or en name.
+        # SQLite JSON search: json_extract(name, '$.sv')
+        
+        # Normalize county name (remove 'län' or 'county' for better matching if needed, 
+        # but the user specific names include 'län')
+        search_name = county_name
+        
+        # Exact match attempt
+        db_region = db.query(Region).filter(
+            (func.json_extract(Region.name, '$.sv').ilike(f"{search_name}%")) |
+            (func.json_extract(Region.name, '$.en').ilike(f"{search_name}%"))
+        ).first()
+        
+        if db_region:
+            region_id = db_region.id
+            # Use the official DB name for display if found
+            if isinstance(db_region.name, str):
+                try:
+                    name_dict = json.loads(db_region.name)
+                    result['display_name'] = name_dict.get('sv') or result['display_name']
+                except:
+                    pass
+            elif isinstance(db_region.name, dict):
+                result['display_name'] = db_region.name.get('sv') or result['display_name']
+
+    return {
+        "latitude": result['latitude'],
+        "longitude": result['longitude'],
+        "display_name": result['display_name'],
+        "region_id": region_id
+    }
