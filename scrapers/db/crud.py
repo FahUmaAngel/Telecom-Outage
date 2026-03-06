@@ -9,8 +9,10 @@ from ..common.engine import extract_region_from_text
 from datetime import datetime
 import json
 
+from sqlalchemy import func
+
 def get_operator_id(db: Session, operator_name: str) -> int:
-    op = db.query(Operator).filter(Operator.name == operator_name).first()
+    op = db.query(Operator).filter(func.lower(Operator.name) == operator_name.lower()).first()
     if op:
         return op.id
     return None

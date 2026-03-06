@@ -7,7 +7,7 @@ import logging
 from bs4 import BeautifulSoup
 import json
 from datetime import datetime
-from common.models import OperatorEnum, RawOutage
+from scrapers.common.models import OperatorEnum, RawOutage
 
 logger = logging.getLogger(__name__)
 

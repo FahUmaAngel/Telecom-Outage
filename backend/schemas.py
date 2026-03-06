@@ -61,7 +61,10 @@ class OutageResponse(BaseModel):
     @classmethod
     def normalize_status(cls, v):
         if v is None: return v
-        return str(v).lower()
+        val_str = str(v)
+        if "OutageStatus" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
 
     @field_validator('severity', mode='before')
     @classmethod

@@ -8,14 +8,14 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from common.models import (
+from scrapers.common.models import (
     NormalizedOutage,
     OperatorEnum,
     SeverityLevel,
     OutageStatus,
     ServiceType
 )
-from common.translation import translate_swedish_to_english
+from scrapers.common.translation import translate_swedish_to_english
 
 logger = logging.getLogger(__name__)
 

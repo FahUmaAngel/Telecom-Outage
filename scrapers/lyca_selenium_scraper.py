@@ -131,24 +131,35 @@ def scrape_lyca_with_selenium() -> Dict:
                         time.sleep(2)
                     
                     # Target specific county row
-                    target_row = driver.find_elements(By.XPATH, f"//tr[contains(., '{county_text}')]")
-                    if not target_row:
-                        logger.warning(f"  Could not find {county_text} after reset")
+                    # Use a more robust selector for the row containing the county name
+                    target_row = None
+                    try:
+                        target_row = wait.until(EC.presence_of_element_located((By.XPATH, f"//tr[contains(., '{county_text}')]")))
+                    except:
+                        logger.warning(f"  Could not find {county_text} row after reset")
                         continue
                         
-                    zoom_icon = target_row[0].find_element(By.CSS_SELECTOR, "i.fa-search, .fa-search")
+                    if not target_row:
+                        continue
+                        
+                    # Find the search/zoom icon within this row
+                    zoom_icon = target_row.find_element(By.CSS_SELECTOR, "i.fa-search, .fa-search")
                     
                     # Scroll and click
                     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", zoom_icon)
-                    time.sleep(1)
+                    time.sleep(2) # Stabilize after scroll
                     driver.execute_script("arguments[0].click();", zoom_icon)
                     
                     logger.info(f"  Wait for incidents to load for {county_text}...")
-                    time.sleep(5)
+                    # Increase wait and look for the dynamic table
+                    time.sleep(8) 
                     
-                    # Fetch incident rows dynamically rendered below
+                    # Fetch incident rows dynamically rendered below the clicked row or in a specific results area
+                    # Usually, Enghouse portals render the list in a specific div or table
                     incident_rows = driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
                     found_for_county = 0
+                    
+                    logger.info(f"  Found {len(incident_rows)} total rows in DOM after click")
                     
                     for ir in incident_rows:
                         cells = ir.find_elements(By.TAG_NAME, "td")

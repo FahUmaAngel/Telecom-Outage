@@ -4,7 +4,7 @@ Core Engine Services: Severity Scoring and Analytics tools.
 from typing import List
 from .models import OutageStatus, SeverityLevel, ServiceType
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 def parse_swedish_date(date_str: str) -> datetime:

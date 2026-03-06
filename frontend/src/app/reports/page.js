@@ -198,8 +198,9 @@ function ReportsContent() {
                     <tbody>
                         {filteredOutages.map((outage) => {
                             let displayStatus = outage.status;
-                            if (outage.end_time) {
-                                const end = new Date(outage.end_time);
+                            const effectiveEndDate = outage.end_time || outage.estimated_fix_time;
+                            if (effectiveEndDate) {
+                                const end = new Date(effectiveEndDate);
                                 if (!isNaN(end.getTime()) && end < new Date()) {
                                     displayStatus = "resolved";
                                 }
@@ -245,7 +246,7 @@ function ReportsContent() {
                                         {formatDate(outage.start_time)}
                                     </td>
                                     <td className="date-cell">
-                                        {formatDate(outage.end_time)}
+                                        {formatDate(outage.end_time || outage.estimated_fix_time)}
                                     </td>
                                     <td className="actions-cell">
                                         <Link href={`/outages/${outage.id}`} className="view-link">

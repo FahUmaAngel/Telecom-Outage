@@ -36,7 +36,9 @@ def get_mttr(db: Session = Depends(get_db)):
         total_hours = 0.0
         valid_outages = 0
         for o in outages:
-            diff = o.end_time - o.start_time
+            st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+            et = o.end_time.replace(tzinfo=None) if o.end_time.tzinfo else o.end_time
+            diff = et - st
             duration_hours = diff.total_seconds() / 3600.0
             
             # Sanity Check: Ignore negative durations or those > 1 year (data errors)
@@ -77,7 +79,9 @@ def get_reliability(db: Session = Depends(get_db)):
         total_downtime = 0.0
         for o in outages:
             if o.start_time and o.end_time:
-                diff = o.end_time - o.start_time
+                st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+                et = o.end_time.replace(tzinfo=None) if o.end_time.tzinfo else o.end_time
+                diff = et - st
                 total_downtime += diff.total_seconds() / 3600.0
             # If still active, maybe count downtime up to now? 
             # For simplicity, we only count resolved for downtime, but all for count.
