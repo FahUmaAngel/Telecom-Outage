@@ -1,0 +1,81 @@
+[
+    {
+        "ID": "INCSE0502694",
+        "Title": "Aktuella Störningar",
+        "Description": "Just nu kan du uppleva störningar i mobilnätet som bland annat påverkar samtal, surf och andra mobila tjänster.",
+        "Status": "Active",
+        "StartTime": "2026-03-04 14:34",
+        "EndTime": "2026-03-06 14:58 (Expected)",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.0169606721,
+            "Longitude": 17.6840704852
+        }
+    },
+    {
+        "ID": "INCSE0508167",
+        "Title": "Aktuella Störningar",
+        "Description": "Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt.",
+        "Status": "Active",
+        "StartTime": "2026-03-05 11:11",
+        "EndTime": "2026-03-06 11:15 (Expected)",
+        "AffectedServices": [
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 60.2780304757,
+            "Longitude": 14.9808402124
+        }
+    },
+    {
+        "ID": "INCSE0508249",
+        "Title": "Aktuella Störningar",
+        "Description": "Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt.",
+        "Status": "Active",
+        "StartTime": "2026-03-05 19:20",
+        "EndTime": "2026-03-06 19:18 (Expected)",
+        "AffectedServices": [
+            "2G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.3339433042,
+            "Longitude": 18.0448216881
+        }
+    },
+    {
+        "ID": "INCSE0508259",
+        "Title": "Historical Incident",
+        "Description": "Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt.",
+        "Status": "Historical",
+        "StartTime": "2026-03-05 19:34",
+        "EndTime": "2026-03-05 20:35",
+        "AffectedServices": [
+            "2G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.366065093,
+            "Longitude": 18.0110325253
+        }
+    },
+    {
+        "ID": "INCSE0508273",
+        "Title": "Aktuella Störningar",
+        "Description": "Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt.",
+        "Status": "Active",
+        "StartTime": "2026-03-05 20:07",
+        "EndTime": "2026-03-06 20:05 (Expected)",
+        "AffectedServices": [
+            "5G",
+            "4G",
+            "2G"
+        ],
+        "Coordinates": {
+            "Latitude": 62.4469630779,
+            "Longitude": 17.3364068337
+        }
+    }
+]

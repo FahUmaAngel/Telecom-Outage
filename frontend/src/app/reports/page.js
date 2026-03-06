@@ -84,9 +84,22 @@ function ReportsContent() {
             if (!matchesService) return false;
         }
 
+        // Compute Display Status (auto-resolve if end_time passed)
+        let displayStatus = o.status;
+        if (o.end_time) {
+            const endDate = new Date(o.end_time);
+            const now = new Date();
+            // Compare millisecond times safely
+            if (!isNaN(endDate.getTime())) {
+                if (endDate.getTime() <= now.getTime()) {
+                    displayStatus = "resolved";
+                }
+            }
+        }
+
         // Status Filter
         if (statusFilter !== "all") {
-            if (statusFilter.toLowerCase() !== o.status.toLowerCase()) return false;
+            if (statusFilter.toLowerCase() !== displayStatus.toLowerCase()) return false;
         }
 
         return true;
@@ -150,18 +163,11 @@ function ReportsContent() {
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
-                            <option value="mobile">{lang === "sv" ? "Mobil" : "Mobile"}</option>
                             <option value="5g+">5G+</option>
                             <option value="5g">5G</option>
                             <option value="4g">4G</option>
                             <option value="3g">3G</option>
                             <option value="2g">2G</option>
-                            <option value="data">{lang === "sv" ? "Mobildata" : "Mobile Data"}</option>
-                            <option value="voice">{lang === "sv" ? "Röstsamtal" : "Voice Calls"}</option>
-                            <option value="sms">SMS</option>
-                            <option value="mms">MMS</option>
-                            <option value="fiber">{lang === "sv" ? "Fiber" : "Fiber"}</option>
-                            <option value="broadband">{lang === "sv" ? "Bredband" : "Broadband"}</option>
                         </select>
                     </div>
                     <div className="search-bar">
@@ -190,56 +196,65 @@ function ReportsContent() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOutages.map((outage) => (
-                            <tr key={outage.id}>
-                                <td>
-                                    <span className={`status-badge-mini ${outage.status.toLowerCase()}`}>
-                                        {outage.status}
-                                    </span>
-                                </td>
-                                <td className="operator-cell">{outage.operator_name}</td>
-                                <td className="title-cell">
-                                    {outage.incident_id
-                                        ? `Incident ${outage.incident_id}`
-                                        : (t(outage.title) || "-")}
-                                </td>
-                                <td className="services-cell">
-                                    <div className="service-tags-mini">
-                                        {(() => {
-                                            const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
-                                            const sorted = [...(outage.affected_services || [])].sort((a, b) => {
-                                                const idxA = priority.indexOf(a.toLowerCase());
-                                                const idxB = priority.indexOf(b.toLowerCase());
-                                                return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-                                            });
-                                            const displayLimit = 5;
-                                            return (
-                                                <>
-                                                    {sorted.slice(0, displayLimit).map((s, i) => (
-                                                        <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
-                                                    ))}
-                                                    {sorted.length > displayLimit && (
-                                                        <span className="mini-tag more">+{sorted.length - displayLimit}</span>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                </td>
-                                <td className="location-cell">{outage.location || "Sweden"}</td>
-                                <td className="date-cell">
-                                    {formatDate(outage.start_time)}
-                                </td>
-                                <td className="date-cell">
-                                    {formatDate(outage.end_time)}
-                                </td>
-                                <td className="actions-cell">
-                                    <Link href={`/outages/${outage.id}`} className="view-link">
-                                        {lang === "sv" ? "Visa" : "View"}
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredOutages.map((outage) => {
+                            let displayStatus = outage.status;
+                            if (outage.end_time) {
+                                const end = new Date(outage.end_time);
+                                if (!isNaN(end.getTime()) && end < new Date()) {
+                                    displayStatus = "resolved";
+                                }
+                            }
+                            return (
+                                <tr key={outage.id}>
+                                    <td>
+                                        <span className={`status-badge-mini ${displayStatus.toLowerCase()}`}>
+                                            {displayStatus}
+                                        </span>
+                                    </td>
+                                    <td className="operator-cell">{outage.operator_name}</td>
+                                    <td className="title-cell">
+                                        {outage.incident_id
+                                            ? outage.incident_id
+                                            : (t(outage.title) || "-")}
+                                    </td>
+                                    <td className="services-cell">
+                                        <div className="service-tags-mini">
+                                            {(() => {
+                                                const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
+                                                const sorted = [...(outage.affected_services || [])].sort((a, b) => {
+                                                    const idxA = priority.indexOf(a.toLowerCase());
+                                                    const idxB = priority.indexOf(b.toLowerCase());
+                                                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                                                });
+                                                const displayLimit = 5;
+                                                return (
+                                                    <>
+                                                        {sorted.slice(0, displayLimit).map((s, i) => (
+                                                            <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
+                                                        ))}
+                                                        {sorted.length > displayLimit && (
+                                                            <span className="mini-tag more">+{sorted.length - displayLimit}</span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </td>
+                                    <td className="location-cell">{outage.location || "Sweden"}</td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.start_time)}
+                                    </td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.end_time)}
+                                    </td>
+                                    <td className="actions-cell">
+                                        <Link href={`/outages/${outage.id}`} className="view-link">
+                                            {lang === "sv" ? "Visa" : "View"}
+                                        </Link>
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
                 {filteredOutages.length === 0 && (

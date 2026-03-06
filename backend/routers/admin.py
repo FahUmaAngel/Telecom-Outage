@@ -35,20 +35,35 @@ def admin_get_outages(
     db: Session = Depends(get_db),
     operator: Optional[str] = None,
     status: Optional[str] = None,
-    limit: Optional[int] = None
+    search: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
 ):
-    """List all outages for administrative editing."""
+    """List outages for administrative editing with pagination and search."""
     query = db.query(Outage).join(Operator)
     
     if operator:
         query = query.filter(Operator.name == operator.lower())
     if status:
-        query = query.filter(Outage.status == status)
+        query = query.filter(Outage.status == status.lower())
+    if search:
+        from sqlalchemy import or_, cast, String
+        q = f"%{search}%"
+        query = query.filter(
+            or_(
+                cast(Outage.id, String).like(q),
+                Outage.incident_id.ilike(q),
+                Outage.location.ilike(q),
+                cast(Outage.title, String).ilike(q),
+            )
+        )
         
-    query = query.options(joinedload(Outage.operator), joinedload(Outage.region)).order_by(Outage.updated_at.desc())
-    if limit:
-        query = query.limit(limit)
-    outages = query.all()
+    query = query.options(
+        joinedload(Outage.operator),
+        joinedload(Outage.region)
+    ).order_by(Outage.updated_at.desc())
+    
+    outages = query.offset(offset).limit(limit).all()
     
     return [
         OutageResponse(

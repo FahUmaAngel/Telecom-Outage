@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
@@ -13,23 +13,46 @@ export default function AdminPage() {
     const [reports, setReports] = useState([]);
     const [outages, setOutages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [outagesLoading, setOutagesLoading] = useState(false);
     const [editingOutage, setEditingOutage] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [searchQuery, setSearchQuery] = useState("");
     const [filterOperator, setFilterOperator] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 100;
+    const searchTimerRef = useRef(null);
+
+    const fetchOutages = useCallback(async (currentPage = 0, search = searchQuery, operator = filterOperator, status = filterStatus) => {
+        setOutagesLoading(true);
+        try {
+            const params = {
+                limit: PAGE_SIZE,
+                offset: currentPage * PAGE_SIZE,
+            };
+            if (search) params.search = search;
+            if (operator) params.operator = operator;
+            if (status) params.status = status;
+            const data = await api.admin.outages.list(params);
+            setOutages(data);
+            setHasMore(data.length === PAGE_SIZE);
+        } catch (err) {
+            console.error("Failed to fetch outages:", err);
+        } finally {
+            setOutagesLoading(false);
+        }
+    }, []);
 
     const fetchData = async () => {
         try {
-            const [scrapersData, reportsData, outagesData] = await Promise.all([
+            const [scrapersData, reportsData] = await Promise.all([
                 api.admin.scrapers(),
                 api.admin.reports.list(),
-                api.admin.outages.list(),
             ]);
             setScrapers(scrapersData);
             setReports(reportsData);
-            setOutages(outagesData);
         } catch (err) {
             console.error("Failed to fetch admin data:", err);
             addToast(lang === "sv" ? "Kunde inte hämta admin-data" : "Failed to fetch admin data", "error");
@@ -38,9 +61,15 @@ export default function AdminPage() {
         }
     };
 
+    const handleFilterChange = (newSearch, newOperator, newStatus) => {
+        setPage(0);
+        fetchOutages(0, newSearch, newOperator, newStatus);
+    };
+
     useEffect(() => {
         setMounted(true);
         fetchData();
+        fetchOutages(0);
     }, []);
 
     useEffect(() => {
@@ -52,25 +81,6 @@ export default function AdminPage() {
         return () => { document.body.style.overflow = 'unset'; };
     }, [editingOutage]);
 
-    const filteredOutages = outages.filter(o => {
-        const matchOp = filterOperator ? o.operator_name === filterOperator : true;
-        const matchStatus = filterStatus ? o.status === filterStatus : true;
-
-        const q = searchQuery.toLowerCase();
-        const titleSv = o.title?.sv?.toLowerCase() || "";
-        const titleEn = o.title?.en?.toLowerCase() || "";
-        const loc = o.location?.toLowerCase() || "";
-        const iId = o.incident_id?.toLowerCase() || "";
-
-        const matchSearch = !searchQuery ||
-            String(o.id).includes(q) ||
-            iId.includes(q) ||
-            titleSv.includes(q) ||
-            titleEn.includes(q) ||
-            loc.includes(q);
-
-        return matchOp && matchStatus && matchSearch;
-    });
 
     const handleReportAction = async (id, action) => {
         try {
@@ -132,7 +142,7 @@ export default function AdminPage() {
             await api.admin.outages.update(editingOutage.id, payload);
             addToast(lang === "sv" ? "Driftstörning uppdaterad" : "Outage updated", "success");
             setEditingOutage(null);
-            fetchData();
+            fetchOutages(page, searchQuery, filterOperator, filterStatus);
         } catch (err) {
             addToast(lang === "sv" ? "Kunde inte uppdatera" : "Failed to update", "error");
         }
@@ -228,12 +238,19 @@ export default function AdminPage() {
                             type="text"
                             placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchQuery(val);
+                                clearTimeout(searchTimerRef.current);
+                                searchTimerRef.current = setTimeout(() => {
+                                    handleFilterChange(val, filterOperator, filterStatus);
+                                }, 400);
+                            }}
                             className="search-input"
                         />
                         <select
                             value={filterOperator}
-                            onChange={(e) => setFilterOperator(e.target.value)}
+                            onChange={(e) => { setFilterOperator(e.target.value); handleFilterChange(searchQuery, e.target.value, filterStatus); }}
                             className="filter-select"
                         >
                             <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
@@ -244,7 +261,7 @@ export default function AdminPage() {
                         </select>
                         <select
                             value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value)}
+                            onChange={(e) => { setFilterStatus(e.target.value); handleFilterChange(searchQuery, filterOperator, e.target.value); }}
                             className="filter-select"
                         >
                             <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
@@ -269,28 +286,70 @@ export default function AdminPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredOutages.map((o) => (
-                                    <tr key={o.id}>
-                                        <td className="id-cell">#{o.id}</td>
-                                        <td className="op-cell">{o.operator_name}</td>
-                                        <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
-                                        <td>
-                                            <span className={`status-badge-mini ${o.status}`}>
-                                                {o.status}
-                                            </span>
-                                        </td>
-                                        <td className="coord-cell">
-                                            {o.latitude ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` : "-"}
-                                        </td>
-                                        <td className="actions-cell">
-                                            <button onClick={() => startEditing(o)} className="btn-edit">
-                                                {lang === "sv" ? "Redigera" : "Edit"}
-                                            </button>
+                                {outagesLoading ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
+                                            <div className="loading-spinner" style={{ margin: "0 auto" }}></div>
                                         </td>
                                     </tr>
-                                ))}
+                                ) : outages.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
+                                            {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    outages.map((o) => (
+                                        <tr key={o.id}>
+                                            <td className="id-cell">#{o.id}</td>
+                                            <td className="op-cell">{o.operator_name}</td>
+                                            <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
+                                            <td>
+                                                <span className={`status-badge-mini ${o.status}`}>
+                                                    {o.status}
+                                                </span>
+                                            </td>
+                                            <td className="coord-cell">
+                                                {o.latitude ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` : "-"}
+                                            </td>
+                                            <td className="actions-cell">
+                                                <button onClick={() => startEditing(o)} className="btn-edit">
+                                                    {lang === "sv" ? "Redigera" : "Edit"}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', padding: '10px 0' }}>
+                        <button
+                            className="btn-secondary"
+                            disabled={page === 0 || outagesLoading}
+                            onClick={() => {
+                                const newPage = page - 1;
+                                setPage(newPage);
+                                fetchOutages(newPage);
+                            }}
+                        >
+                            {lang === "sv" ? "← Föregående" : "← Previous"}
+                        </button>
+                        <span style={{ alignSelf: 'center', opacity: 0.7 }}>
+                            {lang === "sv" ? `Sida ${page + 1}` : `Page ${page + 1}`}
+                        </span>
+                        <button
+                            className="btn-secondary"
+                            disabled={!hasMore || outagesLoading}
+                            onClick={() => {
+                                const newPage = page + 1;
+                                setPage(newPage);
+                                fetchOutages(newPage);
+                            }}
+                        >
+                            {lang === "sv" ? "Nästa →" : "Next →"}
+                        </button>
                     </div>
                 </div>
             </section>

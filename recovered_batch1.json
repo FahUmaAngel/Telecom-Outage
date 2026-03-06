@@ -1,0 +1,166 @@
+[
+    {
+        "ID": "INCSE0504255",
+        "Title": "Visby, Gotland Incident",
+        "Description": "Historical disturbance found in system logs for Visby area.",
+        "Status": "Historical",
+        "StartTime": "2026-03-04",
+        "EndTime": "2026-03-05",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 57.636341,
+            "Longitude": 18.291868
+        }
+    },
+    {
+        "ID": "INCSE0500172",
+        "Title": "Eskilstuna Network Fault",
+        "Description": "Network disturbance affecting regional services.",
+        "Status": "Historical",
+        "StartTime": "2026-03-04",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.342123,
+            "Longitude": 16.510575
+        }
+    },
+    {
+        "ID": "INCSE0508251",
+        "Title": "Sölvesborg Service Interruption",
+        "Description": "Active disturbance reported in Sölvesborg.",
+        "Status": "Active",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 56.050548,
+            "Longitude": 14.685372
+        }
+    },
+    {
+        "ID": "INCSE0499021",
+        "Title": "Vänersborg Fault",
+        "Description": "Historical 2G/4G disturbance.",
+        "Status": "Historical",
+        "StartTime": "2026-03-04",
+        "EndTime": "2026-03-05",
+        "AffectedServices": [
+            "2G",
+            "4G"
+        ],
+        "Coordinates": {
+            "Latitude": 58.437027,
+            "Longitude": 12.699825
+        }
+    },
+    {
+        "ID": "INCSE0506219",
+        "Title": "Borås Regional Outage",
+        "Description": "Recent disturbance affecting Borås area.",
+        "Status": "Active/Historical",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 57.713356,
+            "Longitude": 13.121436
+        }
+    },
+    {
+        "ID": "INCSE0507801",
+        "Title": "Kungälv Network Issue",
+        "Description": "Disturbance near Kungälv/Göteborg.",
+        "Status": "Active",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 57.838088,
+            "Longitude": 11.718118
+        }
+    },
+    {
+        "ID": "INCSE0498666",
+        "Title": "Göteborg South Incident",
+        "Description": "Short-term historical disturbance in South Göteborg.",
+        "Status": "Historical",
+        "StartTime": "2026-03-04",
+        "EndTime": "2026-03-04",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 57.652156,
+            "Longitude": 11.890786
+        }
+    },
+    {
+        "ID": "INCSE0505464",
+        "Title": "Sundsvall Service Fault",
+        "Description": "Active disturbance in Sundsvall.",
+        "Status": "Active",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "2G",
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 62.434472,
+            "Longitude": 17.535173
+        }
+    },
+    {
+        "ID": "INCSE0505881",
+        "Title": "Tyresö 5G Disturbance",
+        "Description": "5G capacity reduction in Tyresö, Stockholm.",
+        "Status": "Active",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.230841,
+            "Longitude": 18.193997
+        }
+    },
+    {
+        "ID": "INCSE0505885",
+        "Title": "Sollentuna 5G Fault",
+        "Description": "Limited 5G coverage in Sollentuna area.",
+        "Status": "Active",
+        "StartTime": "2026-03-05",
+        "EndTime": "2026-03-06",
+        "AffectedServices": [
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 59.418466,
+            "Longitude": 17.925232
+        }
+    }
+]

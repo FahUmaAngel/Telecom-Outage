@@ -1,12 +1,10 @@
 """
 Database Models (SQLAlchemy).
 """
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Text, Float, JSON, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Float, JSON, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from geoalchemy2 import Geometry
 from .connection import Base
-from ..common.models import OperatorEnum, SeverityLevel, OutageStatus
 
 class Operator(Base):
     __tablename__ = "operators"
@@ -50,8 +48,8 @@ class Outage(Base):
     title = Column(JSON) # Bilingual {"sv": "...", "en": "..."}
     description = Column(JSON, nullable=True) # Bilingual
     
-    status = Column(Enum(OutageStatus))
-    severity = Column(Enum(SeverityLevel))
+    status = Column(String, nullable=True)   # e.g. "active", "resolved", "scheduled", "investigating"
+    severity = Column(String, nullable=True)  # e.g. "low", "medium", "high", "critical"
     
     start_time = Column(DateTime(timezone=True), nullable=True)
     end_time = Column(DateTime(timezone=True), nullable=True)

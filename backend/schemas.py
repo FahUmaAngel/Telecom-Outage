@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for API responses.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -56,6 +56,18 @@ class OutageResponse(BaseModel):
     affected_services: List[str]
     updated_at: Optional[datetime]
     
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
     class Config:
         from_attributes = True
 
@@ -153,3 +165,15 @@ class OutageUpdate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     affected_services: Optional[List[str]] = None
+
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        return str(v).lower()
