@@ -127,13 +127,16 @@ def run_scrapers():
                     )
                     
                     # Geocoding fallback: use county coordinates if specific coords not available
-                    county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
+                    # Try location_text first, then context_text if location_text is empty or doesn't match
+                    search_text = location_text if location_text else context_text
+                    county_name = extract_region_from_text(search_text, SWEDISH_COUNTIES)
+                    
                     if county_name:
                         normalized.location = county_name  # Ensure DB holds exact standardization
                         coords = get_county_coordinates(county_name, jitter=True)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
-                            logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
+                            logger.info(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
                     save_outage(db, normalized, {"source": "lyca_selenium", "raw": outage})
                 
