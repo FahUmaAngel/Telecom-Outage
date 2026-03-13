@@ -18,6 +18,22 @@ def _safe_val(v):
         return None
     return v.value if hasattr(v, 'value') else v
 
+def _effective_status(o):
+    """Return 'resolved' if the incident's end date has already passed, regardless of DB status."""
+    raw = _safe_val(o.status) or 'active'
+    if raw.lower() == 'resolved':
+        return raw
+    end = o.end_time or o.estimated_fix_time
+    if end:
+        try:
+            end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
+            end_dt = end_dt.replace(tzinfo=None)
+            if end_dt < datetime.utcnow():
+                return 'resolved'
+        except Exception:
+            pass
+    return raw
+
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
     db: Session = Depends(get_db),
@@ -49,7 +65,7 @@ def get_outage_history(
             raw_data_id=o.raw_data_id,
             title=o.title if o.title else {},
             description=o.description,
-            status=_safe_val(o.status),
+            status=_effective_status(o),
             severity=_safe_val(o.severity),
             start_time=o.start_time,
             end_time=o.end_time,
@@ -114,7 +130,7 @@ def get_outages(
             raw_data_id=o.raw_data_id,
             title=o.title if o.title else {},
             description=o.description,
-            status=_safe_val(o.status),
+            status=_effective_status(o),
             severity=_safe_val(o.severity),
             start_time=o.start_time,
             end_time=o.end_time,

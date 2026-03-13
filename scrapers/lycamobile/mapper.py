@@ -21,12 +21,13 @@ logger = logging.getLogger(__name__)
 
 def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
     try:
+        out_id = parsed_outage.get('id', '')
         outage = NormalizedOutage(
             operator=OperatorEnum.LYCAMOBILE,
-            outage_id=parsed_outage.get('id'),
+            outage_id=out_id,
             title={
-                'sv': f"Störning i {parsed_outage.get('location', 'Sverige')}",
-                'en': f"Outage in {parsed_outage.get('location', 'Sweden')}"
+                'sv': str(out_id),
+                'en': str(out_id)
             },
             description=parsed_outage.get('description'),
             status=OutageStatus.ACTIVE, # Default to active for now
