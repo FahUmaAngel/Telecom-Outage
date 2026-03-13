@@ -109,22 +109,18 @@ def run_scrapers():
                     title_text = outage.get('title', f"Incident {outage['incident_id']}")
                     context_text = f"{location_text} {desc_text} {title_text}"
                     
+                    from scrapers.common.translation import create_bilingual_text
+                    
                     # Create NormalizedOutage object
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.LYCAMOBILE,
                         incident_id=outage['incident_id'],
-                        title={
-                            "sv": title_text,
-                            "en": title_text
-                        },
-                        description={
-                            "sv": desc_text or f"Incident ID: {outage['incident_id']}",
-                            "en": desc_text or f"Incident ID: {outage['incident_id']}"
-                        },
+                        title=create_bilingual_text(title_text),
+                        description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
                         location=location_text or 'Unknown',
                         status=classify_status(context_text, OutageStatus.ACTIVE),
                         severity=SeverityLevel.MEDIUM,
-                        affected_services=classify_services(context_text),
+                        affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
                         source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
                         started_at=parse_swedish_date(outage.get('start_time')),
                         estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))

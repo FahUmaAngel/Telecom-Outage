@@ -46,6 +46,9 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         context_text = f"{location} {desc_sv} {title_sv}"
         affected_services = classify_services(context_text)
         
+        # Filter out 'voice' and 'data' as requested by user
+        affected_services = [s for s in affected_services if s not in [ServiceType.VOICE, ServiceType.MOBILE_DATA]]
+        
         # Remove 'mobile' if we have more specific generations to keep it cleaner
         # (Optional, but usually better if we have 5G etc.)
         # However, user wants "mobile" specifically for Tre.

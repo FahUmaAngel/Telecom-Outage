@@ -84,18 +84,8 @@ function ReportsContent() {
             if (!matchesService) return false;
         }
 
-        // Compute Display Status (auto-resolve if end_time passed)
-        let displayStatus = o.status;
-        if (o.end_time) {
-            const endDate = new Date(o.end_time);
-            const now = new Date();
-            // Compare millisecond times safely
-            if (!isNaN(endDate.getTime())) {
-                if (endDate.getTime() <= now.getTime()) {
-                    displayStatus = "resolved";
-                }
-            }
-        }
+        // Display Status
+        const displayStatus = o.status;
 
         // Status Filter
         if (statusFilter !== "all") {
@@ -197,14 +187,7 @@ function ReportsContent() {
                     </thead>
                     <tbody>
                         {filteredOutages.map((outage) => {
-                            let displayStatus = outage.status;
-                            const effectiveEndDate = outage.end_time || outage.estimated_fix_time;
-                            if (effectiveEndDate) {
-                                const end = new Date(effectiveEndDate);
-                                if (!isNaN(end.getTime()) && end < new Date()) {
-                                    displayStatus = "resolved";
-                                }
-                            }
+                            const displayStatus = outage.status;
                             return (
                                 <tr key={outage.id}>
                                     <td>

@@ -95,6 +95,41 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         db.add(new_outage)
         return new_outage
 
+def auto_resolve_expired_outages(db: Session):
+    """
+    Find outages that are still active/scheduled but their end dates/ETAs have passed.
+    Mark them as 'resolved' in the database.
+    """
+    now = datetime.utcnow()
+    
+    # 1. Check end_time (definite resolution time)
+    expired_end = db.query(Outage).filter(
+        Outage.status != 'resolved',
+        Outage.end_time != None,
+        Outage.end_time <= now
+    ).all()
+    
+    # 2. Check estimated_fix_time (ETA passed)
+    # We only auto-resolve based on ETA if there's no definite end_time
+    expired_eta = db.query(Outage).filter(
+        Outage.status != 'resolved',
+        Outage.end_time == None,
+        Outage.estimated_fix_time != None,
+        Outage.estimated_fix_time <= now
+    ).all()
+    
+    total_resolved = 0
+    for outage in expired_end + expired_eta:
+        outage.status = 'resolved'
+        outage.updated_at = now
+        total_resolved += 1
+        
+    if total_resolved > 0:
+        db.commit()
+        print(f"AUTO-RESOLVE: Marked {total_resolved} expired outages as 'resolved'.")
+    
+    return total_resolved
+
 def cleanup_old_data(db: Session, days: int = 30):
     """
     Remove resolved outages and raw data older than X days.

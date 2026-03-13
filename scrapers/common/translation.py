@@ -54,6 +54,14 @@ SWEDISH_TO_ENGLISH = {
     "plats": "location",
     
     # Time
+    # Common templates (longer phrases first)
+    "Under denna period kan man uppleva problem med täckningen i ovan område": "During this period, you may experience coverage issues in the above area",
+    "Just nu har vi en driftstörning som kan påverka dina tjänster i området. Våra tekniker jobbar på att lösa det så snart som möjligt": "We are currently experiencing a service disruption that may affect your services in the area. Our technicians are working to resolve it as soon as possible",
+    "Just nu har vi driftstörningar i delar av norra Sverige pga rådande väder": "We are currently experiencing service disruptions in parts of northern Sweden due to the prevailing weather",
+    "Just nu kan du uppleva störningar i mobilnätet som bland annat påverkar samtal, surf och andra mobila tjänster": "You may currently experience mobile network disruptions affecting calls, data, and other mobile services",
+    "På grund av ett kabelfel i ditt område kan du uppleva störningar i mobilnätet som påverkar samtal, surf och andra mobila tjänster": "Due to a cable fault in your area, you may experience mobile network disruptions affecting calls, data, and other mobile services",
+    "fault has been found, although it was resolved a long time ago and is considered obsolete": "A fault was found, but it has been resolved and is considered obsolete",
+    
     "beräknad åtgärdstid": "estimated fix time",
     "starttid": "start time",
     "sluttid": "end time",
@@ -65,6 +73,20 @@ SWEDISH_TO_ENGLISH = {
     "åtgärda": "fix",
     "felet": "the fault",
     "i ditt område": "in your area",
+    "felsökning pågår": "troubleshooting in progress",
+    "arbete pågår": "work in progress",
+    "arbete startar": "work starts",
+    "arbete klart": "work finished",
+    "tekniker på väg": "technician on the way",
+    "inget End date": "no end date",
+    "beräknas vara klart": "estimated to be finished",
+    "underhållsarbete": "maintenance work",
+    "täckningen": "coverage",
+    "pga": "due to",
+    "rådande väder": "current weather",
+    "ovan område": "above area",
+    "norra sverige": "northern Sweden",
+    "södra sverige": "southern Sweden",
 }
 
 def translate_swedish_to_english(text: str) -> str:

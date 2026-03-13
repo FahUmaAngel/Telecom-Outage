@@ -16,6 +16,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from scrapers.run import run_scrapers
 from scrapers.config import settings
+from scrapers.db.connection import SessionLocal
+from scrapers.db.crud import auto_resolve_expired_outages
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,19 @@ def scraper_job():
     """Background job to run scrapers"""
     try:
         logger.info("Running scheduled scraper job...")
+        
+        # 1. Run Scrapers
         run_scrapers()
+        
+        # 2. Auto-resolve expired outages
+        db = SessionLocal()
+        try:
+            resolved_count = auto_resolve_expired_outages(db)
+            if resolved_count > 0:
+                logger.info(f"Auto-resolved {resolved_count} expired outages")
+        finally:
+            db.close()
+            
         logger.info("Scraper job completed successfully")
     except Exception as e:
         logger.error(f"Error in scraper job: {e}")
