@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const fetcher = async (endpoint, options = {}) => {
     const url = `${BASE_URL}${endpoint}`;
@@ -20,46 +20,46 @@ const fetcher = async (endpoint, options = {}) => {
 
 export const api = {
     operators: {
-        list: () => fetcher("/operators"),
+        list: () => fetcher("/api/v1/operators"),
     },
     outages: {
         list: (params = {}) => {
             const query = new URLSearchParams(params).toString();
-            return fetcher(`/outages${query ? `?${query}` : ""}`);
+            return fetcher(`/api/v1/outages${query ? `?${query}` : ""}`);
         },
-        get: (id) => fetcher(`/outages/${id}`),
-        history: () => fetcher("/analytics/history"),
-        reliability: () => fetcher("/analytics/reliability"),
-        mttr: () => fetcher("/analytics/mttr"),
+        get: (id) => fetcher(`/api/v1/outages/${id}`),
+        history: () => fetcher("/api/v1/analytics/history"),
+        reliability: () => fetcher("/api/v1/analytics/reliability"),
+        mttr: () => fetcher("/api/v1/analytics/mttr"),
     },
     reports: {
-        list: () => fetcher("/reports"),
-        hotspots: () => fetcher("/reports/hotspots"),
-        create: (data) => fetcher("/reports", {
+        list: () => fetcher("/api/v1/reports"),
+        hotspots: () => fetcher("/api/v1/reports/hotspots"),
+        create: (data) => fetcher("/api/v1/reports", {
             method: "POST",
             body: JSON.stringify(data),
         }),
     },
     regions: {
-        list: () => fetcher("/regions"),
+        list: () => fetcher("/api/v1/regions"),
     },
     admin: {
-        scrapers: () => fetcher("/admin/scrapers"),
+        scrapers: () => fetcher("/api/v1/admin/scrapers"),
         outages: {
             list: (params = {}) => {
                 const query = new URLSearchParams(params).toString();
-                return fetcher(`/admin/outages${query ? `?${query}` : ""}`);
+                return fetcher(`/api/v1/admin/outages${query ? `?${query}` : ""}`);
             },
-            update: (id, data) => fetcher(`/admin/outages/${id}`, {
+            update: (id, data) => fetcher(`/api/v1/admin/outages/${id}`, {
                 method: "PUT",
                 body: JSON.stringify(data),
             }),
-            resolvePlace: (query) => fetcher(`/admin/resolve-place`, { method: 'POST', body: JSON.stringify({ query }) }),
+            resolvePlace: (query) => fetcher(`/api/v1/admin/resolve-place`, { method: 'POST', body: JSON.stringify({ query }) }),
         },
         reports: {
-            list: () => fetcher("/reports"),
-            verify: (id) => fetcher(`/admin/reports/${id}/verify`, { method: "POST" }),
-            reject: (id) => fetcher(`/admin/reports/${id}/reject`, { method: "POST" }),
+            list: () => fetcher("/api/v1/reports"),
+            verify: (id) => fetcher(`/api/v1/admin/reports/${id}/verify`, { method: "POST" }),
+            reject: (id) => fetcher(`/api/v1/admin/reports/${id}/reject`, { method: "POST" }),
         }
     }
 };
