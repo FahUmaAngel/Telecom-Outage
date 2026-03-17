@@ -41,6 +41,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
     county_name = extract_region_from_text(lookup_text, SWEDISH_COUNTIES)
     
     if county_name:
+        normalized.location = county_name
         region = db.query(Region).filter(Region.name["sv"].as_string() == county_name).first()
         if region:
             region_id = region.id

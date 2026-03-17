@@ -13,10 +13,25 @@ def main():
     rows = cur.fetchall()
     
     updated = 0
+    ids_fixed = 0
+    
     for r in rows:
         oid, inc_id, title_raw, op_name = r
+        
+        # 1. Fix missing IDs for Tre
+        if not inc_id and op_name.lower() == 'tre':
+            # Try to reconstruct ID from location and start_time (stored as ISO in DB)
+            cur.execute("SELECT location, start_time FROM outages WHERE id = ?", (oid,))
+            loc, start = cur.fetchone()
+            if loc and start:
+                reconstructed_id = f"tre_{loc}_{start.replace(' ', '_')}"
+                cur.execute("UPDATE outages SET incident_id = ? WHERE id = ?", (reconstructed_id, oid))
+                inc_id = reconstructed_id
+                ids_fixed += 1
+        
         if not inc_id: continue
         
+        # 2. Standardize Titles
         needs_update = False
         try:
             title_dict = json.loads(title_raw) if title_raw else {}
@@ -32,7 +47,7 @@ def main():
             
     conn.commit()
     conn.close()
-    print(f"Finished. Standardized {updated} incident titles to their Incident IDs.")
+    print(f"Finished. Standardized {updated} incident titles and fixed {ids_fixed} missing IDs.")
 
 if __name__ == "__main__":
     main()

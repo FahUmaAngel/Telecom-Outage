@@ -60,7 +60,7 @@ def run_scrapers():
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.TELIA,
                         incident_id=inc_id,
-                        title={"sv": f"Incident {inc_id}", "en": f"Incident {inc_id}"},
+                        title={"sv": inc_id, "en": inc_id},
                         description=desc,
                         location=location_text,
                         status=classify_status(context_text, OutageStatus.ACTIVE),
@@ -115,7 +115,7 @@ def run_scrapers():
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.LYCAMOBILE,
                         incident_id=outage['incident_id'],
-                        title=create_bilingual_text(title_text),
+                        title={"sv": outage['incident_id'], "en": outage['incident_id']},
                         description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
                         location=location_text or 'Unknown',
                         status=classify_status(context_text, OutageStatus.ACTIVE),

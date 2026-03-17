@@ -132,7 +132,9 @@ export default function OutageDetailPage() {
                                     <MapPin size={14} />
                                     <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
                                 </div>
-                                <span className="info-value">{outage.location || "Sweden"}</span>
+                                <span className="info-value">
+                                    {outage.region_name ? t(outage.region_name) : (outage.location || "Sweden")}
+                                </span>
                             </div>
                             <div className="info-item">
                                 <div className="info-header">

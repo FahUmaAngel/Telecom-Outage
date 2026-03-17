@@ -24,7 +24,7 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         out_id = parsed_outage.get('id', '')
         outage = NormalizedOutage(
             operator=OperatorEnum.LYCAMOBILE,
-            outage_id=out_id,
+            incident_id=out_id,
             title={
                 'sv': str(out_id),
                 'en': str(out_id)

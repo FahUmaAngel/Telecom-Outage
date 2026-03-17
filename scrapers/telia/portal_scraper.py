@@ -16,6 +16,7 @@ from playwright.sync_api import sync_playwright
 
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import CITY_TO_COUNTY, SWEDISH_COUNTIES
+from scrapers.common.engine import extract_region_from_text, parse_swedish_date
 
 logger = logging.getLogger("TeliaPortalScraper")
 
@@ -215,6 +216,18 @@ def scrape_portal_granular():
         return
     telia_id = res[0]
 
+    # Pre-fetch regions for mapping
+    cursor.execute("SELECT id, name FROM regions")
+    region_rows = cursor.fetchall()
+    region_id_map = {}
+    for rid, name_json in region_rows:
+        try:
+            name_dict = json.loads(name_json)
+            sv_name = name_dict.get('sv')
+            region_id_map[sv_name] = rid
+        except:
+            region_id_map[name_json] = rid
+
     timestamp = datetime.now().isoformat()
     ins, upd = 0, 0
 
@@ -231,18 +244,27 @@ def scrape_portal_granular():
             precise_city = resolve_location_name(lat, lon)
 
         # --- Build location string ---
-        area_name = item.get("AreaName") or "Unknown"
+        area_name = item.get("AreaName") or ""
         county_name = item.get("CountyName") or ""
         
         # Don't use "Unknown" as a county name
         if county_name.lower() == "unknown":
             county_name = ""
             
-        if precise_city:
-            location = f"{precise_city}, {county_name}" if county_name else precise_city
-            logger.info(f"  {inc_id}: Resolved to '{location}' via Nominatim")
-        else:
-            location = f"{area_name}, {county_name}" if county_name else area_name
+        # Build raw location for regional extraction
+        raw_location_parts = []
+        if precise_city: raw_location_parts.append(precise_city)
+        if area_name: raw_location_parts.append(area_name)
+        if county_name: raw_location_parts.append(county_name)
+        
+        raw_location = ", ".join(raw_location_parts)
+        
+        # Standardize to Region Name
+        standard_region = extract_region_from_text(raw_location, SWEDISH_COUNTIES)
+        location = standard_region if standard_region else (county_name if county_name else area_name or "Unknown")
+        
+        # Get region_id
+        region_id = region_id_map.get(location)
 
         # --- County for geocoding ---
         county_for_geo = f"{county_name} län" if county_name and 'län' not in county_name.lower() else county_name
@@ -271,7 +293,7 @@ def scrape_portal_granular():
         services = extract_services(desc_raw + " " + services_txt)
 
         # --- Build DB record ---
-        title_json = json.dumps({"sv": f"{inc_id}: {item.get('FaultType', 'ACTIVE')}", "en": f"{inc_id}: {item.get('FaultType', 'ACTIVE')}"})
+        title_json = json.dumps({"sv": f"{inc_id}", "en": f"{inc_id}"}) # Title is strictly incident ID
         desc_json = json.dumps({"sv": desc_raw, "en": desc_raw})
         services_json = json.dumps(services)
 
@@ -281,18 +303,18 @@ def scrape_portal_granular():
         if row:
             cursor.execute("""
                 UPDATE outages 
-                SET location = ?, latitude = ?, longitude = ?, start_time = ?, estimated_fix_time = ?,
+                SET location = ?, region_id = ?, latitude = ?, longitude = ?, start_time = ?, estimated_fix_time = ?,
                     description = ?, affected_services = ?, title = ?, updated_at = ?, status = 'active'
                 WHERE id = ?
-            """, (location, lat, lon, start_time, end_time, desc_json, services_json, title_json, timestamp, row[0]))
+            """, (location, region_id, lat, lon, start_time, end_time, desc_json, services_json, title_json, timestamp, row[0]))
             upd += 1
         else:
             cursor.execute("""
                 INSERT INTO outages 
-                    (incident_id, operator_id, title, description, location, latitude, longitude,
+                    (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
                      start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
-            """, (inc_id, telia_id, title_json, desc_json, location, lat, lon, start_time, end_time, services_json, timestamp, timestamp))
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
+            """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services_json, timestamp, timestamp))
             ins += 1
 
     conn.commit()

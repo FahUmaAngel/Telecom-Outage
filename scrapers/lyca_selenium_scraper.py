@@ -195,7 +195,7 @@ def scrape_lyca_with_selenium() -> Dict:
                                 }
                                 
                                 short_desc = description[:60] + "..." if len(description) > 60 else description
-                                incident['title'] = f"{county_text}: {short_desc}" if description else f"Lycamobile Incident {incident_id} ({county_text})"
+                                incident['title'] = incident_id
                                 
                                 # Prevent duplicates
                                 existing_ids = {o['incident_id'] for o in results['outages']}

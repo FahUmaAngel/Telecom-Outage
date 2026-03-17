@@ -53,12 +53,14 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         # (Optional, but usually better if we have 5G etc.)
         # However, user wants "mobile" specifically for Tre.
 
+        inc_id = parsed_outage.get('id')
+        
         normalized = NormalizedOutage(
             operator=OperatorEnum.TRE,
-            outage_id=parsed_outage.get('id'),
+            incident_id=inc_id,
             title={
-                'sv': title_sv,
-                'en': title_en
+                'sv': inc_id,
+                'en': inc_id
             },
             description={
                 'sv': desc_sv,
