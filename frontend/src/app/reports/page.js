@@ -240,7 +240,7 @@ function ReportsContent() {
                                         </div>
                                     </td>
                                      <td className="location-cell">
-                                        {outage.region_name ? t(outage.region_name) : (outage.location || "Sweden")}
+                                        {outage.region_name ? t(outage.region_name) : (lang === "sv" ? "Sverige" : "Sweden")}
                                     </td>
                                     <td className="date-cell">
                                         {formatDate(outage.start_time)}

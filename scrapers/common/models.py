@@ -12,6 +12,7 @@ class OperatorEnum(str, Enum):
     TELIA = "telia"
     TRE = "tre"
     LYCAMOBILE = "lycamobile"
+    TELE2 = "tele2"
 
 
 class ServiceType(str, Enum):

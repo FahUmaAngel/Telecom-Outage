@@ -101,7 +101,9 @@ def scrape_lyca_with_selenium() -> Dict:
             for r in county_rows:
                 try:
                     name = r.text.strip().split('\n')[0].replace('Visa', '').strip()
-                    if name: county_names.append(name)
+                    if name: 
+                        name = name.split('(')[0].replace('County', 'län').strip()
+                        county_names.append(name)
                 except: pass
                 
             num_counties = len(county_names)

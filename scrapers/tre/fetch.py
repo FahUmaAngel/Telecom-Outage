@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 TRE_URLS = [
     "https://www.tre.se/varfor-tre/tackning/driftstorningar",
-    "https://www.tre.se/varfor-tre/tackning/tackningskarta"
+    # NOTE: tackningskarta contains the same data as driftstorningar - scraping only from 
+    # one source prevents duplicate incidents in the database.
+    # "https://www.tre.se/varfor-tre/tackning/tackningskarta"
 ]
 
 class TreFetcher:

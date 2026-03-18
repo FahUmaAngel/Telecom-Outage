@@ -133,7 +133,7 @@ export default function OutageDetailPage() {
                                     <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
                                 </div>
                                 <span className="info-value">
-                                    {outage.region_name ? t(outage.region_name) : (outage.location || "Sweden")}
+                                    {outage.region_name ? t(outage.region_name) : (lang === "sv" ? "Sverige" : "Sweden")}
                                 </span>
                             </div>
                             <div className="info-item">
