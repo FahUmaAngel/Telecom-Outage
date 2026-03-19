@@ -37,6 +37,8 @@ def admin_get_outages(
     operator: Optional[str] = None,
     status: Optional[str] = None,
     search: Optional[str] = None,
+    missing_coords: Optional[bool] = Query(None),
+    missing_end_date: Optional[bool] = Query(None),
     limit: int = 100,
     offset: int = 0,
 ):
@@ -47,6 +49,17 @@ def admin_get_outages(
         query = query.filter(Operator.name == operator.lower())
     if status:
         query = query.filter(Outage.status == status.lower())
+    
+    if missing_coords is True:
+        query = query.filter((Outage.latitude == None) | (Outage.longitude == None))
+    elif missing_coords is False:
+        query = query.filter((Outage.latitude != None) & (Outage.longitude != None))
+        
+    if missing_end_date is True:
+        query = query.filter(Outage.end_time == None)
+    elif missing_end_date is False:
+        query = query.filter(Outage.end_time != None)
+
     if search:
         from sqlalchemy import or_, cast, String
         q = f"%{search}%"
@@ -66,8 +79,15 @@ def admin_get_outages(
     
     outages = query.offset(offset).limit(limit).all()
     
-    return [
-        OutageResponse(
+    results = []
+    for o in outages:
+        issues = []
+        if o.latitude is None or o.longitude is None:
+            issues.append("missing_coords")
+        if o.end_time is None:
+            issues.append("missing_end_date")
+            
+        results.append(OutageResponse(
             id=o.id,
             incident_id=o.incident_id,
             operator_id=o.operator_id,
@@ -87,10 +107,11 @@ def admin_get_outages(
             longitude=o.longitude,
             affected_services=o.affected_services if o.affected_services else [],
             place=o.place,
+            quality_issues=issues,
             updated_at=o.updated_at
-        )
-        for o in outages
-    ]
+        ))
+    
+    return results
 
 @router.put("/outages/{outage_id}", response_model=OutageResponse)
 def update_outage(
@@ -110,6 +131,12 @@ def update_outage(
     db.commit()
     db.refresh(outage)
     
+    issues = []
+    if outage.latitude is None or outage.longitude is None:
+        issues.append("missing_coords")
+    if outage.end_time is None:
+        issues.append("missing_end_date")
+
     return OutageResponse(
         id=outage.id,
         incident_id=outage.incident_id,
@@ -130,6 +157,7 @@ def update_outage(
         longitude=outage.longitude,
         affected_services=outage.affected_services if outage.affected_services else [],
         place=outage.place,
+        quality_issues=issues,
         updated_at=outage.updated_at
     )
 

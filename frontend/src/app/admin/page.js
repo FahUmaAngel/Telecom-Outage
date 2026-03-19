@@ -19,13 +19,15 @@ export default function AdminPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterOperator, setFilterOperator] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const [filterMissingCoords, setFilterMissingCoords] = useState(false);
+    const [filterMissingEndDate, setFilterMissingEndDate] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const PAGE_SIZE = 100;
     const searchTimerRef = useRef(null);
 
-    const fetchOutages = useCallback(async (currentPage = 0, search = searchQuery, operator = filterOperator, status = filterStatus) => {
+    const fetchOutages = useCallback(async (currentPage = 0, search = searchQuery, operator = filterOperator, status = filterStatus, missingCoords = filterMissingCoords, missingEndDate = filterMissingEndDate) => {
         setOutagesLoading(true);
         try {
             const params = {
@@ -35,6 +37,9 @@ export default function AdminPage() {
             if (search) params.search = search;
             if (operator) params.operator = operator;
             if (status) params.status = status;
+            if (missingCoords) params.missing_coords = true;
+            if (missingEndDate) params.missing_end_date = true;
+            
             const data = await api.admin.outages.list(params);
             setOutages(data);
             setHasMore(data.length === PAGE_SIZE);
@@ -43,7 +48,7 @@ export default function AdminPage() {
         } finally {
             setOutagesLoading(false);
         }
-    }, []);
+    }, [searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate]);
 
     const fetchData = async () => {
         try {
@@ -61,9 +66,9 @@ export default function AdminPage() {
         }
     };
 
-    const handleFilterChange = (newSearch, newOperator, newStatus) => {
+    const handleFilterChange = (newSearch, newOperator, newStatus, newMissingCoords, newMissingEndDate) => {
         setPage(0);
-        fetchOutages(0, newSearch, newOperator, newStatus);
+        fetchOutages(0, newSearch, newOperator, newStatus, newMissingCoords, newMissingEndDate);
     };
 
     useEffect(() => {
@@ -284,11 +289,32 @@ export default function AdminPage() {
                             className="filter-select"
                         >
                             <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
-                            <option value="active">Active</option>
-                            <option value="resolved">Resolved</option>
-                            <option value="investigating">Investigating</option>
                             <option value="scheduled">Scheduled</option>
                         </select>
+                        <div className="quality-filters">
+                            <label className="filter-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={filterMissingCoords} 
+                                    onChange={(e) => {
+                                        setFilterMissingCoords(e.target.checked);
+                                        handleFilterChange(searchQuery, filterOperator, filterStatus, e.target.checked, filterMissingEndDate);
+                                    }} 
+                                />
+                                {lang === "sv" ? "Saknar koordinater" : "Missing Coords"}
+                            </label>
+                            <label className="filter-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={filterMissingEndDate} 
+                                    onChange={(e) => {
+                                        setFilterMissingEndDate(e.target.checked);
+                                        handleFilterChange(searchQuery, filterOperator, filterStatus, filterMissingCoords, e.target.checked);
+                                    }} 
+                                />
+                                {lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div className="premium-card table-card" style={{ marginTop: '20px' }}>
@@ -319,8 +345,12 @@ export default function AdminPage() {
                                     </tr>
                                 ) : (
                                     outages.map((o) => (
-                                        <tr key={o.id}>
-                                            <td className="id-cell">#{o.id}</td>
+                                        <tr key={o.id} className={o.quality_issues?.length > 0 ? "row-low-quality" : ""}>
+                                            <td className="id-cell">
+                                                #{o.id}
+                                                {o.quality_issues?.includes("missing_coords") && <span className="quality-tag" title="Missing Coordinates">📍</span>}
+                                                {o.quality_issues?.includes("missing_end_date") && <span className="quality-tag" title="Missing End Date">⏱️</span>}
+                                            </td>
                                             <td className="op-cell">{o.operator_name}</td>
                                             <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
                                             <td>
@@ -328,8 +358,8 @@ export default function AdminPage() {
                                                     {o.status}
                                                 </span>
                                             </td>
-                                            <td className="coord-cell">
-                                                {o.latitude ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` : "-"}
+                                            <td className={`coord-cell ${!o.latitude ? "text-error" : ""}`}>
+                                                {o.latitude ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` : (lang === "sv" ? "Saknas" : "Missing")}
                                             </td>
                                             <td className="actions-cell">
                                                 <button onClick={() => startEditing(o)} className="btn-edit">
@@ -532,6 +562,9 @@ export default function AdminPage() {
                 .filter-controls { display: flex; gap: 12px; flex-wrap: wrap; }
                 .search-input { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-primary); color: var(--text-primary); font-size: 0.9rem; min-width: 250px; }
                 .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-primary); color: var(--text-primary); font-size: 0.9rem; cursor: pointer; }
+                .quality-filters { display: flex; gap: 16px; align-items: center; margin-left: 8px; }
+                .filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none; }
+                .filter-checkbox input { width: 14px; height: 14px; cursor: pointer; }
                 .section-title { margin-bottom: 20px; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
                 .scraper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
                 .scraper-card { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
@@ -547,6 +580,10 @@ export default function AdminPage() {
                 .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
                 .admin-table th { padding: 14px 20px; background: var(--surface-hover); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color); }
                 .admin-table td { padding: 14px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+                .row-low-quality { background: rgba(255, 107, 107, 0.05); }
+                .row-low-quality:hover { background: rgba(255, 107, 107, 0.08) !important; }
+                .quality-tag { margin-left: 6px; font-size: 0.9rem; vertical-align: middle; cursor: help; }
+                .text-error { color: var(--status-critical); font-weight: 600; }
                 .op-cell { font-weight: 700; color: var(--accent-primary); }
                 .id-cell { font-family: monospace; color: var(--text-muted); font-size: 0.75rem; }
                 .status-badge-mini { padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }

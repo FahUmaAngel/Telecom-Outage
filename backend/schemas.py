@@ -55,6 +55,7 @@ class OutageResponse(BaseModel):
     
     affected_services: List[str]
     place: Optional[str] = None
+    quality_issues: Optional[List[str]] = None
     updated_at: Optional[datetime]
     
     @field_validator('status', mode='before')
