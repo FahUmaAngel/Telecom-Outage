@@ -164,6 +164,47 @@ def run_scrapers():
         except Exception as e:
             logger.error(f"Tre failed: {e}")
             db.rollback()
+
+        # 4. Tele2 (Spatial Probing)
+        try:
+            logger.info("Running Tele2 (Spatial Probing)...")
+            from scrapers.tele2.fetch import scrape_tele2
+            from scrapers.common.translation import create_bilingual_text
+            
+            tele2_outages = scrape_tele2()
+            
+            if tele2_outages:
+                logger.info(f"✓ Tele2 scraper found {len(tele2_outages)} potential outages")
+                for outage in tele2_outages:
+                    normalized = NormalizedOutage(
+                        operator=OperatorEnum.TELE2,
+                        incident_id=outage['incident_id'],
+                        title=create_bilingual_text(outage['title']),
+                        description=create_bilingual_text(outage['description']),
+                        location=outage['location'],
+                        status=classify_status(outage['description'], OutageStatus.ACTIVE),
+                        severity=SeverityLevel.MEDIUM,
+                        affected_services=classify_services(outage['description']),
+                        source_url="https://www.tele2.se/driftstorning-mobilnatet",
+                        started_at=parse_swedish_date(outage.get('start_time')),
+                        estimated_fix_time=parse_swedish_date(outage.get('end_time'))
+                    )
+                    
+                    # Store coordinates directly if available
+                    if outage.get('latitude'):
+                        normalized.latitude = outage['latitude']
+                        normalized.longitude = outage['longitude']
+                    
+                    save_outage(db, normalized, {"source": "tele2_spatial", "raw": outage})
+                
+                db.commit()
+                logger.info(f"Tele2: saved {len(tele2_outages)} outages")
+            else:
+                logger.info("Tele2: No outages found in current probe")
+                
+        except Exception as e:
+            logger.error(f"Tele2 failed: {e}")
+            db.rollback()
             
     finally:
         db.close()
