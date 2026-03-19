@@ -317,6 +317,25 @@ export default function AdminPage() {
                         </div>
                     </div>
                 </div>
+
+                <div className="network-sharing-note" style={{ margin: '15px 0', padding: '15px 20px', backgroundColor: 'rgba(56, 189, 248, 0.05)', borderLeft: '4px solid var(--accent-primary)', borderRadius: '0 6px 6px 0' }}>
+                    <h4 style={{ margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
+                        <span style={{ fontSize: '1.2rem' }}>ℹ️</span> 
+                        {lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)"}
+                    </h4>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        {lang === "sv" 
+                            ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" 
+                            : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:"}
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                        <li><strong>Telia:</strong> Halebop, Fello</li>
+                        <li><strong>Tele2:</strong> Comviq</li>
+                        <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
+                        <li><strong>Tre:</strong> Hallon</li>
+                    </ul>
+                </div>
+
                 <div className="premium-card table-card" style={{ marginTop: '20px' }}>
                     <div className="table-wrapper custom-scrollbar">
                         <table className="admin-table">
