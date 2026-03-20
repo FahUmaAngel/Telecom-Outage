@@ -1,0 +1,176 @@
+# Proposed Geocoding for Tre Missing Coordinates
+# Total Incidents: 171
+----------------------------------------------------------------------------------------------------
+Incident ID     | Location                  | Latitude     | Longitude    | Plus Code      
+----------------------------------------------------------------------------------------------------
+TRE-DC56D6      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-69DA96      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-813B3E      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-E1F484      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-9DDE44      | Norrbottens län           | 66.981210    | 19.999164    | 9FRXXXJX+FM    
+TRE-B1844F      | Västernorrlands län       | 63.047826    | 18.101444    | 9FMW24X2+4H    
+TRE-5A8A2C      | Norrbottens län           | 66.981210    | 19.999164    | 9FRXXXJX+FM    
+TRE-103627      | Gävleborgs län            | 61.268224    | 16.688925    | 9FHR7M9Q+7H    
+TRE-1C8D17      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-97A952      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-A8F0E8      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-BF2DF0      | Västerbottens län         | 64.728204    | 18.553451    | 9FPWPHH3+79    
+TRE-0FF3ED      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-73C60F      | Kalmar län                | 57.026266    | 16.574984    | 9F9R2HGF+GX    
+TRE-077284      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-6789AC      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-1DD292      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-DD1FA2      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-0E9F89      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-FC4677      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-C88C6E      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-D13001      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-CE570F      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-9849DD      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-240F09      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-6955BE      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-1DFDA5      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-955AA6      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-336D20      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-F7D8B7      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-0073A6      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-8E7CAA      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-105F2F      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-924DDC      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-644184      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-8B2B9F      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-17C7EA      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-EDB2F1      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-48798B      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-C963D9      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-09290B      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-9FBC9F      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-282A29      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-9E69ED      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-7FB343      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-59F8BE      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-9E1519      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-191FB4      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-F9553B      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-F18588      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-0FAA50      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-A662A6      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-CD0E6E      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-198384      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-59C8A4      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-41F075      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-29E619      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-2A796C      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-4B76BD      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-4A7709      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-C441CD      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-1957AD      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-9AC880      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-1EC840      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-5A9218      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-E8CBEA      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-1FF599      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-CAB5AB      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-EDAA43      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-EA7D10      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-66CC8D      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-E099F5      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-0D71FB      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-14D27C      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-C89FB3      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-128BA3      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-56A673      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-105B1E      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-E8F949      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-B96172      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-2B4052      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-2879AA      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-20AFC9      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-BE100C      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-EE316E      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-14D719      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-E0975A      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-EF8F8A      | Södermanlands län         | 58.964945    | 16.729398    | 9FCRXP7H+XQ    
+TRE-2E8BD9      | Södermanlands län         | 58.964945    | 16.729398    | 9FCRXP7H+XQ    
+TRE-F25D95      | Gotlands län              | 57.648002    | 18.595295    | 9F9WJHXW+64    
+TRE-33A0E4      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-2CF1DF      | Hallands län              | 56.954786    | 12.856568    | 9F8JXV34+WJ    
+TRE-7218F9      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-12F924      | Dalarnas län              | 61.060378    | 14.215122    | 9FHP3668+52    
+TRE-EB5320      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-C155DF      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-C436DE      | Västernorrlands län       | 63.047826    | 18.101444    | 9FMW24X2+4H    
+TRE-9C7B3E      | Gävleborgs län            | 61.268224    | 16.688925    | 9FHR7M9Q+7H    
+TRE-7E0F4D      | Västerbottens län         | 64.728204    | 18.553451    | 9FPWPHH3+79    
+TRE-58ADB6      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-390828      | Örebro län                | 59.378487    | 14.988292    | 9FFP9XHQ+98    
+TRE-090704      | Jämtlands län             | 63.346586    | 14.123751    | 9FMP84WF+JG    
+TRE-4C484B      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-495CDC      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-C9037E      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-798475      | Kalmar län                | 57.026266    | 16.574984    | 9F9R2HGF+GX    
+TRE-662136      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-497057      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-988E6A      | Blekinge län              | 56.124060    | 15.402309    | 9F8Q4CF2+JW    
+TRE-AB6939      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-19CAEA      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-FBD40A      | Hallands län              | 56.954786    | 12.856568    | 9F8JXV34+WJ    
+TRE-B02FA2      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-B27793      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-06F5C9      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-F2F4F8      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-2DDB69      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-30A6BC      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-54FF5A      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-288898      | Västmanlands län          | 59.696556    | 16.184608    | 9FFRM5WM+JR    
+TRE-6A8C05      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-52F686      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-DB8800      | Kalmar län                | 57.026266    | 16.574984    | 9F9R2HGF+GX    
+TRE-67E5E2      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-7B8364      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-395C40      | Kronobergs län            | 56.800788    | 14.410897    | 9F8PRC26+89    
+TRE-A8E8B1      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-7A607A      | Örebro län                | 59.378487    | 14.988292    | 9FFP9XHQ+98    
+TRE-8C023E      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-4CC29B      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-EBA846      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-09FC5D      | Kalmar län                | 57.026266    | 16.574984    | 9F9R2HGF+GX    
+TRE-154F77      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-36B914      | Jämtlands län             | 63.346586    | 14.123751    | 9FMP84WF+JG    
+TRE-18490D      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-698B01      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-FDED95      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-5CCFFA      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-2B0DE4      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-79CB82      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-54E631      | Blekinge län              | 56.124060    | 15.402309    | 9F8Q4CF2+JW    
+TRE-FD104D      | Hallands län              | 56.954786    | 12.856568    | 9F8JXV34+WJ    
+TRE-9FEF11      | Västmanlands län          | 59.696556    | 16.184608    | 9FFRM5WM+JR    
+TRE-A6397F      | Östergötlands län         | 58.367812    | 16.046385    | 9FCR929W+4H    
+TRE-819AE3      | Jämtlands län             | 63.346586    | 14.123751    | 9FMP84WF+JG    
+TRE-0816A1      | Värmlands län             | 59.890792    | 13.294921    | 9FFMV7RV+8X    
+TRE-4B5C66      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-53438F      | Sverige                   | 59.674971    | 14.520858    | 9FFPMGFC+X8    
+TRE-335D47      | Kronobergs län            | 56.800788    | 14.410897    | 9F8PRC26+89    
+TRE-F2E9BF      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-FB9397      | Örebro län                | 59.378487    | 14.988292    | 9FFP9XHQ+98    
+TRE-A2BFC1      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-241DE5      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-E12B79      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-45F0E2      | Kalmar län                | 57.026266    | 16.574984    | 9F9R2HGF+GX    
+TRE-6287CB      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
+TRE-63DF05      | Jämtlands län             | 63.346586    | 14.123751    | 9FMP84WF+JG    
+TRE-7B7899      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-2EC9D5      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-18648A      | Stockholms län            | 59.394865    | 18.666007    | 9FFW9MV8+WC    
+TRE-CE288F      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-A18C48      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-950245      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-C2A88F      | Blekinge län              | 56.124060    | 15.402309    | 9F8Q4CF2+JW    
+TRE-86C847      | Hallands län              | 56.954786    | 12.856568    | 9F8JXV34+WJ    
+TRE-C6E43C      | Västmanlands län          | 59.696556    | 16.184608    | 9FFRM5WM+JR    
+TRE-B70322      | Västmanlands län          | 59.696556    | 16.184608    | 9FFRM5WM+JR    
+TRE-DA402A      | Jämtlands län             | 63.346586    | 14.123751    | 9FMP84WF+JG    
+TRE-E62DDD      | Värmlands län             | 59.890792    | 13.294921    | 9FFMV7RV+8X    
+TRE-74CB49      | Västra Götalands län      | 58.224551    | 12.652219    | 9FCJ6MF2+RV    
+TRE-97CFBA      | Skåne län                 | 55.847230    | 13.633929    | 9F7MRJWM+VH    
