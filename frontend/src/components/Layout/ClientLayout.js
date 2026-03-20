@@ -6,6 +6,7 @@ import { ThemeProvider } from "../../context/ThemeContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ToastProvider } from "../../context/ToastContext";
 import ToastContainer from "../Toast/ToastContainer";
+import ScrollToTop from "../Common/ScrollToTop";
 
 export default function ClientLayout({ children }) {
     return (
@@ -20,6 +21,7 @@ export default function ClientLayout({ children }) {
                         </main>
                     </div>
                     <ToastContainer />
+                    <ScrollToTop />
                 </ToastProvider>
             </LanguageProvider>
 
