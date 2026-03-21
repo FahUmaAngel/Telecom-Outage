@@ -14,6 +14,7 @@ export default function Sidebar() {
     { label_sv: "Rapportera", label_en: "Report Outage", path: "/report" },
     { label_sv: "Rapporter", label_en: "Reports", path: "/reports" },
     { label_sv: "Regioner", label_en: "Regions", path: "/regions" },
+    { label_sv: "Prestanda", label_en: "Performance", path: "/prestanda" },
     { label_sv: "Analys", label_en: "Analytics", path: "/analytics" },
     { label_sv: "Admin", label_en: "Admin", path: "/admin" },
   ];

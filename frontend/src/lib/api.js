@@ -1,7 +1,15 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const fetcher = async (endpoint, options = {}) => {
-    const url = `${BASE_URL}${endpoint}`;
+    let url = `${BASE_URL}${endpoint}`;
+
+    if (options.params) {
+        const query = new URLSearchParams(options.params).toString();
+        if (query) {
+            url += (url.includes("?") ? "&" : "?") + query;
+        }
+    }
+
     const response = await fetch(url, {
         ...options,
         headers: {
@@ -29,8 +37,10 @@ export const api = {
         },
         get: (id) => fetcher(`/api/v1/outages/${id}`),
         history: () => fetcher("/api/v1/analytics/history"),
-        reliability: () => fetcher("/api/v1/analytics/reliability"),
-        mttr: () => fetcher("/api/v1/analytics/mttr"),
+        reliability: (params) => fetcher("/api/v1/analytics/reliability", { params }),
+        mttr: (params) => fetcher("/api/v1/analytics/mttr", { params }),
+        mttrDynamic: (params) => fetcher("/api/v1/analytics/mttr-dynamic", { params }),
+        locations: (params) => fetcher("/api/v1/analytics/locations", { params }),
     },
     reports: {
         list: () => fetcher("/api/v1/reports"),
