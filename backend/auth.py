@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 from scrapers.db.models import User
 
 # Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-telecom-key-12345")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set. Application cannot start securely.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
