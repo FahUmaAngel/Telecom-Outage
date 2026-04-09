@@ -15,6 +15,20 @@ function ReportsContent() {
     const searchParams = useSearchParams();
     const initialStatus = searchParams.get("status") || "all";
     const [statusFilter, setStatusFilter] = useState(initialStatus);
+    const [operatorFilter, setOperatorFilter] = useState("all");
+    const [operators, setOperators] = useState([]);
+
+    useEffect(() => {
+        const fetchMetadata = async () => {
+            try {
+                const ops = await api.operators.list();
+                setOperators(ops);
+            } catch (err) {
+                console.error("Failed to fetch operators:", err);
+            }
+        };
+        fetchMetadata();
+    }, []);
 
     useEffect(() => {
         const fetchOutages = async () => {
@@ -42,28 +56,71 @@ function ReportsContent() {
 
         if (!matchesSearch) return false;
 
+        // Operator Filter
+        if (operatorFilter !== "all" && o.operator_name.toLowerCase() !== operatorFilter.toLowerCase()) {
+            return false;
+        }
+
         // Service Filter
         if (serviceFilter !== "all") {
             const services = o.affected_services || [];
             const lowerServices = services.map(s => s.toLowerCase());
 
             let matchesService = false;
-            if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
+            // Precise matching for enum values
+            if (serviceFilter === "5g+") matchesService = lowerServices.includes("5g+");
+            else if (serviceFilter === "5g") matchesService = lowerServices.includes("5g");
             else if (serviceFilter === "4g") matchesService = lowerServices.includes("4g");
-            else if (serviceFilter === "voice") matchesService = lowerServices.some(s => s.includes("voice") || s.includes("samtal") || s.includes("telefoni"));
-            else if (serviceFilter === "data") matchesService = lowerServices.some(s => s.includes("data") || s.includes("surf") || s.includes("internet"));
+            else if (serviceFilter === "3g") matchesService = lowerServices.includes("3g");
+            else if (serviceFilter === "2g") matchesService = lowerServices.includes("2g");
+            else if (serviceFilter === "data") matchesService = lowerServices.includes("data");
+            else if (serviceFilter === "voice") matchesService = lowerServices.includes("voice");
+            else if (serviceFilter === "sms") matchesService = lowerServices.includes("sms");
+            else if (serviceFilter === "mms") matchesService = lowerServices.includes("mms");
+            else if (serviceFilter === "fiber") matchesService = lowerServices.includes("fiber");
+            else if (serviceFilter === "broadband") matchesService = lowerServices.includes("broadband");
+            else if (serviceFilter === "mobile") matchesService = lowerServices.includes("mobile");
 
             if (!matchesService) return false;
         }
 
+        // Display Status — auto-resolve when end date has passed
+        const getEffectiveStatus = (o) => {
+            if (o.status && o.status.toLowerCase() === 'resolved') return 'resolved';
+            const endDateStr = o.end_time || o.estimated_fix_time;
+            if (endDateStr) {
+                const endDate = new Date(endDateStr);
+                if (!isNaN(endDate.getTime()) && endDate < new Date()) {
+                    return 'resolved';
+                }
+            }
+            return o.status || 'active';
+        };
+        const displayStatus = getEffectiveStatus(o);
+
         // Status Filter
         if (statusFilter !== "all") {
-            if (statusFilter === "active" && o.status === "resolved") return false;
-            if (statusFilter === "resolved" && o.status !== "resolved") return false;
+            if (statusFilter.toLowerCase() !== displayStatus.toLowerCase()) return false;
         }
 
         return true;
+    }).sort((a, b) => {
+        const dateA = a.start_time ? new Date(a.start_time) : new Date(0);
+        const dateB = b.start_time ? new Date(b.start_time) : new Date(0);
+        return dateB - dateA;
     });
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "-";
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "-";
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}/${month}/${day}`;
+    };
 
     if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
 
@@ -81,12 +138,24 @@ function ReportsContent() {
                 <div className="filters-container">
                     <div className="filter-group">
                         <select
+                            value={operatorFilter}
+                            onChange={(e) => setOperatorFilter(e.target.value)}
+                            className="service-select"
+                        >
+                            <option value="all">{lang === "sv" ? "Alla Operatörer" : "All Operators"}</option>
+                            {operators.map(op => (
+                                <option key={op.id} value={op.name.toLowerCase()}>{op.name.charAt(0).toUpperCase() + op.name.slice(1)}</option>
+                            ))}
+                        </select>
+                        <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Status" : "All Status"}</option>
                             <option value="active">{lang === "sv" ? "Aktiva" : "Active"}</option>
+                            <option value="investigating">{lang === "sv" ? "Undersöker" : "Investigating"}</option>
+                            <option value="scheduled">{lang === "sv" ? "Planerat" : "Scheduled"}</option>
                             <option value="resolved">{lang === "sv" ? "Lösta" : "Resolved"}</option>
                         </select>
                         <select
@@ -95,10 +164,11 @@ function ReportsContent() {
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
+                            <option value="5g+">5G+</option>
                             <option value="5g">5G</option>
                             <option value="4g">4G</option>
-                            <option value="data">{lang === "sv" ? "Mobildata (Surf)" : "Mobile Data"}</option>
-                            <option value="voice">{lang === "sv" ? "Röstsamtal" : "Voice Calls"}</option>
+                            <option value="3g">3G</option>
+                            <option value="2g">2G</option>
                         </select>
                     </div>
                     <div className="search-bar">
@@ -121,39 +191,71 @@ function ReportsContent() {
                             <th>{lang === "sv" ? "Händelse" : "Incident"}</th>
                             <th>{lang === "sv" ? "Tjänster" : "Services"}</th>
                             <th>{lang === "sv" ? "Plats" : "Location"}</th>
-                            <th>{lang === "sv" ? "Datum" : "Date"}</th>
+                            <th>{lang === "sv" ? "Startdatum" : "Start date"}</th>
+                            <th>{lang === "sv" ? "Slutdatum" : "End date"}</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOutages.map((outage) => (
-                            <tr key={outage.id}>
-                                <td>
-                                    <span className={`status-badge-mini ${outage.status.toLowerCase()}`}>
-                                        {outage.status}
-                                    </span>
-                                </td>
-                                <td className="operator-cell">{outage.operator_name}</td>
-                                <td className="title-cell">{t(outage.title)}</td>
-                                <td className="services-cell">
-                                    <div className="service-tags-mini">
-                                        {outage.affected_services?.slice(0, 3).map((s, i) => (
-                                            <span key={i} className="mini-tag">{s}</span>
-                                        ))}
-                                        {outage.affected_services?.length > 3 && (
-                                            <span className="mini-tag more">+{outage.affected_services.length - 3}</span>
-                                        )}
-                                    </div>
-                                </td>
-                                <td className="location-cell">{outage.location || "Sweden"}</td>
-                                <td className="date-cell">{new Date(outage.start_time).toLocaleDateString()}</td>
-                                <td className="actions-cell">
-                                    <Link href={`/outages/${outage.id}`} className="view-link">
-                                        {lang === "sv" ? "Visa" : "View"}
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredOutages.map((outage) => {
+                            const endDateStr = outage.end_time || outage.estimated_fix_time;
+                            const isExpired = endDateStr && new Date(endDateStr) < new Date();
+                            const displayStatus = (outage.status && outage.status.toLowerCase() === 'resolved') || isExpired
+                                ? 'resolved'
+                                : (outage.status || 'active');
+                            return (
+                                <tr key={outage.id}>
+                                    <td>
+                                        <span className={`status-badge-mini ${displayStatus.toLowerCase()}`}>
+                                            {displayStatus}
+                                        </span>
+                                    </td>
+                                    <td className="operator-cell">{outage.operator_name}</td>
+                                    <td className="title-cell">
+                                        {outage.incident_id
+                                            ? outage.incident_id
+                                            : (t(outage.title) || "-")}
+                                    </td>
+                                    <td className="services-cell">
+                                        <div className="service-tags-mini">
+                                            {(() => {
+                                                const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
+                                                const sorted = [...(outage.affected_services || [])].sort((a, b) => {
+                                                    const idxA = priority.indexOf(a.toLowerCase());
+                                                    const idxB = priority.indexOf(b.toLowerCase());
+                                                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                                                });
+                                                const displayLimit = 5;
+                                                return (
+                                                    <>
+                                                        {sorted.slice(0, displayLimit).map((s, i) => (
+                                                            <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
+                                                        ))}
+                                                        {sorted.length > displayLimit && (
+                                                            <span className="mini-tag more">+{sorted.length - displayLimit}</span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </td>
+                                     <td className="location-cell">
+                                        {outage.region_name ? t(outage.region_name) : (lang === "sv" ? "Sverige" : "Sweden")}
+                                    </td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.start_time)}
+                                    </td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.end_time || outage.estimated_fix_time)}
+                                    </td>
+                                    <td className="actions-cell">
+                                        <Link href={`/outages/${outage.id}`} className="view-link">
+                                            {lang === "sv" ? "Visa" : "View"}
+                                        </Link>
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
                 {filteredOutages.length === 0 && (
@@ -261,6 +363,12 @@ function ReportsContent() {
                 .status-badge-mini.active { color: var(--status-critical); border: 1px solid var(--status-critical); }
                 .status-badge-mini.resolved { color: var(--status-success); border: 1px solid var(--status-success); }
                 .status-badge-mini.investigating { color: var(--status-warning); border: 1px solid var(--status-warning); }
+                
+                .mini-tag.mobile {
+                    background: rgba(0, 243, 255, 0.1);
+                    color: #00f3ff;
+                    border-color: #00f3ff;
+                }
 
                 .view-link {
                     color: var(--accent-primary);

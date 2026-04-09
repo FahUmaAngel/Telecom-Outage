@@ -25,6 +25,19 @@ SWEDISH_COUNTY_COORDS = {
 }
 
 
-def get_county_coordinates(county_name: str):
+import random
+
+def get_county_coordinates(county_name: str, jitter: bool = False):
     """Get central coordinates for a Swedish county."""
-    return SWEDISH_COUNTY_COORDS.get(county_name)
+    coords = SWEDISH_COUNTY_COORDS.get(county_name)
+    if not coords:
+        return None
+    
+    if jitter:
+        # Add a small random offset (approx 1-5km)
+        # 0.01 degrees is roughly 1.1km
+        lat_jitter = random.uniform(-0.04, 0.04)
+        lng_jitter = random.uniform(-0.06, 0.06)
+        return (coords[0] + lat_jitter, coords[1] + lng_jitter)
+        
+    return coords

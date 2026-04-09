@@ -158,3 +158,41 @@ class EnghouseFetcher:
             
         return outages
 
+    def get_admin_areas(self) -> List[Dict]:
+        """Get list of administrative areas (regions/counties)."""
+        try:
+            url = f"{self.base_url}/Fault/AdminAreaList"
+            response = self.session.get(url, timeout=10)
+            if response.status_code == 200:
+                areas = response.json()
+                if isinstance(areas, list):
+                    return areas
+        except Exception as e:
+            logger.error(f"[{self.operator}] Error fetching admin areas: {e}")
+        return []
+
+    def get_region_faults(self, region_id: str) -> List[RawOutage]:
+        """Get specific faults for a given region."""
+        outages = []
+        token = self._token or self.get_token()
+        try:
+            url = f"{self.base_url}/Fault/RegionFaultList"
+            data = {'regionId': region_id}
+            if token:
+                data[self.token_param] = token
+            
+            response = self.session.post(url, data=data, timeout=15)
+            if response.status_code == 200:
+                faults = response.json()
+                if isinstance(faults, list):
+                    for fault in faults:
+                        outages.append(RawOutage(
+                            operator=self.operator,
+                            source_url=url,
+                            raw_data=fault,
+                            scraped_at=datetime.now()
+                        ))
+        except Exception as e:
+            logger.error(f"[{self.operator}] Error fetching region faults: {e}")
+        return outages
+

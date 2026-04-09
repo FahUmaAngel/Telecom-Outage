@@ -34,15 +34,29 @@ def get_mttr(db: Session = Depends(get_db)):
             continue
             
         total_hours = 0.0
+        valid_outages = 0
         for o in outages:
-            diff = o.end_time - o.start_time
-            total_hours += diff.total_seconds() / 3600.0
+            st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+            et = o.end_time.replace(tzinfo=None) if o.end_time.tzinfo else o.end_time
+            diff = et - st
+            duration_hours = diff.total_seconds() / 3600.0
             
-        avg_hours = total_hours / len(outages)
+            # Sanity Check: Ignore negative durations or those > 1 year (data errors)
+            if duration_hours <= 0 or duration_hours > 8760:
+                continue
+                
+            total_hours += duration_hours
+            valid_outages += 1
+            
+        if valid_outages == 0:
+            results.append(MTTRResponse(operator_name=op.name, average_mttr_hours=0.0, outage_count=0))
+            continue
+            
+        avg_hours = total_hours / valid_outages
         results.append(MTTRResponse(
             operator_name=op.name,
             average_mttr_hours=round(avg_hours, 2),
-            outage_count=len(outages)
+            outage_count=valid_outages
         ))
         
     return results
@@ -65,7 +79,9 @@ def get_reliability(db: Session = Depends(get_db)):
         total_downtime = 0.0
         for o in outages:
             if o.start_time and o.end_time:
-                diff = o.end_time - o.start_time
+                st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+                et = o.end_time.replace(tzinfo=None) if o.end_time.tzinfo else o.end_time
+                diff = et - st
                 total_downtime += diff.total_seconds() / 3600.0
             # If still active, maybe count downtime up to now? 
             # For simplicity, we only count resolved for downtime, but all for count.

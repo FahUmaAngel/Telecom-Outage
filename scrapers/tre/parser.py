@@ -32,9 +32,13 @@ def parse_tre_outages(raw_outages: List) -> List[Dict]:
                         if not text:
                             text = item.get('notificationMessage', '')
                         
-                        if text and ('Arbete startar' in text or 'påverka täckning' in text or 'Driftstörning' in text or 'Senast uppdaterat' in text):
-                            # This is likely the planned works block
-                            logger.info("Found matching Tre text block, parsing details...")
+                        if text and ('Arbete startar' in text or 
+                                     'påverka täckning' in text or 
+                                     'Driftstörning' in text or 
+                                     'Senast uppdaterat' in text or
+                                     'Aktuella störningar' in text):
+                            # This is likely the outages block
+                            logger.info(f"Found matching Tre text block ({text[:50]}...), parsing details...")
                             parsed.extend(parse_markdown_text(text))
                             
             except Exception as e:
@@ -112,9 +116,12 @@ def parse_markdown_text(text: str) -> List[Dict]:
                     outage['affected_services'] = list(set(services))
             
             if outage.get('location') and (outage.get('start_time') or outage.get('end_time')):
-                # Generate an ID based on location and time
+                # Generate a clean ID based on location and time
                 t_val = outage.get('start_time') or outage.get('end_time')
-                outage['id'] = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
+                raw_str = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
+                import hashlib
+                hash_str = hashlib.md5(raw_str.encode()).hexdigest()[:6].upper()
+                outage['id'] = f"TRE-{hash_str}"
                 outages.append(outage)
                 
         except Exception as e:

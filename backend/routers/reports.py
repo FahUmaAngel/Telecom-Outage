@@ -53,7 +53,8 @@ def create_report(report: ReportCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=List[ReportResponse])
 def get_reports(db: Session = Depends(get_db)):
     """List all user reports."""
-    reports = db.query(UserReport).all()
+    from sqlalchemy.orm import joinedload
+    reports = db.query(UserReport).options(joinedload(UserReport.operator)).all()
     return [
         ReportResponse(
             id=r.id,

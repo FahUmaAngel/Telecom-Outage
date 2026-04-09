@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for API responses.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -33,15 +33,17 @@ class RegionResponse(BaseModel):
 class OutageResponse(BaseModel):
     id: int
     incident_id: Optional[str]
+    operator_id: Optional[int]
     operator_name: str
     region_id: Optional[int] = None
     region_name: Optional[Dict[str, str]] = None
+    raw_data_id: Optional[int] = None
     
     title: Dict[str, str] # Bilingual
     description: Optional[Dict[str, str]]
     
-    status: OutageStatus
-    severity: SeverityLevel
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
     
     start_time: Optional[datetime]
     end_time: Optional[datetime]
@@ -52,8 +54,25 @@ class OutageResponse(BaseModel):
     longitude: Optional[float]
     
     affected_services: List[str]
+    place: Optional[str] = None
+    quality_issues: Optional[List[str]] = None
     updated_at: Optional[datetime]
     
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        val_str = str(v)
+        if "OutageStatus" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
     class Config:
         from_attributes = True
 
@@ -134,3 +153,42 @@ class OperatorResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class OutageUpdate(BaseModel):
+    incident_id: Optional[str] = None
+    operator_id: Optional[int] = None
+    region_id: Optional[int] = None
+    raw_data_id: Optional[int] = None
+    title: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    affected_services: Optional[List[str]] = None
+    place: Optional[str] = None
+
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+class ResolvePlaceRequest(BaseModel):
+    query: str
+
+class ResolvePlaceResponse(BaseModel):
+    latitude: float
+    longitude: float
+    display_name: str
+    region_id: Optional[int] = None

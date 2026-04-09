@@ -8,14 +8,14 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from common.models import (
+from scrapers.common.models import (
     NormalizedOutage,
     OperatorEnum,
     SeverityLevel,
     OutageStatus,
     ServiceType
 )
-from common.translation import translate_swedish_to_english
+from scrapers.common.translation import translate_swedish_to_english
 
 logger = logging.getLogger(__name__)
 
@@ -40,34 +40,58 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
              title_en = f"Planned maintenance in {location}"
              status = OutageStatus.SCHEDULED
 
-        # Map services
-        raw_services = parsed_outage.get('affected_services', [])
-        affected_services = []
+        from common.engine import classify_services
         
-        service_map = {
-            '5G': ServiceType.MOBILE_5G,
-            '4G': ServiceType.MOBILE_4G,
-            '3G': ServiceType.MOBILE_3G,
-            '2G': ServiceType.MOBILE_2G,
-            'Mobile Data': ServiceType.MOBILE_DATA,
-            'Voice': ServiceType.VOICE,
-            'SMS': ServiceType.SMS,
-            'Mobile Network': ServiceType.MOBILE
-        }
+        # Build context for classification
+        context_text = f"{location} {desc_sv} {title_sv}"
+        affected_services = classify_services(context_text)
         
-        for s in raw_services:
-            if s in service_map:
-                affected_services.append(service_map[s])
+        # Filter out 'voice' and 'data' as requested by user
+        affected_services = [s for s in affected_services if s not in [ServiceType.VOICE, ServiceType.MOBILE_DATA]]
         
-        if not affected_services:
-            affected_services = [ServiceType.MOBILE]
+        # Remove 'mobile' if we have more specific generations to keep it cleaner
+        # (Optional, but usually better if we have 5G etc.)
+        # However, user wants "mobile" specifically for Tre.
 
+        inc_id = parsed_outage.get('id')
+        
+        from scrapers.common.translation import SWEDISH_COUNTIES
+        from scrapers.common.engine import extract_region_from_text
+        import requests, time
+        
+        # 1. Try local extraction first
+        lookup_text = f"{location} {title_sv} {desc_sv}"
+        county_name = extract_region_from_text(lookup_text, SWEDISH_COUNTIES)
+        
+        # 2. If it fails, try Nominatim reverse geocoding
+        if not county_name and location.lower() not in ['sverige', 'hela sverige']:
+            try:
+                url = "https://nominatim.openstreetmap.org/search"
+                params = {'q': f"{location}, Sweden", 'format': 'json', 'addressdetails': 1, 'limit': 1}
+                headers = {'User-Agent': 'TelecomOutageBot/1.0'}
+                response = requests.get(url, params=params, headers=headers, timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data and len(data) > 0:
+                        addr = data[0].get('address', {})
+                        resolved_county = addr.get('county')
+                        if resolved_county:
+                            county_name = extract_region_from_text(resolved_county, SWEDISH_COUNTIES) or resolved_county
+                time.sleep(1) # respectful rate limit
+            except:
+                pass
+                
+        # 3. If STILL no county, the user demands ONLY Regions. We must drop it.
+        if not county_name:
+            logger.info(f"Dropping Tre outage {inc_id} because it lacks a strict Region mapping (Loc: {location})")
+            return None
+            
         normalized = NormalizedOutage(
             operator=OperatorEnum.TRE,
-            outage_id=parsed_outage.get('id'),
+            incident_id=inc_id,
             title={
-                'sv': title_sv,
-                'en': title_en
+                'sv': inc_id,
+                'en': inc_id
             },
             description={
                 'sv': desc_sv,
@@ -75,10 +99,9 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
             },
             status=status,
             affected_services=affected_services,
-            location=parsed_outage.get('location'),
+            location=county_name,
             estimated_fix_time=parsed_outage.get('end_time'),
-            # Use started_at for start_time
-            start_time=parsed_outage.get('start_time')
+            started_at=parsed_outage.get('start_time')
         )
         return normalized
         

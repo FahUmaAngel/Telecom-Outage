@@ -30,15 +30,21 @@ class TeliaFetcher(EnghouseFetcher):
         logger.info("[Telia] Fetching mobile messages...")
         all_outages.extend(self.get_messages())
         
-        logger.info("[Telia] Fetching mobile area tickets...")
-        # Sweden Bounding Box
-        sweden_bbox = {
-            'llx': 10.0, 'lly': 55.0,
-            'urx': 25.0, 'ury': 70.0
-        }
-        # Telia Services
-        services = 'GSM_VOICE,GSM_DATA,UMTS_VOICE,UMTS_DATA,LTE_VOICE,LTE_DATA,5G_DATA,VoLTE'
-        all_outages.extend(self.get_area_tickets(sweden_bbox, services))
+        # 1.5 Mobile Regional Outages (New Location-Aware Method)
+        logger.info("[Telia] Fetching regional mobile outages...")
+        areas = self.get_admin_areas()
+        if areas:
+            logger.info(f"[Telia] Found {len(areas)} admin areas for regional scanning")
+            for area in areas:
+                name = area.get('Name')
+                aid = area.get('Id')
+                if name and aid:
+                    logger.debug(f"[Telia] Fetching faults for region: {name}")
+                    region_faults = self.get_region_faults(aid)
+                    for rf in region_faults:
+                        # Tag raw data with region name for the parser
+                        rf.raw_data['_region_name'] = name
+                        all_outages.append(rf)
         
         # 2. Fixed Outages (GLUP - Custom Logic)
         # GLUP is different from standard Enghouse, keeping custom logic simple here

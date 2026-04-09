@@ -1,0 +1,18 @@
+[
+    {
+        "ID": "INCSE0505843",
+        "Title": "Gotland capacity reduction",
+        "Description": "Active disturbance near Visby. Reduced capacity for 4G and 5G.",
+        "Status": "Active",
+        "StartTime": "2026-03-05 12:16",
+        "EndTime": "2026-03-06 15:16",
+        "AffectedServices": [
+            "4G",
+            "5G"
+        ],
+        "Coordinates": {
+            "Latitude": 57.568761,
+            "Longitude": 18.285687
+        }
+    }
+]
