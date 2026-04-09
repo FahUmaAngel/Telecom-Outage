@@ -9,8 +9,10 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from scrapers.db.models import User
 
+from scrapers.config import settings
+
 # Configuration
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = getattr(settings, "SECRET_KEY", None)
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY environment variable is not set. Application cannot start securely.")
 ALGORITHM = "HS256"
