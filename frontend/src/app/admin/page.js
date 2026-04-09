@@ -279,7 +279,6 @@ export default function AdminPage() {
                         >
                             <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
                             <option value="telia">Telia</option>
-                            <option value="tele2">Tele2</option>
                             <option value="lycamobile">Lycamobile</option>
                             <option value="tre">Tre</option>
                         </select>
@@ -330,7 +329,7 @@ export default function AdminPage() {
                     </p>
                     <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                         <li><strong>Telia:</strong> Halebop, Fello</li>
-                        <li><strong>Tele2:</strong> Comviq</li>
+                        <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
                         <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
                         <li><strong>Tre:</strong> Hallon</li>
                     </ul>
