@@ -188,7 +188,7 @@ export default function AdminPage() {
             <section className="admin-section">
                 <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
                 <div className="scraper-grid">
-                    {scrapers.map((s) => (
+                    {scrapers.filter(s => s.operator !== 'tele2').map((s) => (
                         <div key={s.operator} className="premium-card scraper-card">
                             <div className="scraper-main">
                                 <div className={`status-dot ${new Date() - new Date(s.last_scraped_at) < 3600000 ? 'online' : 'stale'}`}></div>
