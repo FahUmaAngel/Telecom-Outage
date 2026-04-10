@@ -4,7 +4,7 @@ FastAPI Entry Point with Background Scheduler.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import outages, operators, reports, analytics, auth, regions, admin
-from .middleware import LoggingMiddleware
+from .middleware import LoggingMiddleware, SecurityHeadersMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import sys
@@ -80,8 +80,10 @@ app = FastAPI(
 )
 
 # CORS Configuration
-origins = ["*"]
+allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or "http://localhost:3000,http://localhost:8080"
+origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(LoggingMiddleware)
 
 app.add_middleware(
