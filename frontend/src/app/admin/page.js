@@ -279,7 +279,7 @@ export default function AdminPage() {
                         >
                             <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
                             <option value="telia">Telia</option>
-                            <option value="lycamobile">Lycamobile</option>
+                            <option value="telenor">Telenor</option>
                             <option value="tre">Tre</option>
                         </select>
                         <select
