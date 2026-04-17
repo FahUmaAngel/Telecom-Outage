@@ -11,7 +11,7 @@ class OperatorEnum(str, Enum):
     """Telecom operator names."""
     TELIA = "telia"
     TRE = "tre"
-    LYCAMOBILE = "lycamobile"
+    TELENOR = "telenor"
     TELE2 = "tele2"
 
 

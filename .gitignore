@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Databases
+*.db
+*.sqlite3
+
+# Secrets
+.env
+telia_cookies.json
+*token*
+*key*
+
+# IDEs
+.vscode/
+.idea/
+
+# Node/Frontend
+node_modules/
+.next/
+out/
+build/
+dist/
+.DS_Store
+
+# Logs
+*.log

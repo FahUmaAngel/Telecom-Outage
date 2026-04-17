@@ -188,7 +188,7 @@ export default function AdminPage() {
             <section className="admin-section">
                 <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
                 <div className="scraper-grid">
-                    {scrapers.map((s) => (
+                    {scrapers.filter(s => s.operator !== 'tele2').map((s) => (
                         <div key={s.operator} className="premium-card scraper-card">
                             <div className="scraper-main">
                                 <div className={`status-dot ${new Date() - new Date(s.last_scraped_at) < 3600000 ? 'online' : 'stale'}`}></div>
@@ -279,8 +279,7 @@ export default function AdminPage() {
                         >
                             <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
                             <option value="telia">Telia</option>
-                            <option value="tele2">Tele2</option>
-                            <option value="lycamobile">Lycamobile</option>
+                            <option value="telenor">Telenor</option>
                             <option value="tre">Tre</option>
                         </select>
                         <select
@@ -330,7 +329,7 @@ export default function AdminPage() {
                     </p>
                     <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                         <li><strong>Telia:</strong> Halebop, Fello</li>
-                        <li><strong>Tele2:</strong> Comviq</li>
+                        <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
                         <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
                         <li><strong>Tre:</strong> Hallon</li>
                     </ul>

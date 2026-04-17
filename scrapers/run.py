@@ -11,9 +11,9 @@ import os
 # from scrapers.telia.parser_enhanced import parse_telia_outages
 # from scrapers.telia.mapper_enhanced import map_telia_outages
 
-from scrapers.lycamobile.fetch import scrape_lyca_outages
-from scrapers.lycamobile.parser import parse_lyca_outages
-from scrapers.lycamobile.mapper import map_lyca_outages
+from scrapers.telenor.fetch import scrape_telenor_outages
+from scrapers.telenor.parser import parse_telenor_outages
+from scrapers.telenor.mapper import map_telenor_outages
 
 from scrapers.tre.fetch import scrape_tre_outages
 from scrapers.tre.parser import parse_tre_outages
@@ -91,19 +91,19 @@ def run_scrapers():
             logger.error(f"Telia enhanced scraper failed: {e}", exc_info=True)
             db.rollback()
 
-        # 2. Lycamobile (Selenium)
+        # 2. Telenor (Selenium)
         try:
-            logger.info("Running Lycamobile (Selenium)...")
-            from scrapers.lyca_selenium_scraper import scrape_lyca_with_selenium
+            logger.info("Running Telenor (Selenium)...")
+            from scrapers.telenor_selenium_scraper import scrape_telenor_with_selenium
             
-            lyca_result = scrape_lyca_with_selenium()
+            telenor_result = scrape_telenor_with_selenium()
             
-            if lyca_result['success']:
-                logger.info(f"✓ Lycamobile scraper succeeded")
-                logger.info(f"  Found {len(lyca_result['outages'])} outages")
+            if telenor_result['success']:
+                logger.info(f"✓ Telenor scraper succeeded")
+                logger.info(f"  Found {len(telenor_result['outages'])} outages")
                 
                 # Save each outage to database
-                for outage in lyca_result['outages']:
+                for outage in telenor_result['outages']:
                     location_text = outage.get('location', '')
                     desc_text = outage.get('description', '')
                     title_text = outage.get('title', f"Incident {outage['incident_id']}")
@@ -113,7 +113,7 @@ def run_scrapers():
                     
                     # Create NormalizedOutage object
                     normalized = NormalizedOutage(
-                        operator=OperatorEnum.LYCAMOBILE,
+                        operator=OperatorEnum.TELENOR,
                         incident_id=outage['incident_id'],
                         title={"sv": outage['incident_id'], "en": outage['incident_id']},
                         description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
@@ -138,15 +138,15 @@ def run_scrapers():
                             normalized.latitude, normalized.longitude = coords
                             logger.info(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
-                    save_outage(db, normalized, {"source": "lyca_selenium", "raw": outage})
+                    save_outage(db, normalized, {"source": "telenor_selenium", "raw": outage})
                 
                 db.commit()
-                logger.info(f"Lycamobile: saved {len(lyca_result['outages'])} outages to database")
+                logger.info(f"Telenor: saved {len(telenor_result['outages'])} outages to database")
             else:
-                logger.error(f"✗ Lycamobile scraper failed")
+                logger.error(f"✗ Telenor scraper failed")
                 
         except Exception as e:
-            logger.error(f"Lycamobile failed with exception: {e}", exc_info=True)
+            logger.error(f"Telenor failed with exception: {e}", exc_info=True)
             db.rollback()
 
         # 3. Tre
@@ -165,46 +165,46 @@ def run_scrapers():
             logger.error(f"Tre failed: {e}")
             db.rollback()
 
-        # 4. Tele2 (Spatial Probing)
-        try:
-            logger.info("Running Tele2 (Spatial Probing)...")
-            from scrapers.tele2.fetch import scrape_tele2
-            from scrapers.common.translation import create_bilingual_text
-            
-            tele2_outages = scrape_tele2()
-            
-            if tele2_outages:
-                logger.info(f"✓ Tele2 scraper found {len(tele2_outages)} potential outages")
-                for outage in tele2_outages:
-                    normalized = NormalizedOutage(
-                        operator=OperatorEnum.TELE2,
-                        incident_id=outage['incident_id'],
-                        title=create_bilingual_text(outage['title']),
-                        description=create_bilingual_text(outage['description']),
-                        location=outage['location'],
-                        status=classify_status(outage['description'], OutageStatus.ACTIVE),
-                        severity=SeverityLevel.MEDIUM,
-                        affected_services=classify_services(outage['description']),
-                        source_url="https://www.tele2.se/driftstorning-mobilnatet",
-                        started_at=parse_swedish_date(outage.get('start_time')),
-                        estimated_fix_time=parse_swedish_date(outage.get('end_time'))
-                    )
-                    
-                    # Store coordinates directly if available
-                    if outage.get('latitude'):
-                        normalized.latitude = outage['latitude']
-                        normalized.longitude = outage['longitude']
-                    
-                    save_outage(db, normalized, {"source": "tele2_spatial", "raw": outage})
-                
-                db.commit()
-                logger.info(f"Tele2: saved {len(tele2_outages)} outages")
-            else:
-                logger.info("Tele2: No outages found in current probe")
-                
-        except Exception as e:
-            logger.error(f"Tele2 failed: {e}")
-            db.rollback()
+        # 4. Tele2 (Spatial Probing) - DISABLED PER USER REQUEST
+        # try:
+        #     logger.info("Running Tele2 (Spatial Probing)...")
+        #     from scrapers.tele2.fetch import scrape_tele2
+        #     from scrapers.common.translation import create_bilingual_text
+        #     
+        #     tele2_outages = scrape_tele2()
+        #     
+        #     if tele2_outages:
+        #         logger.info(f"✓ Tele2 scraper found {len(tele2_outages)} potential outages")
+        #         for outage in tele2_outages:
+        #             normalized = NormalizedOutage(
+        #                 operator=OperatorEnum.TELE2,
+        #                 incident_id=outage['incident_id'],
+        #                 title=create_bilingual_text(outage['title']),
+        #                 description=create_bilingual_text(outage['description']),
+        #                 location=outage['location'],
+        #                 status=classify_status(outage['description'], OutageStatus.ACTIVE),
+        #                 severity=SeverityLevel.MEDIUM,
+        #                 affected_services=classify_services(outage['description']),
+        #                 source_url="https://www.tele2.se/driftstorning-mobilnatet",
+        #                 started_at=parse_swedish_date(outage.get('start_time')),
+        #                 estimated_fix_time=parse_swedish_date(outage.get('end_time'))
+        #             )
+        #             
+        #             # Store coordinates directly if available
+        #             if outage.get('latitude'):
+        #                 normalized.latitude = outage['latitude']
+        #                 normalized.longitude = outage['longitude']
+        #             
+        #             save_outage(db, normalized, {"source": "tele2_spatial", "raw": outage})
+        #         
+        #         db.commit()
+        #         logger.info(f"Tele2: saved {len(tele2_outages)} outages")
+        #     else:
+        #         logger.info("Tele2: No outages found in current probe")
+        #         
+        # except Exception as e:
+        #     logger.error(f"Tele2 failed: {e}")
+        #     db.rollback()
             
     finally:
         db.close()
