@@ -3,12 +3,12 @@ Outage endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
 from scrapers.db.models import Outage, Operator, Region
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/v1/outages", tags=["outages"])
 
@@ -28,7 +28,7 @@ def _effective_status(o):
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
             end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.utcnow():
+            if end_dt < datetime.now(timezone.utc).replace(tzinfo=None):
                 return 'resolved'
         except Exception:
             pass
@@ -36,14 +36,14 @@ def _effective_status(o):
 
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     days: int = 7
 ):
     """
     Get resolved outages history.
     """
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
     query = db.query(Outage).join(Operator).filter(
         Outage.status == "resolved",
         Outage.end_time >= since_date
@@ -81,7 +81,7 @@ def get_outage_history(
 
 @router.get("/", response_model=List[OutageResponse])
 def get_outages(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     status: Optional[str] = None,
     lat: Optional[float] = None,
@@ -145,7 +145,7 @@ def get_outages(
     return response_list
 
 @router.get("/{outage_id}", response_model=OutageResponse)
-def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
+def get_outage_detail(outage_id: int, db: Annotated[Session, Depends(get_db)]):
     outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
     if not outage:
         raise HTTPException(status_code=404, detail="Outage not found")

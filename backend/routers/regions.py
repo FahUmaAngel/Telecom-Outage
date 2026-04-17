@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
+from typing import List, Annotated
 from ..dependencies import get_db
 from .. import schemas
 from scrapers.db.models import Region, Outage
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.RegionResponse])
-def get_regions(db: Session = Depends(get_db)):
+def get_regions(db: Annotated[Session, Depends(get_db)]):
     """
     Get all regions with their current active outage counts.
     """
@@ -36,7 +36,7 @@ def get_regions(db: Session = Depends(get_db)):
     return regions
 
 @router.get("/{id}", response_model=schemas.RegionResponse)
-def get_region(id: int, db: Session = Depends(get_db)):
+def get_region(id: int, db: Annotated[Session, Depends(get_db)]):
     region = db.query(Region).filter(Region.id == id).first()
     if not region:
         raise HTTPException(status_code=404, detail="Region not found")

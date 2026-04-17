@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Annotated
 from ..dependencies import get_db
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
 from ..utils.geocoding import resolve_place
+from ..constants import OutageStatus, QualityIssue
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -16,7 +17,7 @@ def _safe_val(v):
     return v.value if hasattr(v, 'value') else v
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
-def get_scraper_status(db: Session = Depends(get_db)):
+def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
     """Get the last scrape time for each operator."""
     # Group by operator and get max(scraped_at)
     subquery = db.query(
@@ -33,7 +34,7 @@ def get_scraper_status(db: Session = Depends(get_db)):
 
 @router.get("/outages", response_model=List[OutageResponse])
 def admin_get_outages(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     status: Optional[str] = None,
     search: Optional[str] = None,
@@ -83,9 +84,9 @@ def admin_get_outages(
     for o in outages:
         issues = []
         if o.latitude is None or o.longitude is None:
-            issues.append("missing_coords")
+            issues.append(QualityIssue.MISSING_COORDS)
         if o.end_time is None:
-            issues.append("missing_end_date")
+            issues.append(QualityIssue.MISSING_END_DATE)
             
         results.append(OutageResponse(
             id=o.id,
@@ -117,7 +118,7 @@ def admin_get_outages(
 def update_outage(
     outage_id: int, 
     update_data: OutageUpdate,
-    db: Session = Depends(get_db)
+    db: Annotated[Session, Depends(get_db)]
 ):
     """Update an outage manually (Admin only)."""
     outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
@@ -133,9 +134,9 @@ def update_outage(
     
     issues = []
     if outage.latitude is None or outage.longitude is None:
-        issues.append("missing_coords")
+        issues.append(QualityIssue.MISSING_COORDS)
     if outage.end_time is None:
-        issues.append("missing_end_date")
+        issues.append(QualityIssue.MISSING_END_DATE)
 
     return OutageResponse(
         id=outage.id,
@@ -162,13 +163,13 @@ def update_outage(
     )
 
 @router.post("/reports/{report_id}/verify", response_model=ReportResponse)
-def verify_report(report_id: int, db: Session = Depends(get_db)):
+def verify_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     """Verify a user report."""
     report = db.query(UserReport).filter(UserReport.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
         
-    report.status = "verified"
+    report.status = OutageStatus.VERIFIED
     db.commit()
     db.refresh(report)
     
@@ -184,13 +185,13 @@ def verify_report(report_id: int, db: Session = Depends(get_db)):
     )
 
 @router.post("/reports/{report_id}/reject", response_model=ReportResponse)
-def reject_report(report_id: int, db: Session = Depends(get_db)):
+def reject_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     """Reject a user report."""
     report = db.query(UserReport).filter(UserReport.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
         
-    report.status = "rejected"
+    report.status = OutageStatus.REJECTED
     db.commit()
     db.refresh(report)
     
@@ -206,7 +207,10 @@ def reject_report(report_id: int, db: Session = Depends(get_db)):
     )
 
 @router.post("/resolve-place", response_model=ResolvePlaceResponse)
-def admin_resolve_place(request: ResolvePlaceRequest, db: Session = Depends(get_db)):
+def admin_resolve_place(
+    request: ResolvePlaceRequest, 
+    db: Annotated[Session, Depends(get_db)]
+):
     """Resolve a place string to coordinates and Map to Region."""
     from scrapers.db.models import Region
     import json
@@ -241,7 +245,7 @@ def admin_resolve_place(request: ResolvePlaceRequest, db: Session = Depends(get_
                 try:
                     name_dict = json.loads(db_region.name)
                     result['display_name'] = name_dict.get('sv') or result['display_name']
-                except:
+                except Exception:
                     pass
             elif isinstance(db_region.name, dict):
                 result['display_name'] = db_region.name.get('sv') or result['display_name']

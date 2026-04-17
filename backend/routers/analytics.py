@@ -4,16 +4,17 @@ Analytics endpoints.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from ..dependencies import get_db
 from ..schemas import MTTRResponse, ReliabilityResponse, HistoricalTrendResponse, DailyTrend
 from scrapers.db.models import Outage, Operator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from ..constants import LocationType
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 
 @router.get("/mttr", response_model=List[MTTRResponse])
-def get_mttr(db: Session = Depends(get_db)):
+def get_mttr(db: Annotated[Session, Depends(get_db)]):
     """Calculate Mean Time To Recovery (MTTR) per operator."""
     # SQLite logic: average(time_diff)
     # We filter only resolved outages (where end_time and start_time are present)
@@ -62,10 +63,10 @@ def get_mttr(db: Session = Depends(get_db)):
     return results
 
 @router.get("/reliability", response_model=List[ReliabilityResponse])
-def get_reliability(db: Session = Depends(get_db)):
+def get_reliability(db: Annotated[Session, Depends(get_db)]):
     """Compare operators by reliability (outage count and total downtime)."""
     # Over the last 30 days
-    since_date = datetime.utcnow() - timedelta(days=30)
+    since_date = datetime.now(timezone.utc) - timedelta(days=30)
     
     operators = db.query(Operator).all()
     results = []
@@ -95,9 +96,9 @@ def get_reliability(db: Session = Depends(get_db)):
     return results
 
 @router.get("/history", response_model=HistoricalTrendResponse)
-def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
+def get_historical_trend(db: Annotated[Session, Depends(get_db)], days: int = 30):
     """Get aggregated outage counts per day for the last X days."""
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc) - timedelta(days=days)
     
     # Query all outages created in the last X days
     outages = db.query(Outage).filter(Outage.created_at >= since_date).all()
@@ -106,8 +107,9 @@ def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
     counts_by_date = {}
     
     # Initialize all dates in range with 0
+    now = datetime.now(timezone.utc)
     for i in range(days + 1):
-        d = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
+        d = (now - timedelta(days=i)).strftime("%Y-%m-%d")
         counts_by_date[d] = 0
         
     for o in outages:
@@ -126,111 +128,156 @@ def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
         "trend": sorted_trend
     }
 
+def _filter_by_service(outages: List[Outage], service: str) -> List[Outage]:
+    """Filter outages by service name within affected_services JSON."""
+    s_lower = service.lower()
+    return [
+        o for o in outages 
+        if o.affected_services and any(s_lower in str(s).lower() for s in o.affected_services)
+    ]
+
+
+def _get_unique_outages(outages: List[Outage]) -> List[Outage]:
+    """Deduplicate outages based on title, description, location, and time."""
+    unique_outages_map = {}
+    for o in outages:
+        # Must have start_time AND resolution timestamp
+        if not o.start_time or not o.end_time:
+            continue
+            
+        # Use only end_time as per refined requirements
+        resolved_dt = o.end_time
+        resolved_str = resolved_dt.isoformat() if resolved_dt else ""
+        
+        # FIX: Extract actual values for key and ensure they are all hashable (strings)
+        title_str = str(o.title) if o.title else ""
+        desc_str = str(o.description) if o.description else ""
+        loc_str = str(o.location) if o.location else ""
+        start_str = o.start_time.isoformat() if o.start_time else ""
+        
+        key = (title_str, desc_str, loc_str, start_str, resolved_str)
+        
+        if key not in unique_outages_map:
+            # First time seeing this incident, create a copy of the outage object 
+            # (or use the existing one and we'll merge into it)
+            unique_outages_map[key] = o
+        else:
+            # Duplicate found! Merge affected_services
+            existing = unique_outages_map[key]
+            if o.affected_services:
+                if not existing.affected_services:
+                    existing.affected_services = o.affected_services
+                else:
+                    # Merge unique services
+                    current_services = set(existing.affected_services)
+                    new_services = set(o.affected_services)
+                    existing.affected_services = list(current_services.union(new_services))
+                    
+    return list(unique_outages_map.values())
+
+def _calculate_avg_mttr(outages: List[Outage]) -> float:
+    """Calculate average MTTR in hours for a list of outages."""
+    if not outages:
+        return 0.0
+    total_hours = 0.0
+    valid_count = 0
+    for o in outages:
+        resolved_at = o.end_time
+        if not resolved_at:
+            continue
+            
+        st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+        res = resolved_at.replace(tzinfo=None) if resolved_at.tzinfo else resolved_at
+        
+        diff = res - st
+        duration_hours = diff.total_seconds() / 3600.0
+        
+        # Sanity check: 0 < duration < 1 year
+        if 0 < duration_hours < 8760:
+            total_hours += duration_hours
+            valid_count += 1
+            
+    return total_hours / valid_count if valid_count > 0 else 0.0
+
 @router.get("/mttr-dynamic", response_model=List[MTTRResponse])
 def get_dynamic_mttr(
+    db: Annotated[Session, Depends(get_db)],
     days: int = 365, 
     location: Optional[str] = None, 
-    location_type: Optional[str] = None,
-    service: Optional[str] = None,
-    db: Session = Depends(get_db)
+    service: Optional[str] = None
 ):
     """Refined MTTR calculation with deduplication and granular filters."""
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc) - timedelta(days=days)
     operators = db.query(Operator).all()
     results = []
     
     for op in operators:
-        # Initial query for recent outages
+        # 1. Base Query - Use func.datetime() for robust SQLite date comparison
         query = db.query(Outage).filter(
             Outage.operator_id == op.id,
-            Outage.start_time >= since_date
+            func.datetime(Outage.start_time) >= func.datetime(since_date)
         )
-        
-        # Location name filtering
         if location:
             query = query.filter(Outage.location.ilike(f"%{location}%"))
             
         outages = query.all()
         
-        # Service filtering (since affected_services is JSON list)
+        # 2. Filter by Service
         if service:
-            filtered_outages = []
-            s_lower = service.lower()
-            for o in outages:
-                services = o.affected_services or []
-                if any(s_lower in str(s).lower() for s in services):
-                    filtered_outages.append(o)
-            outages = filtered_outages
+            outages = _filter_by_service(outages, service)
             
-        # Location type filtering (Län vs City)
-        if location_type:
-            lt_lower = location_type.lower()
-            filtered_by_type = []
-            for o in outages:
-                if not o.location:
-                    continue
-                is_lan = o.location.lower().endswith("län")
-                if lt_lower == "lan" and is_lan:
-                    filtered_by_type.append(o)
-                elif lt_lower == "city" and not is_lan:
-                    filtered_by_type.append(o)
-            outages = filtered_by_type
-            
-        # Deduplication (handled by prioritized resolution time)
-        unique_outages = []
-        seen = set()
-        for o in outages:
-            # Must have start_time AND at least one resolution timestamp
-            if not o.start_time or (not o.end_time and not o.estimated_fix_time):
-                continue
-                
-            # Use end_time if present, otherwise estimated_fix_time
-            resolved_dt = o.end_time or o.estimated_fix_time
-            resolved_str = resolved_dt.isoformat() if resolved_dt else ""
-            
-            key = (title_str, desc_str, loc_str, start_str, resolved_str)
-            if key not in seen:
-                seen.add(key)
-                unique_outages.append(o)
-        
-        outages = unique_outages
+        # 4. Deduplicate
+        outages = _get_unique_outages(outages)
 
-        if not outages:
-            results.append(MTTRResponse(operator_name=op.name.upper(), average_mttr_hours=0.0, outage_count=0))
-            continue
-            
-        total_hours = 0.0
-        for o in outages:
-            # Priority: end_time > estimated_fix_time
-            resolved_at = o.end_time or o.estimated_fix_time
-            
-            st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
-            res = resolved_at.replace(tzinfo=None) if resolved_at.tzinfo else resolved_at
-            
-            diff = res - st
-            duration_hours = diff.total_seconds() / 3600.0
-            
-            # Simple sanity check
-            if duration_hours > 0 and duration_hours < 8760:
-                total_hours += duration_hours
-            
-        avg_mttr = total_hours / len(outages)
+        # 5. Calculate and append
+        avg_h = _calculate_avg_mttr(outages)
         results.append(MTTRResponse(
             operator_name=op.name.upper(),
-            average_mttr_hours=round(avg_mttr, 2),
+            average_mttr_hours=round(avg_h, 2),
             outage_count=len(outages)
         ))
         
     return results
 
+import re
+
 @router.get("/locations", response_model=List[str])
-def get_locations(operator_id: Optional[int] = None, db: Session = Depends(get_db)):
-    """Get unique locations from the outages table."""
-    query = db.query(Outage.location).distinct()
+def get_locations(
+    db: Annotated[Session, Depends(get_db)],
+    operator_id: Optional[int] = None
+):
+    """Get unique locations from the outages table that have valid MTTR data."""
+    query = db.query(Outage.location).filter(
+        Outage.location.isnot(None),
+        func.trim(Outage.location) != "",
+        Outage.end_time.isnot(None)
+    ).distinct()
+    
     if operator_id:
         query = query.filter(Outage.operator_id == operator_id)
     
-    results = query.filter(Outage.location.isnot(None)).order_by(Outage.location).all()
-    # Flatten the results from tuples to a single list of strings
-    return [r[0] for r in results]
+    results = query.order_by(Outage.location).all()
+    
+    # Post-process to remove bad data
+    banned_exact = {"unknown", "sverige", "hela sverige", "sharper of sweden"}
+    has_numbers = re.compile(r'\d')
+    
+    final_locations = []
+    for r in results:
+        loc = r[0]
+        if not loc or not loc.strip():
+            continue
+            
+        loc_clean = loc.strip()
+        loc_lower = loc_clean.lower()
+        
+        if loc_lower in banned_exact:
+            continue
+            
+        if has_numbers.search(loc_clean):
+            continue
+            
+        final_locations.append(loc_clean)
+        
+    return final_locations
 

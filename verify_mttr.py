@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 db_path = 'telecom_outage.db'
 conn = sqlite3.connect(db_path)
@@ -11,7 +11,7 @@ cursor.execute("SELECT id FROM operators WHERE name = 'tre' COLLATE NOCASE;")
 tre_id = cursor.fetchone()[0]
 
 # Calculate MTTR for last year (365 days) manually
-since_date = (datetime.utcnow() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
+since_date = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
 
 cursor.execute(f"""
     SELECT start_time, end_time 
@@ -47,7 +47,7 @@ for start_str, end_str in outages:
 
 avg_hours = round(total_hours / valid_count, 2) if valid_count > 0 else 0
 
-print(f"Manual Verification for Tre (Last 365 days):")
+print("Manual Verification for Tre (Last 365 days):")
 print(f"Total valid outages: {valid_count}")
 print(f"Average MTTR: {avg_hours} hours")
 

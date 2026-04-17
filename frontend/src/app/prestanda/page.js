@@ -4,13 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import {
-    Clock,
-    MapPin,
-    Activity,
-    Info,
-    Server,
-    ChevronDown,
-    AlertCircle
+    ChevronDown
 } from "lucide-react";
 
 export default function PrestandaPage() {
@@ -22,7 +16,6 @@ export default function PrestandaPage() {
     // Filters state
     const [period, setPeriod] = useState("365");
     const [town, setTown] = useState("");
-    const [locationType, setLocationType] = useState("");
     const [service, setService] = useState("");
 
     const fetchMTTR = async () => {
@@ -30,7 +23,6 @@ export default function PrestandaPage() {
         try {
             const params = { days: parseInt(period) };
             if (town) params.location = town;
-            if (locationType) params.location_type = locationType;
             if (service) params.service = service;
 
             const results = await api.outages.mttrDynamic(params);
@@ -44,8 +36,7 @@ export default function PrestandaPage() {
 
     const fetchLocations = async () => {
         try {
-            // Operator 2 is Tre
-            const data = await api.outages.locations({ operator_id: 2 });
+            const data = await api.outages.locations();
             setLocations(data);
         } catch (err) {
             console.error("Failed to fetch locations:", err);
@@ -58,13 +49,14 @@ export default function PrestandaPage() {
 
     useEffect(() => {
         fetchMTTR();
-    }, [period, town, locationType, service]);
+    }, [period, town, service]);
 
     const getOperatorColor = (name) => {
         const n = name.toLowerCase();
         if (n.includes('telia')) return '#A31FD0'; // Purple
         if (n.includes('tre')) return '#EB6F2A';   // Orange
         if (n.includes('tele2')) return '#005BBB'; // Blue
+        if (n.includes('telenor')) return '#0070b8'; // Telenor Blue
         if (n.includes('lyca')) return '#22C55E';  // Green
         return 'var(--accent-primary)';
     };
@@ -84,9 +76,9 @@ export default function PrestandaPage() {
 
                 <div className="filters-row">
                     <div className="premium-filter">
-                        <label>TIDSPERIOD</label>
+                        <label htmlFor="period-select">TIDSPERIOD</label>
                         <div className="select-wrapper">
-                            <select value={period} onChange={(e) => setPeriod(e.target.value)}>
+                            <select id="period-select" value={period} onChange={(e) => setPeriod(e.target.value)}>
                                 <option value="365">{lang === "sv" ? "Ett år" : "One Year"}</option>
                                 <option value="90">{lang === "sv" ? "Tre månader" : "Three Months"}</option>
                                 <option value="30">{lang === "sv" ? "En månad" : "One Month"}</option>
@@ -97,12 +89,12 @@ export default function PrestandaPage() {
                     </div>
 
                     <div className="premium-filter">
-                        <label>STAD (DATA FÖR TRE)</label>
+                        <label htmlFor="town-select">{lang === "sv" ? "REGION" : "REGION"}</label>
                         <div className="select-wrapper">
-                            <select value={town} onChange={(e) => setTown(e.target.value)}>
+                            <select id="town-select" value={town} onChange={(e) => setTown(e.target.value)}>
                                 <option value="">{lang === "sv" ? "Hela Sverige" : "Entire Sweden"}</option>
-                                {locations.map((loc, i) => (
-                                    <option key={i} value={loc}>{loc}</option>
+                                {locations.map((loc) => (
+                                    <option key={loc} value={loc}>{loc}</option>
                                 ))}
                             </select>
                             <ChevronDown size={14} className="select-icon" />
@@ -110,21 +102,9 @@ export default function PrestandaPage() {
                     </div>
 
                     <div className="premium-filter">
-                        <label>PLATS TYP</label>
+                        <label htmlFor="service-select">TJÄNST</label>
                         <div className="select-wrapper">
-                            <select value={locationType} onChange={(e) => setLocationType(e.target.value)}>
-                                <option value="">{lang === "sv" ? "Alla" : "All"}</option>
-                                <option value="lan">{lang === "sv" ? "Endast Län" : "Only Counties"}</option>
-                                <option value="city">{lang === "sv" ? "Endast Städer" : "Only Cities"}</option>
-                            </select>
-                            <ChevronDown size={14} className="select-icon" />
-                        </div>
-                    </div>
-
-                    <div className="premium-filter">
-                        <label>TJÄNST</label>
-                        <div className="select-wrapper">
-                            <select value={service} onChange={(e) => setService(e.target.value)}>
+                            <select id="service-select" value={service} onChange={(e) => setService(e.target.value)}>
                                 <option value="">{lang === "sv" ? "Alla" : "All"}</option>
                                 <option value="4G">4G</option>
                                 <option value="5G">5G</option>
@@ -150,17 +130,14 @@ export default function PrestandaPage() {
 
             {/* Operator Cards Grid */}
             <div className="operator-grid">
-                {mttrData.length > 0 ? mttrData.map((data, idx) => {
+                {mttrData.length > 0 ? mttrData.map((data) => {
                     const isPlaceholder = data.operator_name !== "TRE";
                     return (
-                        <div key={idx} className="premium-card mttr-card" style={{ '--op-color': getOperatorColor(data.operator_name) }}>
+                        <div key={data.operator_name} className="premium-card mttr-card" style={{ '--op-color': getOperatorColor(data.operator_name) }}>
                             <div className="card-top-accent"></div>
                             <div className="card-inner">
                                 <div className="card-title-row">
                                     <h3 className="operator-name">{data.operator_name}</h3>
-                                    {isPlaceholder && (
-                                        <span className="simulated-badge">Simulerat</span>
-                                    )}
                                 </div>
 
                                 <div className="mttr-value-display">

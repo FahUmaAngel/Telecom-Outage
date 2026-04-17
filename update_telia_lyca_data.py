@@ -13,7 +13,8 @@ REGION_MAP = {
     'Blekinge län': 10, 'Hallands län': 11, 'Värmlands län': 12,
     'Örebro län': 13, 'Västmanlands län': 14, 'Dalarnas län': 15,
     'Gävleborgs län': 16, 'Västernorrlands län': 17, 'Jämtlands län': 18,
-    'Västerbottens län': 19, 'Norrbottens län': 20, 'Södermanlands län': 21
+    'Västerbottens län': 19, 'Norrbottens län': 20, 'Södermanlands län': 21,
+    'Östergötland': 5, 'Södermanland': 21, 'Västmanland': 14, 'Gävleborg': 16
 }
 
 CITY_TO_COUNTY = {
@@ -54,7 +55,7 @@ def get_county_from_nominatim(lat, lon):
                     if official_county.lower() in county.lower():
                         CACHE_GEO[(lat, lon)] = official_county
                         return official_county
-    except:
+    except Exception:
         pass
     return None
 
@@ -79,12 +80,26 @@ def normalize_to_lan(row):
     if lat and lon:
         return get_county_from_nominatim(lat, lon)
 
+    # Final attempt: search for 'län' or specific substrings manually
+    l_lower = loc_str.lower()
+    for county_name in REGION_MAP.keys():
+        nm = county_name.lower().replace(' län', '')
+        if nm in l_lower:
+            return county_name
+
     return None
 
-def process_operator(conn, op_name, op_id):
+def process_operator(conn, op_name, op_id, min_date=None):
     print(f"\nProcessing {op_name} (ID: {op_id})...")
     df = pd.read_sql_query(f"SELECT * FROM outages WHERE operator_id = {op_id}", conn)
     print(f"  Initial records path count: {len(df)}")
+
+    # YEAR FILTER
+    if min_date:
+        df['temp_st'] = pd.to_datetime(df['start_time'], errors='coerce', format='mixed', utc=True)
+        min_dt = pd.to_datetime(min_date, utc=True)
+        df = df[df['temp_st'] >= min_dt]
+        print(f"  After year filter ({min_date}): {len(df)}")
 
     # USE MIXED FORMAT AND UTC TO PREVENT NaT FOR VALID STRINGS
     df['st_dt'] = pd.to_datetime(df['start_time'], errors='coerce', format='mixed', utc=True)
@@ -120,8 +135,13 @@ def process_operator(conn, op_name, op_id):
     print("  Updating and mapping locations to Län...")
     df['location_lan'] = df.apply(normalize_to_lan, axis=1)
 
+    # DEBUG: See what we resolved
+    if not df.empty:
+        print("  DEBUG: Location mapping counts:")
+        print(df['location_lan'].value_counts(dropna=False))
+
     # Filter out unmapped locations
-    df = df[df['location_lan'].notna()]
+    df = df[df['location_lan'].notna()].copy()
     print(f"  After location resolution/filter: {len(df)}")
 
     if df.empty:
@@ -152,14 +172,38 @@ def process_operator(conn, op_name, op_id):
 
     # Clean up dates for Excel (Naive)
     for col in ['start_time', 'end_time', 'estimated_fix_time']:
-        # We use the parsed versions converted back to naive to be safe
         dt_col = 'st_dt' if col == 'start_time' else ('et_dt' if col == 'end_time' else 'eft_dt')
-        df_export[col] = df[dt_col].dt.tz_localize(None)
+        if dt_col in df:
+            # We already have aware versions in st_dt, et_dt, eft_dt
+            # Convert to naive safely
+            df_export[col] = df[dt_col].dt.tz_localize(None)
+
+    # Force string for all other extra columns to prevent openpyxl errors
+    for c in remaining:
+        df_export[c] = df_export[c].astype(str).replace('nan', '')
+
+    # ADD OVERALL MTTR SUMMARY ROW (SWEDEN)
+    overall_mttr = df_export['duration_hours'].mean().round(2)
+    # Create empty spacer row
+    empty_row = pd.Series([None] * len(df_export.columns), index=df_export.columns)
+    # Create summary row
+    summary_row = pd.Series([None] * len(df_export.columns), index=df_export.columns)
+    summary_row['location'] = 'Sweden'
+    summary_row['duration_hours'] = overall_mttr
+    
+    # Append to export dataframe
+    df_export = pd.concat([df_export, empty_row.to_frame().T, summary_row.to_frame().T], ignore_index=True)
 
     # Save to Excel
     filename = f"{op_name}_geocoded_lan.xlsx"
+    print(f"  DEBUG: Final df_export length: {len(df_export)}")
     df_export.to_excel(filename, index=False)
     print(f"  Saved {len(df_export)} records to {filename}")
+    
+    # Try a unique filename too
+    unique_file = f"DEBUG_{op_name}_{int(time.time())}.xlsx"
+    df_export.to_excel(unique_file, index=False)
+    print(f"  DEBUG: Saved to {unique_file}")
 
     # Update Database
     cursor = conn.cursor()
@@ -178,6 +222,7 @@ def main():
     db_path = 'telecom_outage.db'
     conn = sqlite3.connect(db_path)
     process_operator(conn, "telia", 1)
+    process_operator(conn, "tre", 2, min_date='2026-01-01')
     process_operator(conn, "lycamobile", 3)
     conn.close()
     print("\nProcessing complete.")
