@@ -1,5 +1,9 @@
-fastapi>=0.100.0
+fastapi>=0.109.1
 uvicorn[standard]>=0.20.0
 sqlalchemy>=2.0.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
+h11>=0.16.0 # not directly required, pinned by Snyk to avoid a vulnerability
+starlette>=0.40.0 # not directly required, pinned by Snyk to avoid a vulnerability
+anyio>=4.4.0 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
