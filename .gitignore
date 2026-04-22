@@ -31,3 +31,6 @@ dist/
 
 # Logs
 *.log
+
+# Scraped Artifacts
+*.html

@@ -56,7 +56,7 @@ def map_tele2_to_outage(address_info: dict, status_text: str, detailed_text: str
     
     # Generate a deterministic ID based on address and date
     # Tele2 doesn't give a public ID for these, so we make one
-    addr_hash = hashlib.md5(address_info['address'].encode()).hexdigest()[:6].upper()
+    addr_hash = hashlib.sha256(address_info['address'].encode()).hexdigest()[:6].upper()
     incident_id = f"TELE2-{addr_hash}-{now.strftime('%y%m%d')}"
     
     # Extract estimated end time

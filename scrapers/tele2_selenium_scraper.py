@@ -31,7 +31,7 @@ TELE2_URL = "https://www.tele2.se/driftstorning-mobilnatet"
 def make_tele2_id(location: str, start_time: str) -> str:
     """Generate a clean, unique, deterministic ID for a Tele2 incident."""
     raw = f"tele2_{location}_{start_time}"
-    hash_str = hashlib.md5(raw.encode()).hexdigest()[:6].upper()
+    hash_str = hashlib.sha256(raw.encode()).hexdigest()[:6].upper()
     return f"TELE2-{hash_str}"
 
 

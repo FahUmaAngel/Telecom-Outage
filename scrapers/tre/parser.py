@@ -120,7 +120,7 @@ def parse_markdown_text(text: str) -> List[Dict]:
                 t_val = outage.get('start_time') or outage.get('end_time')
                 raw_str = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
                 import hashlib
-                hash_str = hashlib.md5(raw_str.encode()).hexdigest()[:6].upper()
+                hash_str = hashlib.sha256(raw_str.encode()).hexdigest()[:6].upper()
                 outage['id'] = f"TRE-{hash_str}"
                 outages.append(outage)
                 
