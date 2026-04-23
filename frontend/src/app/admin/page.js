@@ -437,46 +437,46 @@ export default function AdminPage() {
                         <form onSubmit={handleUpdateOutage} className="edit-form">
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Incident ID</label>
-                                    <input value={editForm.incident_id} onChange={e => setEditForm({ ...editForm, incident_id: e.target.value })} />
+                                    <label htmlFor="incident_id">Incident ID</label>
+                                    <input id="incident_id" value={editForm.incident_id} onChange={e => setEditForm({ ...editForm, incident_id: e.target.value })} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Operator ID</label>
-                                    <input type="number" value={editForm.operator_id} onChange={e => setEditForm({ ...editForm, operator_id: e.target.value })} />
-                                </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Region ID</label>
-                                    <input type="number" value={editForm.region_id} onChange={e => setEditForm({ ...editForm, region_id: e.target.value })} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Raw Data ID</label>
-                                    <input type="number" value={editForm.raw_data_id} onChange={e => setEditForm({ ...editForm, raw_data_id: e.target.value })} />
+                                    <label htmlFor="operator_id">Operator ID</label>
+                                    <input id="operator_id" type="number" value={editForm.operator_id} onChange={e => setEditForm({ ...editForm, operator_id: e.target.value })} />
                                 </div>
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Title (Svenska)</label>
-                                    <input value={editForm.title_sv} onChange={e => setEditForm({ ...editForm, title_sv: e.target.value })} />
+                                    <label htmlFor="region_id">Region ID</label>
+                                    <input id="region_id" type="number" value={editForm.region_id} onChange={e => setEditForm({ ...editForm, region_id: e.target.value })} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Title (English)</label>
-                                    <input value={editForm.title_en} onChange={e => setEditForm({ ...editForm, title_en: e.target.value })} />
+                                    <label htmlFor="raw_data_id">Raw Data ID</label>
+                                    <input id="raw_data_id" type="number" value={editForm.raw_data_id} onChange={e => setEditForm({ ...editForm, raw_data_id: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="title_sv">Title (Svenska)</label>
+                                    <input id="title_sv" value={editForm.title_sv} onChange={e => setEditForm({ ...editForm, title_sv: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="title_en">Title (English)</label>
+                                    <input id="title_en" value={editForm.title_en} onChange={e => setEditForm({ ...editForm, title_en: e.target.value })} />
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Description (Svenska)</label>
-                                <textarea value={editForm.description_sv} onChange={e => setEditForm({ ...editForm, description_sv: e.target.value })} />
+                                <label htmlFor="description_sv">Description (Svenska)</label>
+                                <textarea id="description_sv" value={editForm.description_sv} onChange={e => setEditForm({ ...editForm, description_sv: e.target.value })} />
                             </div>
                             <div className="form-group">
-                                <label>Description (English)</label>
-                                <textarea value={editForm.description_en} onChange={e => setEditForm({ ...editForm, description_en: e.target.value })} />
+                                <label htmlFor="description_en">Description (English)</label>
+                                <textarea id="description_en" value={editForm.description_en} onChange={e => setEditForm({ ...editForm, description_en: e.target.value })} />
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Status</label>
-                                    <select value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+                                    <label htmlFor="status">Status</label>
+                                    <select id="status" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
                                         <option value="detecting">Detecting</option>
                                         <option value="active">Active</option>
                                         <option value="investigating">Investigating</option>
@@ -487,8 +487,8 @@ export default function AdminPage() {
                                     </select>
                                 </div>
                                 <div className="form-group">
-                                    <label>Severity</label>
-                                    <select value={editForm.severity} onChange={e => setEditForm({ ...editForm, severity: e.target.value })}>
+                                    <label htmlFor="severity">Severity</label>
+                                    <select id="severity" value={editForm.severity} onChange={e => setEditForm({ ...editForm, severity: e.target.value })}>
                                         <option value="low">Low</option>
                                         <option value="medium">Medium</option>
                                         <option value="high">High</option>
@@ -499,22 +499,23 @@ export default function AdminPage() {
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Start Time</label>
-                                    <input type="datetime-local" value={editForm.start_time} onChange={e => setEditForm({ ...editForm, start_time: e.target.value })} />
+                                    <label htmlFor="start_time">Start Time</label>
+                                    <input id="start_time" type="datetime-local" value={editForm.start_time} onChange={e => setEditForm({ ...editForm, start_time: e.target.value })} />
                                 </div>
                                 <div className="form-group">
-                                    <label>End Time</label>
-                                    <input type="datetime-local" value={editForm.end_time} onChange={e => setEditForm({ ...editForm, end_time: e.target.value })} />
+                                    <label htmlFor="end_time">End Time</label>
+                                    <input id="end_time" type="datetime-local" value={editForm.end_time} onChange={e => setEditForm({ ...editForm, end_time: e.target.value })} />
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Estimated Fix Time</label>
-                                <input type="datetime-local" value={editForm.estimated_fix_time} onChange={e => setEditForm({ ...editForm, estimated_fix_time: e.target.value })} />
+                                <label htmlFor="estimated_fix_time">Estimated Fix Time</label>
+                                <input id="estimated_fix_time" type="datetime-local" value={editForm.estimated_fix_time} onChange={e => setEditForm({ ...editForm, estimated_fix_time: e.target.value })} />
                             </div>
                             <div className="form-group">
-                                <label>Place (Plus Code or Address)</label>
+                                <label htmlFor="place">Place (Plus Code or Address)</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     <input
+                                        id="place"
                                         style={{ flex: 1 }}
                                         placeholder="Ex: M2GM+R6 Göteborg"
                                         value={editForm.place}
@@ -531,17 +532,17 @@ export default function AdminPage() {
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Location Name</label>
-                                <input value={editForm.location} onChange={e => setEditForm({ ...editForm, location: e.target.value })} />
+                                <label htmlFor="location">Location Name</label>
+                                <input id="location" value={editForm.location} onChange={e => setEditForm({ ...editForm, location: e.target.value })} />
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Latitude</label>
-                                    <input type="number" step="any" value={editForm.latitude} onChange={e => setEditForm({ ...editForm, latitude: e.target.value })} />
+                                    <label htmlFor="latitude">Latitude</label>
+                                    <input id="latitude" type="number" step="any" value={editForm.latitude} onChange={e => setEditForm({ ...editForm, latitude: e.target.value })} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Longitude</label>
-                                    <input type="number" step="any" value={editForm.longitude} onChange={e => setEditForm({ ...editForm, longitude: e.target.value })} />
+                                    <label htmlFor="longitude">Longitude</label>
+                                    <input id="longitude" type="number" step="any" value={editForm.longitude} onChange={e => setEditForm({ ...editForm, longitude: e.target.value })} />
                                 </div>
                             </div>
 
