@@ -89,6 +89,18 @@ SWEDISH_TO_ENGLISH = {
     "södra sverige": "southern Sweden",
 }
 
+# Swedish county constants to avoid duplication
+COUNTY_JONKOPINGS = "Jönköpings län"
+COUNTY_VASTRA_GOTALANDS = "Västra Götalands län"
+COUNTY_KRONOBERGS = "Kronobergs län"
+COUNTY_VARMLANDS = "Värmlands län"
+COUNTY_VASTMANLANDS = "Västmanlands län"
+COUNTY_NORRBOTTENS = "Norrbottens län"
+COUNTY_DALARNAS = "Dalarnas län"
+COUNTY_JAMTLANDS = "Jämtlands län"
+COUNTY_OREBRO = "Örebro län"
+COUNTY_VASTERBOTTENS = "Västerbottens län"
+
 def translate_swedish_to_english(text: str) -> str:
     """
     Translate Swedish text to English using dictionary lookup.
