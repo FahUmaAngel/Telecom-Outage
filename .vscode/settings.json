@@ -4,6 +4,6 @@
     "claudeCode.useTerminal": false,
     "sonarlint.connectedMode.project": {
         "connectionId": "fahumaangel",
-        "projectKey": "FahUmaAngel_Telecom-Outage"
+        "projectKey": "Telecom-Outage-Backend"
     }
 }
