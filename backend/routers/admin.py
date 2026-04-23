@@ -1,20 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Dict, Any, Optional, Annotated
-from ..dependencies import get_db
+from datetime import datetime
+from ..dependencies import get_db, RoleChecker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
 from ..utils.geocoding import resolve_place
 import json
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(
+    prefix="/api/v1/admin",
+    tags=["admin"],
+    dependencies=[Depends(RoleChecker(["admin"]))],
+)
 
 def _safe_val(v):
     """Safely extract the value from an Enum or return as is."""
     if v is None:
         return None
     return v.value if hasattr(v, 'value') else v
+
+def _effective_status(o: Outage):
+    """Keep detail and list responses aligned when the ETA has already passed."""
+    raw = _safe_val(o.status) or "active"
+    if raw.lower() == "resolved":
+        return raw
+
+    end = o.end_time or o.estimated_fix_time
+    if end:
+        try:
+            end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
+            end_dt = end_dt.replace(tzinfo=None)
+            if end_dt < datetime.utcnow():
+                return "resolved"
+        except Exception:
+            pass
+
+    return raw
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
 def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
@@ -50,7 +73,7 @@ def _map_outage_to_response(o: Outage) -> OutageResponse:
         raw_data_id=o.raw_data_id,
         title=o.title if o.title else {},
         description=o.description,
-        status=_safe_val(o.status),
+        status=_effective_status(o),
         severity=_safe_val(o.severity),
         start_time=o.start_time,
         end_time=o.end_time,

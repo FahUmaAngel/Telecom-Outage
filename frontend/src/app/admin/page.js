@@ -66,7 +66,13 @@ export default function AdminPage() {
         }
     };
 
-    const handleFilterChange = (newSearch, newOperator, newStatus, newMissingCoords, newMissingEndDate) => {
+    const handleFilterChange = (
+        newSearch = searchQuery,
+        newOperator = filterOperator,
+        newStatus = filterStatus,
+        newMissingCoords = filterMissingCoords,
+        newMissingEndDate = filterMissingEndDate,
+    ) => {
         setPage(0);
         fetchOutages(0, newSearch, newOperator, newStatus, newMissingCoords, newMissingEndDate);
     };
@@ -166,7 +172,7 @@ export default function AdminPage() {
             await api.admin.outages.update(editingOutage.id, payload);
             addToast(lang === "sv" ? "Driftstörning uppdaterad" : "Outage updated", "success");
             setEditingOutage(null);
-            fetchOutages(page, searchQuery, filterOperator, filterStatus);
+            fetchOutages(page, searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate);
         } catch (err) {
             addToast(lang === "sv" ? "Kunde inte uppdatera" : "Failed to update", "error");
         }
