@@ -33,7 +33,7 @@ class RegionResponse(BaseModel):
 class OutageResponse(BaseModel):
     id: int
     incident_id: Optional[str]
-    operator_id: Optional[int]
+    operator_id: Optional[int] = None
     operator_name: str
     region_id: Optional[int] = None
     region_name: Optional[Dict[str, str]] = None
