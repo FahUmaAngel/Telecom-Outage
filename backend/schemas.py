@@ -182,7 +182,10 @@ class OutageUpdate(BaseModel):
     @classmethod
     def normalize_severity(cls, v):
         if v is None: return v
-        return str(v).lower()
+        val_str = str(v)
+        if "SeverityLevel" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
 
 class ResolvePlaceRequest(BaseModel):
     query: str

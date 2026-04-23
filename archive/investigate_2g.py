@@ -23,7 +23,7 @@ def investigate():
                 print(json.dumps(data[0], indent=2)[:500] + "...")
             else:
                 print(json.dumps(data, indent=2)[:500] + "...")
-        except:
+        except Exception:
             print(data_str[:500])
             
     conn.close()
