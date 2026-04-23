@@ -226,11 +226,11 @@ SWEDISH_CITIES = list(CITY_TO_COUNTY.keys())
 
 # Swedish counties (län)
 SWEDISH_COUNTIES = [
-    "Stockholms län", "Västra Götalands län", "Skåne län",
-    "Uppsala län", "Östergötlands län", "Jönköpings län",
-    "Kronobergs län", "Kalmar län", "Gotlands län",
-    "Blekinge län", "Hallands län", "Värmlands län",
-    "Örebro län", "Västmanlands län", "Dalarnas län",
-    "Gävleborgs län", "Västernorrlands län", "Jämtlands län",
-    "Västerbottens län", "Norrbottens län", "Södermanlands län"
+    "Stockholms län", COUNTY_VASTRA_GOTALANDS, "Skåne län",
+    "Uppsala län", "Östergötlands län", COUNTY_JONKOPINGS,
+    COUNTY_KRONOBERGS, "Kalmar län", "Gotlands län",
+    "Blekinge län", "Hallands län", COUNTY_VARMLANDS,
+    COUNTY_OREBRO, COUNTY_VASTMANLANDS, COUNTY_DALARNAS,
+    "Gävleborgs län", "Västernorrlands län", COUNTY_JAMTLANDS,
+    COUNTY_VASTERBOTTENS, COUNTY_NORRBOTTENS, "Södermanlands län"
 ]
