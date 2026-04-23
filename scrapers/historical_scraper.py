@@ -142,7 +142,7 @@ def _find_and_click(driver, by, value, sleep_time: int = 1):
         return False
 
 
-def _expand_county(driver, wait, county: str, all_incidents: list):
+def _expand_county(driver, county: str, all_incidents: list):
     """Expand a county section and extract incidents."""
     try:
         county_links = driver.find_elements(By.XPATH, f"//a[contains(text(), '{county}')] | //td[contains(text(), '{county}')]")
@@ -165,7 +165,7 @@ def _expand_county(driver, wait, county: str, all_incidents: list):
     return False
 
 
-def set_date_and_get_incidents(driver, wait, target_date: str) -> List[Dict]:
+def set_date_and_get_incidents(driver, target_date: str) -> List[Dict]:
     """
     Attempt to set the Nätverkshistorik date and scrape incidents.
     target_date: 'YYYY-MM-DD' string
@@ -187,12 +187,12 @@ def set_date_and_get_incidents(driver, wait, target_date: str) -> List[Dict]:
     all_incidents.extend(initial)
     
     for county in SWEDISH_COUNTIES:
-        _expand_county(driver, wait, county, all_incidents)
+        _expand_county(driver, county, all_incidents)
     
     return all_incidents
 
 
-def _scrape_current_incidents(driver, wait, all_incident_ids: set, results: dict):
+def _scrape_current_incidents(driver, all_incident_ids: set, results: dict):
     """Scrape current active incidents and expand counties."""
     page_source = driver.page_source
     current_incidents = extract_incidents_from_source(page_source)
@@ -255,7 +255,7 @@ def _extract_county_name(row) -> str or None:
     return None
 
 
-def _switch_to_historical_mode(driver, wait, all_incident_ids: set, results: dict):
+def _switch_to_historical_mode(driver, all_incident_ids: set, results: dict):
     """Switch to historical mode and scrape historical incidents."""
     try:
         driver.get(COVERAGE_PORTAL_URL)
@@ -275,7 +275,7 @@ def _switch_to_historical_mode(driver, wait, all_incident_ids: set, results: dic
     hist_clicked = _click_historik_radio(driver)
     
     if hist_clicked:
-        _set_historical_date_and_scrape(driver, wait, all_incident_ids, results)
+        _set_historical_date_and_scrape(driver, all_incident_ids, results)
 
 
 def _click_historik_radio(driver) -> bool:
@@ -299,7 +299,7 @@ def _click_historik_radio(driver) -> bool:
     return False
 
 
-def _set_historical_date_and_scrape(driver, wait, all_incident_ids: set, results: dict):
+def _set_historical_date_and_scrape(driver, all_incident_ids: set, results: dict):
     """Set date in historical mode and scrape incidents."""
     date_inputs = driver.find_elements(By.XPATH, "//input[@type='date' or @type='text' and @placeholder]")
     for di in date_inputs:
@@ -355,10 +355,10 @@ def scrape_telia_history(start_date: datetime, end_date: datetime) -> Dict:
         _click_element_safe(wait, By.XPATH, "//a[contains(text(), 'Nätverksstatus')] | //div[contains(text(), 'Nätverksstatus')]", "Nätverksstatus tab")
         
         # Scrape current incidents and expand counties
-        _scrape_current_incidents(driver, wait, all_incident_ids, results)
+        _scrape_current_incidents(driver, all_incident_ids, results)
         
         # Switch to historical mode
-        _switch_to_historical_mode(driver, wait, all_incident_ids, results)
+        _switch_to_historical_mode(driver, all_incident_ids, results)
         
         results['success'] = True
         logger.info(f"Total unique incidents collected: {len(results['outages'])}")
