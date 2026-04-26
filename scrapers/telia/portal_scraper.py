@@ -86,131 +86,112 @@ def resolve_location_name(lat: float, lon: float) -> Optional[str]:
     return None
 
 
+def interact_with_portal(page):
+    """Triggers UI interactions to load incidents."""
+    try:
+        fel_btn = page.locator("text=Fel").first
+        if fel_btn.is_visible():
+            fel_btn.click()
+            page.wait_for_timeout(3000)
+    except Exception: pass
+
+    visa_links = page.locator("text=Visa område")
+    count = visa_links.count()
+    for i in range(min(count, 10)):
+        try:
+            link = visa_links.nth(i)
+            link.scroll_into_view_if_needed(timeout=2000)
+            link.click(timeout=2000)
+            page.wait_for_timeout(2000)
+            f_btn = page.locator("text=Fel").first
+            if f_btn.is_visible(): f_btn.click()
+        except Exception: pass
+
+
 def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
     """Runs Playwright session to capture incidents and session token."""
-    captured_incidents = []
-    session_token = [None]
+    captured = []
+    token = [None]
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
+        context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         page = context.new_page()
 
         def handle_response(response):
-            if "coverageportal" not in response.url:
-                return
-            
-            # Capture ERT token
+            if "coverageportal" not in response.url: return
             ert_match = re.search(r'ert=([^&]+)', response.url)
-            if ert_match and not session_token[0]:
-                session_token[0] = urllib.parse.unquote(ert_match.group(1))
+            if ert_match and not token[0]:
+                token[0] = urllib.parse.unquote(ert_match.group(1))
                 logger.info("Captured ERT token")
 
-            if response.status != 200:
-                return
-
-            try:
-                if "AreaTicketList" in response.url:
+            if response.status == 200 and "AreaTicketList" in response.url:
+                try:
                     data = response.json()
                     if isinstance(data, list) and data:
-                        logger.info(f"Intercepted AreaTicketList with {len(data)} incidents")
-                        captured_incidents.extend(data)
-            except Exception as e:
-                logger.debug(f"Error handling response: {e}")
+                        logger.info(f"Intercepted {len(data)} incidents")
+                        captured.extend(data)
+                except Exception as e: logger.debug(f"JSON err: {e}")
 
         page.on("response", handle_response)
-
         try:
-            url = f"{BASE_URL}?appmode=outage"
-            page.goto(url, wait_until="networkidle", timeout=90000)
+            page.goto(f"{BASE_URL}?appmode=outage", wait_until="networkidle", timeout=90000)
             page.wait_for_timeout(2000)
+            interact_with_portal(page)
+            if not captured: page.wait_for_timeout(10000)
+        except Exception as e: logger.error(f"PW err: {e}")
+        finally: browser.close()
 
-            # Trigger flow
-            try:
-                fel_btn = page.locator("text=Fel").first
-                if fel_btn.is_visible():
-                    fel_btn.click()
-                    page.wait_for_timeout(3000)
-            except Exception: pass
+    return captured, token[0]
 
-            # Region interaction
-            visa_links = page.locator("text=Visa område")
-            count = visa_links.count()
-            for i in range(min(count, 10)):
-                try:
-                    link = visa_links.nth(i)
-                    link.scroll_into_view_if_needed(timeout=2000)
-                    link.click(timeout=2000)
-                    page.wait_for_timeout(2000)
-                    fel_btn = page.locator("text=Fel").first
-                    if fel_btn.is_visible():
-                        fel_btn.click()
-                except Exception: pass
 
-            if not captured_incidents:
-                page.wait_for_timeout(10000)
-        except Exception as e:
-            logger.error(f"Playwright error: {e}")
-        finally:
-            browser.close()
+def extract_incident_coords(item, county_name):
+    """Extracts or resolves coordinates for an incident."""
+    bbox = item.get("BBox", {})
+    ll = bbox.get("LL", {})
+    lat = ll.get("Northing") or item.get("Northing")
+    lon = ll.get("Easting") or item.get("Easting")
 
-    return captured_incidents, session_token[0]
+    if not lat or not lon:
+        county_geo = f"{county_name} län" if county_name and 'län' not in county_name.lower() else county_name
+        coords = get_county_coordinates(county_geo, jitter=True)
+        lat, lon = coords if coords else (58.0, 14.0)
+    return lat, lon
 
+def parse_incident_dates(item):
+    """Cleans and parses start/end times."""
+    def clean(val):
+        if not val: return None
+        if isinstance(val, str) and "/Date(" in val:
+            m = re.search(r'\d+', val)
+            if m: return datetime.fromtimestamp(int(m.group()) / 1000).isoformat() + "+01:00"
+        return parse_swedish_date(val) if isinstance(val, str) and len(val) > 5 else None
+
+    start = clean(item.get("StartTimeStr") or item.get("EventTime"))
+    end = clean(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
+    return start, end
 
 def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
     """Processes and saves a single incident to the DB."""
     inc_id = item.get("ExternalId")
     if not inc_id: return
 
-    # Coordinates
-    bbox = item.get("BBox", {})
-    ll = bbox.get("LL", {})
-    lat = ll.get("Northing") or item.get("Northing")
-    lon = ll.get("Easting") or item.get("Easting")
-
-    # Resolve location
-    precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
-    area_name = item.get("AreaName") or ""
     county_name = item.get("CountyName") or ""
     if county_name.lower() == "unknown": county_name = ""
     
-    raw_parts = [p for p in [precise_city, area_name, county_name] if p]
-    raw_location = ", ".join(raw_parts)
+    lat, lon = extract_incident_coords(item, county_name)
+    precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
     
-    standard_region = extract_region_from_text(raw_location, SWEDISH_COUNTIES)
-    fallback_loc = county_name if county_name else (area_name or "Unknown")
-    location = standard_region if standard_region else fallback_loc
+    raw_location = ", ".join([p for p in [precise_city, item.get("AreaName"), county_name] if p])
+    location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or (county_name if county_name else (item.get("AreaName") or "Unknown"))
     region_id = region_id_map.get(location)
 
-    # Coords fallback
-    if not lat or not lon:
-        county_for_geo = f"{county_name} län" if county_name and 'län' not in county_name.lower() else county_name
-        coords = get_county_coordinates(county_for_geo, jitter=True)
-        lat, lon = coords if coords else (58.0, 14.0)
-
-    # Dates
-    def clean_date(val):
-        if not val: return None
-        if isinstance(val, str) and "/Date(" in val:
-            m = re.search(r'\d+', val)
-            if m:
-                ts = int(m.group()) / 1000
-                return datetime.fromtimestamp(ts).isoformat() + "+01:00"
-        if isinstance(val, str) and len(val) > 5:
-            return parse_swedish_date(val)
-        return None
-
-    start_time = clean_date(item.get("StartTimeStr") or item.get("EventTime"))
-    end_time = clean_date(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
-
+    start_time, end_time = parse_incident_dates(item)
     desc_raw = item.get("Description") or item.get("Text") or ""
-    services = extract_services(desc_raw + " " + item.get("AffectedServices", ""))
-
-    title_json = json.dumps({"sv": f"{inc_id}", "en": f"{inc_id}"})
+    services = json.dumps(extract_services(desc_raw + " " + item.get("AffectedServices", "")))
+    
+    title_json = json.dumps({"sv": str(inc_id), "en": str(inc_id)})
     desc_json = json.dumps({"sv": desc_raw, "en": desc_raw})
-    services_json = json.dumps(services)
 
     cursor.execute("SELECT id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
     row = cursor.fetchone()
@@ -219,13 +200,13 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
         cursor.execute("""
             UPDATE outages SET location=?, region_id=?, latitude=?, longitude=?, start_time=?, estimated_fix_time=?,
             description=?, affected_services=?, title=?, updated_at=?, status='active' WHERE id=?
-        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services_json, title_json, timestamp, row[0]))
+        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services, title_json, timestamp, row[0]))
     else:
         cursor.execute("""
             INSERT INTO outages (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
             start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
-        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services_json, timestamp, timestamp))
+        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services, timestamp, timestamp))
 
 
 def scrape_portal_granular():

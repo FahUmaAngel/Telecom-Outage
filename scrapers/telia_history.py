@@ -245,7 +245,7 @@ def run_historical_scrape(start_year: int = 2025, start_month: int = 1) -> Dict:
     try:
         logger.info("Starting Chrome...")
         driver = make_driver()
-        wait = WebDriverWait(driver, 15)
+
 
         logger.info(f"Loading {COVERAGE_PORTAL} once for all dates...")
         driver.get(COVERAGE_PORTAL)

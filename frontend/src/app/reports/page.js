@@ -202,6 +202,8 @@ function ReportsContent() {
                             const isExpired = endDateStr && new Date(endDateStr) < new Date();
                             const isResolved = (outage?.status?.toLowerCase() === 'resolved') || isExpired;
                             const displayStatus = isResolved ? 'resolved' : (outage?.status || 'active');
+                            const fallbackLoc = lang === "sv" ? "Sverige" : "Sweden";
+                            const locationDisplay = outage.region_name ? t(outage.region_name) : fallbackLoc;
                             return (
                                 <tr key={outage.id}>
                                     <td>
@@ -237,7 +239,7 @@ function ReportsContent() {
                                         </div>
                                     </td>
                                      <td className="location-cell">
-                                        {outage.region_name ? t(outage.region_name) : (lang === "sv" ? "Sverige" : "Sweden")}
+                                        {locationDisplay}
                                     </td>
                                     <td className="date-cell">
                                         {formatDate(outage.start_time)}

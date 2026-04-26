@@ -167,7 +167,7 @@ def run_recovery():
     driver = None
     try:
         driver = get_chrome_driver()
-        wait = WebDriverWait(driver, 20)
+
         
         start_date = datetime(2026, 4, 18)
         end_date = datetime(2026, 4, 21)
