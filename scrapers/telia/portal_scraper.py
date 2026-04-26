@@ -108,6 +108,25 @@ def interact_with_portal(page):
         except Exception: pass
 
 
+def handle_portal_response(response, captured, token_container):
+    """Handles responses from the Telia portal."""
+    if "coverageportal" not in response.url:
+        return
+        
+    ert_match = re.search(r'ert=([^&]+)', response.url)
+    if ert_match and not token_container[0]:
+        token_container[0] = urllib.parse.unquote(ert_match.group(1))
+        logger.info("Captured ERT token")
+
+    if response.status == 200 and "AreaTicketList" in response.url:
+        try:
+            data = response.json()
+            if isinstance(data, list) and data:
+                logger.info(f"Intercepted {len(data)} incidents")
+                captured.extend(data)
+        except Exception as e:
+            logger.debug(f"JSON err: {e}")
+
 def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
     """Runs Playwright session to capture incidents and session token."""
     captured = []
@@ -117,30 +136,17 @@ def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         page = context.new_page()
+        page.on("response", lambda r: handle_portal_response(r, captured, token))
 
-        def handle_response(response):
-            if "coverageportal" not in response.url: return
-            ert_match = re.search(r'ert=([^&]+)', response.url)
-            if ert_match and not token[0]:
-                token[0] = urllib.parse.unquote(ert_match.group(1))
-                logger.info("Captured ERT token")
-
-            if response.status == 200 and "AreaTicketList" in response.url:
-                try:
-                    data = response.json()
-                    if isinstance(data, list) and data:
-                        logger.info(f"Intercepted {len(data)} incidents")
-                        captured.extend(data)
-                except Exception as e: logger.debug(f"JSON err: {e}")
-
-        page.on("response", handle_response)
         try:
             page.goto(f"{BASE_URL}?appmode=outage", wait_until="networkidle", timeout=90000)
             page.wait_for_timeout(2000)
             interact_with_portal(page)
             if not captured: page.wait_for_timeout(10000)
-        except Exception as e: logger.error(f"PW err: {e}")
-        finally: browser.close()
+        except Exception as e:
+            logger.error(f"PW err: {e}")
+        finally:
+            browser.close()
 
     return captured, token[0]
 
