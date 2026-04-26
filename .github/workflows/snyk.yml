@@ -10,10 +10,10 @@ jobs:
   snyk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f4043f958c080e720b63012f2c0d9904d66c045b # v3.5.3
       
       - name: Snyk Backend Scan
-        uses: snyk/actions/python-3.10@master
+        uses: snyk/actions/python-3.10@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -21,7 +21,7 @@ jobs:
           args: --file=backend/requirements.txt --severity-threshold=high
           
       - name: Snyk Frontend Scan
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
