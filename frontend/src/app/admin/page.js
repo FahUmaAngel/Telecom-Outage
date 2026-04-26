@@ -674,11 +674,11 @@ export default function AdminPage() {
                 .btn-primary { background: var(--accent-primary) !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer; font-weight: 700; }
                 .btn-secondary { background: var(--surface-hover) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer; }
 
-                @media (max-width: 768px) { .admin-container { padding: 20px; } .scraper-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
-            `}</style>
-        </div>
-    );
- }
+                 @media (max-width: 768px) { .admin-container { padding: 20px; } .scraper-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+             `}</style>
+         </div>
+     );
+}
 
     const handleFilterChange = (
         newSearch = searchQuery,

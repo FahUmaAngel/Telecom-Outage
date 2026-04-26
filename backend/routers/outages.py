@@ -8,7 +8,7 @@ from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
 from scrapers.db.models import Outage, Operator, Region
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/v1/outages", tags=["outages"])
 
@@ -27,8 +27,11 @@ def _effective_status(o):
     if end:
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
-            end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.utcnow():
+            # Make end_dt timezone aware (UTC) if it's naive
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            # Compare with current UTC time
+            if end_dt < datetime.now(timezone.utc):
                 return 'resolved'
         except Exception:
             pass
@@ -43,7 +46,7 @@ def get_outage_history(
     """
     Get resolved outages history.
     """
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc) - timedelta(days=days)
     query = db.query(Outage).join(Operator).filter(
         Outage.status == "resolved",
         Outage.end_time >= since_date
