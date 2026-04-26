@@ -106,9 +106,12 @@ export default function OutageDetailPage() {
     const hasEstimation = !!outage.estimated_fix_time;
     const hasUpdates = outage.updated_at && new Date(outage.updated_at) > new Date(outage.start_time);
 
-    const resolutionDesc = isResolved 
-        ? (lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.") 
-        : (lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.");
+    const resolvedText = lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.";
+    const pendingText = lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.";
+    const resolutionDesc = isResolved ? resolvedText : pendingText;
+    
+    const defaultRegion = lang === "sv" ? "Sverige" : "Sweden";
+    const regionName = outage.region_name ? t(outage.region_name) : defaultRegion;
 
     return (
         <div className="outage-detail-container animate-fade-in">
@@ -137,7 +140,7 @@ export default function OutageDetailPage() {
                                     <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
                                 </div>
                                 <span className="info-value">
-                                    {outage.region_name ? t(outage.region_name) : (lang === "sv" ? "Sverige" : "Sweden")}
+                                    {regionName}
                                 </span>
                             </div>
                             <div className="info-item">
