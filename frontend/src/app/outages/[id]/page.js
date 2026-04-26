@@ -106,6 +106,10 @@ export default function OutageDetailPage() {
     const hasEstimation = !!outage.estimated_fix_time;
     const hasUpdates = outage.updated_at && new Date(outage.updated_at) > new Date(outage.start_time);
 
+    const resolutionDesc = isResolved 
+        ? (lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.") 
+        : (lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.");
+
     return (
         <div className="outage-detail-container animate-fade-in">
             <header className="detail-header">
@@ -237,7 +241,7 @@ export default function OutageDetailPage() {
                                         <span className="node-title">{lang === "sv" ? "Återställt" : "Resolution"}</span>
                                         {isResolved && <span className="node-time">{outage.end_time ? new Date(outage.end_time).toLocaleTimeString() : new Date(outage.updated_at).toLocaleTimeString()}</span>}
                                     </div>
-                                    <p className="node-desc">{isResolved ? (lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.") : (lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.")}</p>
+                                    <p className="node-desc">{resolutionDesc}</p>
                                 </div>
                             </div>
                         </div>
