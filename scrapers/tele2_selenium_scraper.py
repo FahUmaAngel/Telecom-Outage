@@ -92,6 +92,50 @@ def extract_outages_from_elements(driver, selectors_to_try):
             pass
     return found_elements
 
+def check_location_in_line(line: str, current_group: dict, swedish_counties: list, city_to_county: dict):
+    line_lower = line.lower()
+    for county in swedish_counties:
+        if county.lower() in line_lower:
+            current_group['location'] = county
+            return
+            
+    for city in city_to_county:
+        if city.lower() in line_lower:
+            if 'location' not in current_group:
+                current_group['location'] = city_to_county[city]
+            return
+
+def extract_attributes_from_line(line: str, current_group: dict):
+    line_lower = line.lower()
+    date_match = re.search(r'\d{4}-\d{2}-\d{2}', line)
+    
+    if 'startar' in line_lower and date_match:
+        current_group['start'] = line
+    elif 'klart' in line_lower and date_match:
+        current_group['end'] = line
+    elif 'beskrivning' in line_lower:
+        current_group['description'] = line
+    elif date_match and not current_group.get('start'):
+        current_group['raw_date'] = line
+
+def process_text_lines(lines: list, outages_found: list):
+    from scrapers.common.translation import SWEDISH_COUNTIES, CITY_TO_COUNTY
+    current_group = {}
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            if current_group.get('location') and (current_group.get('start') or current_group.get('end')):
+                outages_found.append(dict(current_group))
+                current_group = {}
+            continue
+            
+        check_location_in_line(line, current_group, SWEDISH_COUNTIES, CITY_TO_COUNTY)
+        extract_attributes_from_line(line, current_group)
+            
+    if current_group.get('location'):
+        outages_found.append(dict(current_group))
+
 def extract_outages_from_text(driver):
     outages_found = []
     try:
@@ -100,41 +144,7 @@ def extract_outages_from_text(driver):
         logger.info(f"Page body text length: {len(all_text)}")
         
         lines = all_text.split('\n')
-        current_group = {}
-        
-        from scrapers.common.translation import SWEDISH_COUNTIES, CITY_TO_COUNTY
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                if current_group.get('location') and (current_group.get('start') or current_group.get('end')):
-                    outages_found.append(dict(current_group))
-                    current_group = {}
-                continue
-                
-            date_match = re.search(r'\d{4}-\d{2}-\d{2}', line)
-            
-            for county in SWEDISH_COUNTIES:
-                if county.lower() in line.lower():
-                    current_group['location'] = county
-                    break
-            for city in CITY_TO_COUNTY:
-                if city.lower() in line.lower():
-                    if 'location' not in current_group:
-                        current_group['location'] = CITY_TO_COUNTY[city]
-                    break
-            
-            if 'startar' in line.lower() and date_match:
-                current_group['start'] = line
-            elif 'klart' in line.lower() and date_match:
-                current_group['end'] = line
-            elif 'beskrivning' in line.lower():
-                current_group['description'] = line
-            elif date_match and not current_group.get('start'):
-                current_group['raw_date'] = line
-                
-        if current_group.get('location'):
-            outages_found.append(dict(current_group))
+        process_text_lines(lines, outages_found)
             
     except NoSuchElementException:
         pass
