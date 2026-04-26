@@ -6,7 +6,7 @@ from .models import Outage, RawData, Operator, Region
 from ..common.models import NormalizedOutage, OperatorEnum
 from ..common.translation import SWEDISH_COUNTIES
 from ..common.engine import extract_region_from_text
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 from sqlalchemy import func
@@ -68,7 +68,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.description = normalized.description
         existing.location = normalized.location
         existing.end_time = normalized.estimated_fix_time
-        existing.updated_at = datetime.utcnow()
+        existing.updated_at = datetime.now(timezone.utc)
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
         existing.region_id = region_id # Update region if detected
@@ -86,7 +86,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
             description=normalized.description,
             status=normalized.status,
             severity=normalized.severity,
-            start_time=normalized.started_at if normalized.started_at else datetime.utcnow(),
+            start_time=normalized.started_at if normalized.started_at else datetime.now(timezone.utc),
             estimated_fix_time=normalized.estimated_fix_time,
             location=normalized.location,
             latitude=normalized.latitude,
@@ -101,7 +101,7 @@ def auto_resolve_expired_outages(db: Session):
     Find outages that are still active/scheduled but their end dates/ETAs have passed.
     Mark them as 'resolved' in the database.
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     # 1. Check end_time (definite resolution time)
     expired_end = db.query(Outage).filter(
@@ -136,7 +136,7 @@ def cleanup_old_data(db: Session, days: int = 30):
     Remove resolved outages and raw data older than X days.
     """
     from datetime import timedelta
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     
     # 1. Delete old resolved outages
     deleted_count = db.query(Outage).filter(
