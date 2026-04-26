@@ -72,7 +72,7 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         desc_en = translate_swedish_to_english(desc_sv)
         location = parsed_outage.get('location', 'Sverige')
         
-        title_sv, title_en, status = determine_title_and_status(location, desc_sv)
+        title_sv, _, status = determine_title_and_status(location, desc_sv)
         
         context_text = f"{location} {desc_sv} {title_sv}"
         affected_services = classify_services(context_text)
