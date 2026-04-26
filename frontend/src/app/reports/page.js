@@ -85,16 +85,16 @@ function ReportsContent() {
         }
 
         // Display Status — auto-resolve when end date has passed
-        const getEffectiveStatus = (o) => {
-            if (o.status && o.status.toLowerCase() === 'resolved') return 'resolved';
-            const endDateStr = o.end_time || o.estimated_fix_time;
+        const getEffectiveStatus = (outageObj) => {
+            if (outageObj?.status?.toLowerCase() === 'resolved') return 'resolved';
+            const endDateStr = outageObj?.end_time || outageObj?.estimated_fix_time;
             if (endDateStr) {
                 const endDate = new Date(endDateStr);
-                if (!isNaN(endDate.getTime()) && endDate < new Date()) {
+                if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) {
                     return 'resolved';
                 }
             }
-            return o.status || 'active';
+            return outageObj?.status || 'active';
         };
         const displayStatus = getEffectiveStatus(o);
 
@@ -113,7 +113,7 @@ function ReportsContent() {
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
         const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return "-";
+        if (Number.isNaN(d.getTime())) return "-";
 
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -200,9 +200,8 @@ function ReportsContent() {
                         {filteredOutages.map((outage) => {
                             const endDateStr = outage.end_time || outage.estimated_fix_time;
                             const isExpired = endDateStr && new Date(endDateStr) < new Date();
-                            const displayStatus = (outage.status && outage.status.toLowerCase() === 'resolved') || isExpired
-                                ? 'resolved'
-                                : (outage.status || 'active');
+                            const isResolved = (outage?.status?.toLowerCase() === 'resolved') || isExpired;
+                            const displayStatus = isResolved ? 'resolved' : (outage?.status || 'active');
                             return (
                                 <tr key={outage.id}>
                                     <td>
@@ -212,9 +211,7 @@ function ReportsContent() {
                                     </td>
                                     <td className="operator-cell">{outage.operator_name}</td>
                                     <td className="title-cell">
-                                        {outage.incident_id
-                                            ? outage.incident_id
-                                            : (t(outage.title) || "-")}
+                                        {outage.incident_id || t(outage.title) || "-"}
                                     </td>
                                     <td className="services-cell">
                                         <div className="service-tags-mini">

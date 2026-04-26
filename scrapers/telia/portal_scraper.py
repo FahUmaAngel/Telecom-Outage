@@ -86,13 +86,10 @@ def resolve_location_name(lat: float, lon: float) -> Optional[str]:
     return None
 
 
-def scrape_portal_granular():
-    """Main function with enhanced per-incident location resolution."""
-    logger.info("Starting Enhanced Telia Portal Scraper...")
-
+def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
+    """Runs Playwright session to capture incidents and session token."""
     captured_incidents = []
     session_token = [None]
-    fault_cache_keys_ref = [""]
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -105,30 +102,21 @@ def scrape_portal_granular():
             if "coverageportal" not in response.url:
                 return
             
-            # Capture ERT token from any successful URL
+            # Capture ERT token
             ert_match = re.search(r'ert=([^&]+)', response.url)
             if ert_match and not session_token[0]:
                 session_token[0] = urllib.parse.unquote(ert_match.group(1))
-                logger.info(f"Captured ERT token from response URL")
+                logger.info("Captured ERT token")
 
             if response.status != 200:
                 return
 
             try:
-                if "AreaTicketList" in response.url and response.status == 200:
+                if "AreaTicketList" in response.url:
                     data = response.json()
-                    if isinstance(data, list) and len(data) > 0:
+                    if isinstance(data, list) and data:
                         logger.info(f"Intercepted AreaTicketList with {len(data)} incidents")
                         captured_incidents.extend(data)
-                
-                # Capture fault cache keys for later use
-                if "FaultsLastUpdatedInfo" in response.url:
-                    data = response.json()
-                    ck = data.get("ActiveCacheKey", "")
-                    pk = data.get("PlannedCacheKey", "")
-                    if ck:
-                        fault_cache_keys_ref[0] = f"PW,{pk},16|AF,{ck},2"
-                        logger.info(f"Captured fault cache keys")
             except Exception as e:
                 logger.debug(f"Error handling response: {e}")
 
@@ -136,190 +124,148 @@ def scrape_portal_granular():
 
         try:
             url = f"{BASE_URL}?appmode=outage"
-            logger.info(f"Navigating to {url}...")
             page.goto(url, wait_until="networkidle", timeout=90000)
             page.wait_for_timeout(2000)
 
-            # Click Fel to start the flow (triggers API calls)
+            # Trigger flow
             try:
                 fel_btn = page.locator("text=Fel").first
                 if fel_btn.is_visible():
                     fel_btn.click()
                     page.wait_for_timeout(3000)
-            except:
-                pass
+            except Exception: pass
 
-            # Interact with region links to trigger AreaTicketList calls
+            # Region interaction
             visa_links = page.locator("text=Visa område")
             count = visa_links.count()
-            logger.info(f"Found {count} 'Visa område' links")
-
             for i in range(min(count, 10)):
                 try:
                     link = visa_links.nth(i)
                     link.scroll_into_view_if_needed(timeout=2000)
                     link.click(timeout=2000)
                     page.wait_for_timeout(2000)
-                    try:
-                        fel_btn = page.locator("text=Fel").first
-                        if fel_btn.is_visible():
-                            fel_btn.click()
-                    except:
-                        pass
-                except Exception as e:
-                    logger.warning(f"Error on region {i}: {e}")
+                    fel_btn = page.locator("text=Fel").first
+                    if fel_btn.is_visible():
+                        fel_btn.click()
+                except Exception: pass
 
             if not captured_incidents:
                 page.wait_for_timeout(10000)
-
         except Exception as e:
-            logger.error(f"Fatal error in portal scraper: {e}")
+            logger.error(f"Playwright error: {e}")
         finally:
             browser.close()
 
-    if not captured_incidents:
-        logger.error("No incidents captured from portal")
+    return captured_incidents, session_token[0]
+
+
+def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
+    """Processes and saves a single incident to the DB."""
+    inc_id = item.get("ExternalId")
+    if not inc_id: return
+
+    # Coordinates
+    bbox = item.get("BBox", {})
+    ll = bbox.get("LL", {})
+    lat = ll.get("Northing") or item.get("Northing")
+    lon = ll.get("Easting") or item.get("Easting")
+
+    # Resolve location
+    precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
+    area_name = item.get("AreaName") or ""
+    county_name = item.get("CountyName") or ""
+    if county_name.lower() == "unknown": county_name = ""
+    
+    raw_parts = [p for p in [precise_city, area_name, county_name] if p]
+    raw_location = ", ".join(raw_parts)
+    
+    standard_region = extract_region_from_text(raw_location, SWEDISH_COUNTIES)
+    fallback_loc = county_name if county_name else (area_name or "Unknown")
+    location = standard_region if standard_region else fallback_loc
+    region_id = region_id_map.get(location)
+
+    # Coords fallback
+    if not lat or not lon:
+        county_for_geo = f"{county_name} län" if county_name and 'län' not in county_name.lower() else county_name
+        coords = get_county_coordinates(county_for_geo, jitter=True)
+        lat, lon = coords if coords else (58.0, 14.0)
+
+    # Dates
+    def clean_date(val):
+        if not val: return None
+        if isinstance(val, str) and "/Date(" in val:
+            m = re.search(r'\d+', val)
+            if m:
+                ts = int(m.group()) / 1000
+                return datetime.fromtimestamp(ts).isoformat() + "+01:00"
+        if isinstance(val, str) and len(val) > 5:
+            return parse_swedish_date(val)
+        return None
+
+    start_time = clean_date(item.get("StartTimeStr") or item.get("EventTime"))
+    end_time = clean_date(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
+
+    desc_raw = item.get("Description") or item.get("Text") or ""
+    services = extract_services(desc_raw + " " + item.get("AffectedServices", ""))
+
+    title_json = json.dumps({"sv": f"{inc_id}", "en": f"{inc_id}"})
+    desc_json = json.dumps({"sv": desc_raw, "en": desc_raw})
+    services_json = json.dumps(services)
+
+    cursor.execute("SELECT id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute("""
+            UPDATE outages SET location=?, region_id=?, latitude=?, longitude=?, start_time=?, estimated_fix_time=?,
+            description=?, affected_services=?, title=?, updated_at=?, status='active' WHERE id=?
+        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services_json, title_json, timestamp, row[0]))
+    else:
+        cursor.execute("""
+            INSERT INTO outages (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
+            start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
+        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services_json, timestamp, timestamp))
+
+
+def scrape_portal_granular():
+    """Main function with enhanced per-incident location resolution."""
+    logger.info("Starting Enhanced Telia Portal Scraper...")
+
+    captured, token = run_playwright_capture()
+    if not captured:
+        logger.error("No incidents captured")
         return
 
-    logger.info(f"Processing {len(captured_incidents)} captured incidents")
-
-    # Set up a requests session with the captured ERT token
-    http_session = requests.Session()
-    http_session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer": BASE_URL,
-        "Accept": "application/json",
-    })
-
-    token = session_token[0]
-    fault_cache_keys = fault_cache_keys_ref[0]
-    logger.info(f"Token available: {'Yes' if token else 'No'}")
-
-    # Deduplicate by ExternalId
-    unique_incidents = {}
-    for item in captured_incidents:
-        inc_id = item.get("ExternalId")
-        if inc_id and inc_id not in unique_incidents:
-            unique_incidents[inc_id] = item
-
-    logger.info(f"Processing {len(unique_incidents)} unique incidents")
+    # Deduplicate
+    unique_incidents = {item.get("ExternalId"): item for item in captured if item.get("ExternalId")}
+    logger.info(f"Processing {len(unique_incidents)} unique incidents. Token: {'Yes' if token else 'No'}")
 
     db_path = get_db_path()
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM operators WHERE name = 'telia'")
+        res = cursor.fetchone()
+        if not res:
+            logger.error("Telia operator not found")
+            return
+        telia_id = res[0]
 
-    cursor.execute("SELECT id FROM operators WHERE name = 'telia'")
-    res = cursor.fetchone()
-    if not res:
-        logger.error("Telia operator not found in DB")
-        conn.close()
-        return
-    telia_id = res[0]
+        cursor.execute("SELECT id, name FROM regions")
+        region_id_map = {}
+        for rid, name_json in cursor.fetchall():
+            try:
+                sv_name = json.loads(name_json).get('sv')
+                region_id_map[sv_name] = rid
+            except Exception:
+                region_id_map[name_json] = rid
 
-    # Pre-fetch regions for mapping
-    cursor.execute("SELECT id, name FROM regions")
-    region_rows = cursor.fetchall()
-    region_id_map = {}
-    for rid, name_json in region_rows:
-        try:
-            name_dict = json.loads(name_json)
-            sv_name = name_dict.get('sv')
-            region_id_map[sv_name] = rid
-        except:
-            region_id_map[name_json] = rid
-
-    timestamp = datetime.now().isoformat()
-    ins, upd = 0, 0
-
-    for inc_id, item in unique_incidents.items():
-        # --- Get coordinates ---
-        bbox = item.get("BBox", {})
-        ll = bbox.get("LL", {})
-        lat = ll.get("Northing") or item.get("Northing")
-        lon = ll.get("Easting") or item.get("Easting")
-
-        # --- Resolve precise location name via Nominatim ---
-        precise_city = None
-        if lat and lon:
-            precise_city = resolve_location_name(lat, lon)
-
-        # --- Build location string ---
-        area_name = item.get("AreaName") or ""
-        county_name = item.get("CountyName") or ""
+        timestamp = datetime.now().isoformat()
+        for item in unique_incidents.values():
+            process_single_incident(item, telia_id, region_id_map, timestamp, cursor)
         
-        # Don't use "Unknown" as a county name
-        if county_name.lower() == "unknown":
-            county_name = ""
-            
-        # Build raw location for regional extraction
-        raw_location_parts = []
-        if precise_city: raw_location_parts.append(precise_city)
-        if area_name: raw_location_parts.append(area_name)
-        if county_name: raw_location_parts.append(county_name)
-        
-        raw_location = ", ".join(raw_location_parts)
-        
-        # Standardize to Region Name
-        standard_region = extract_region_from_text(raw_location, SWEDISH_COUNTIES)
-        location = standard_region if standard_region else (county_name if county_name else area_name or "Unknown")
-        
-        # Get region_id
-        region_id = region_id_map.get(location)
-
-        # --- County for geocoding ---
-        county_for_geo = f"{county_name} län" if county_name and 'län' not in county_name.lower() else county_name
-        if not lat or not lon:
-            coords = get_county_coordinates(county_for_geo, jitter=True)
-            lat, lon = coords if coords else (58.0, 14.0)
-
-        # --- Parse dates ---
-        def clean_date(val):
-            if not val: return None
-            if isinstance(val, str) and "/Date(" in val:
-                m = re.search(r'\d+', val)
-                if m:
-                    ts = int(m.group()) / 1000
-                    return datetime.fromtimestamp(ts).isoformat() + "+01:00"
-            if isinstance(val, str) and len(val) > 5:
-                return parse_swedish_date(val)
-            return None
-
-        start_time = clean_date(item.get("StartTimeStr") or item.get("EventTime"))
-        end_time = clean_date(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
-
-        # --- Services ---
-        desc_raw = item.get("Description") or item.get("Text") or ""
-        services_txt = item.get("AffectedServices", "")
-        services = extract_services(desc_raw + " " + services_txt)
-
-        # --- Build DB record ---
-        title_json = json.dumps({"sv": f"{inc_id}", "en": f"{inc_id}"}) # Title is strictly incident ID
-        desc_json = json.dumps({"sv": desc_raw, "en": desc_raw})
-        services_json = json.dumps(services)
-
-        cursor.execute("SELECT id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
-        row = cursor.fetchone()
-
-        if row:
-            cursor.execute("""
-                UPDATE outages 
-                SET location = ?, region_id = ?, latitude = ?, longitude = ?, start_time = ?, estimated_fix_time = ?,
-                    description = ?, affected_services = ?, title = ?, updated_at = ?, status = 'active'
-                WHERE id = ?
-            """, (location, region_id, lat, lon, start_time, end_time, desc_json, services_json, title_json, timestamp, row[0]))
-            upd += 1
-        else:
-            cursor.execute("""
-                INSERT INTO outages 
-                    (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
-                     start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
-            """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services_json, timestamp, timestamp))
-            ins += 1
-
-    conn.commit()
-    conn.close()
-    logger.info(f"Done. Created: {ins}, Updated: {upd}")
+        conn.commit()
+    logger.info("Scraping complete")
 
 
 if __name__ == "__main__":

@@ -138,7 +138,7 @@ def save_incident(db, inc, target_date_str):
         logger.error(f"Error saving {inc.get('incident_id')}: {save_err}")
         return False
 
-def recover_telia_for_date(db, driver, wait, target_date_obj):
+def recover_telia_for_date(db, driver, target_date_obj):
     target_date_str = target_date_obj.strftime("%Y-%m-%d")
     logger.info(f"--- Final Robust Recovery for Telia: {target_date_str} ---")
     
@@ -175,7 +175,7 @@ def run_recovery():
         current = start_date
         total_saved = 0
         while current <= end_date:
-            count = recover_telia_for_date(db, driver, wait, current)
+            count = recover_telia_for_date(db, driver, current)
             total_saved += count
             logger.info(f"Saved {count} incidents for {current.date()}")
             current += timedelta(days=1)

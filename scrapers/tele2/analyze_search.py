@@ -44,7 +44,7 @@ def analyze_tele2_search():
         )
         page = context.new_page()
 
-        api_calls = []
+
 
         def handle_request(request):
             if 'mim-api' in request.url:
