@@ -25,18 +25,23 @@ logger = logging.getLogger(__name__)
 
 TELENOR_BASE_URL = "https://mboss.telenor.se/coverageportal?appmode=outage"
 
+def get_accordion_element(wait):
+    for selector in ["//button[contains(., 'I följande län')]", "//*[@id='headingOne']/button"]:
+        try:
+            if selector.startswith("//") or selector.startswith("/*"):
+                accordion = wait.until(EC.element_to_be_clickable((By.XPATH, selector)))
+            else:
+                accordion = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+            if accordion: 
+                return accordion
+        except TimeoutException: 
+            continue
+    return None
+
 def expand_accordion(driver, wait):
     try:
         logger.info("Looking for disturbances accordion...")
-        accordion = None
-        for selector in ["//button[contains(., 'I följande län')]", "//*[@id='headingOne']/button"]:
-            try:
-                if selector.startswith("//") or selector.startswith("/*"):
-                    accordion = wait.until(EC.element_to_be_clickable((By.XPATH, selector)))
-                else:
-                    accordion = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
-                if accordion: break
-            except: continue
+        accordion = get_accordion_element(wait)
         
         if accordion:
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", accordion)
@@ -65,7 +70,7 @@ def get_county_names(driver) -> List[str]:
                 if name: 
                     name = name.split('(')[0].replace('County', 'län').strip()
                     county_names.append(name)
-            except: pass
+            except Exception: pass
     except Exception as e:
         logger.warning(f"Error getting county names: {e}")
     return county_names
@@ -87,9 +92,9 @@ def parse_incident_row(cells, county_text, results, found_for_county):
         desc_idx, start_idx, end_idx = 2, 3, 4
         
     if incident_id:
-        description = cells[desc_idx].text.strip() if desc_idx < len(cells) else ""
-        started_at = cells[start_idx].text.strip() if start_idx < len(cells) else ""
-        est_end = cells[end_idx].text.strip() if end_idx < len(cells) else ""
+        description = cells[desc_idx].text.strip()
+        started_at = cells[start_idx].text.strip()
+        est_end = cells[end_idx].text.strip()
         
         incident = {
             'incident_id': incident_id,
@@ -120,7 +125,7 @@ def process_county(driver, wait, county_text, results):
         target_row = None
         try:
             target_row = wait.until(EC.presence_of_element_located((By.XPATH, f"//tr[contains(., '{county_text}')]")))
-        except:
+        except TimeoutException:
             logger.warning(f"  Could not find {county_text} row after reset")
             return
             
@@ -236,4 +241,4 @@ if __name__ == "__main__":
     res = scrape_telenor_with_selenium()
     with open('telenor_selenium_results.json', 'w', encoding='utf-8') as f:
         json.dump(res, f, indent=2, ensure_ascii=False)
-    print(f"Results saved to telenor_selenium_results.json")
+    print("Results saved to telenor_selenium_results.json")
