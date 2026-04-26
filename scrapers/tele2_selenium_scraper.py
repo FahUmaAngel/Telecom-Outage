@@ -9,7 +9,7 @@ import time
 import hashlib
 import re
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     from selenium import webdriver
@@ -75,6 +75,121 @@ def parse_tele2_date(date_str: str) -> Optional[datetime]:
     return None
 
 
+def extract_outages_from_elements(driver, selectors_to_try):
+    found_elements = []
+    for by, selector in selectors_to_try:
+        try:
+            elements = driver.find_elements(
+                By.CSS_SELECTOR if by == "css" else By.XPATH, 
+                selector
+            )
+            if elements:
+                logger.info(f"Found {len(elements)} elements with selector: {selector}")
+                found_elements.extend([(selector, el) for el in elements])
+        except NoSuchElementException:
+            pass
+        except Exception:
+            pass
+    return found_elements
+
+def extract_outages_from_text(driver):
+    outages_found = []
+    try:
+        body = driver.find_element(By.TAG_NAME, 'body')
+        all_text = body.text
+        logger.info(f"Page body text length: {len(all_text)}")
+        
+        lines = all_text.split('\n')
+        current_group = {}
+        
+        from scrapers.common.translation import SWEDISH_COUNTIES, CITY_TO_COUNTY
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                if current_group.get('location') and (current_group.get('start') or current_group.get('end')):
+                    outages_found.append(dict(current_group))
+                    current_group = {}
+                continue
+                
+            date_match = re.search(r'\d{4}-\d{2}-\d{2}', line)
+            
+            for county in SWEDISH_COUNTIES:
+                if county.lower() in line.lower():
+                    current_group['location'] = county
+                    break
+            for city in CITY_TO_COUNTY:
+                if city.lower() in line.lower():
+                    if 'location' not in current_group:
+                        current_group['location'] = CITY_TO_COUNTY[city]
+                    break
+            
+            if 'startar' in line.lower() and date_match:
+                current_group['start'] = line
+            elif 'klart' in line.lower() and date_match:
+                current_group['end'] = line
+            elif 'beskrivning' in line.lower():
+                current_group['description'] = line
+            elif date_match and not current_group.get('start'):
+                current_group['raw_date'] = line
+                
+        if current_group.get('location'):
+            outages_found.append(dict(current_group))
+            
+    except NoSuchElementException:
+        pass
+    except Exception as e:
+        logger.error(f"Error extracting body text: {e}")
+        
+    return outages_found
+
+def extract_next_data(driver, results):
+    try:
+        next_data_script = driver.find_element(By.ID, '__NEXT_DATA__')
+        if next_data_script:
+            data = json.loads(next_data_script.get_attribute('innerHTML'))
+            logger.info("Found __NEXT_DATA__ on Tele2 page!")
+            results['raw_next_data'] = str(data)[:500]
+    except NoSuchElementException:
+        pass
+    except Exception:
+        pass
+
+def extract_script_data(driver):
+    scripts = driver.find_elements(By.TAG_NAME, 'script')
+    for script in scripts:
+        try:
+            content = script.get_attribute('innerHTML')
+            if content and ('driftstörning' in content.lower() or 'outage' in content.lower()):
+                logger.info(f"Found relevant script content: {content[:200]}")
+        except Exception:
+            pass
+
+def normalize_outages(outages_found, results):
+    for raw_outage in outages_found:
+        location = raw_outage.get('location', '')
+        if not location:
+            continue
+        
+        start_str = raw_outage.get('start', raw_outage.get('raw_date', ''))
+        end_str = raw_outage.get('end', '')
+        desc = raw_outage.get('description', f'Driftstörning i {location}')
+        
+        start_dt = parse_tele2_date(start_str)
+        end_dt = parse_tele2_date(end_str)
+        
+        inc_id = make_tele2_id(location, start_str or datetime.now(timezone.utc).isoformat())
+        
+        outage_dict = {
+            'incident_id': inc_id,
+            'location': location,
+            'description': desc,
+            'start_time': start_dt.isoformat() if start_dt else None,
+            'end_time': end_dt.isoformat() if end_dt else None,
+            'source_url': TELE2_URL
+        }
+        results['outages'].append(outage_dict)
+
 def scrape_tele2_with_selenium() -> Dict:
     """Scrape Tele2 outages using Selenium (Browser automation)."""
     if not SELENIUM_AVAILABLE:
@@ -106,7 +221,6 @@ def scrape_tele2_with_selenium() -> Dict:
     try:
         logger.info("Starting Chrome...")
         driver = webdriver.Chrome(options=chrome_options)
-        wait = WebDriverWait(driver, 30)
         
         logger.info(f"Loading: {TELE2_URL}")
         driver.get(TELE2_URL)
@@ -114,142 +228,26 @@ def scrape_tele2_with_selenium() -> Dict:
         
         logger.info("Page loaded. Searching for outage content...")
         
-        # First, dump full page source text for analysis
         page_source = driver.page_source
         
-        # Strategy 1: Look for any table/list with outage data
-        outages_found = []
-        
-        # Try multiple selectors common to telecom outage pages
         selectors_to_try = [
-            # Tables
-            ("css", "table"),
-            ("css", "table tr"),
-            # Accordion/cards
-            ("css", ".accordion"),
-            ("css", ".card"),
-            ("css", ".outage"),
-            ("css", ".disturbance"),
-            ("css", "[class*='outage']"),
-            ("css", "[class*='disturbance']"),
+            ("css", "table"), ("css", "table tr"),
+            ("css", ".accordion"), ("css", ".card"),
+            ("css", ".outage"), ("css", ".disturbance"),
+            ("css", "[class*='outage']"), ("css", "[class*='disturbance']"),
             ("css", "[class*='driftstorning']"),
-            # Generic list items
-            ("css", ".status-item"),
-            ("css", ".incident"),
+            ("css", ".status-item"), ("css", ".incident"),
         ]
         
-        found_elements = []
-        for by, selector in selectors_to_try:
-            try:
-                elements = driver.find_elements(
-                    By.CSS_SELECTOR if by == "css" else By.XPATH, 
-                    selector
-                )
-                if elements:
-                    logger.info(f"Found {len(elements)} elements with selector: {selector}")
-                    found_elements.extend([(selector, el) for el in elements])
-            except:
-                pass
+        extract_outages_from_elements(driver, selectors_to_try)
         
-        # Strategy 2: Extract all visible text content and look for outage patterns
-        try:
-            body = driver.find_element(By.TAG_NAME, 'body')
-            all_text = body.text
-            logger.info(f"Page body text length: {len(all_text)}")
-            
-            # Look for patterns: area names + dates
-            # Tele2 often shows outages as "Ort: X, Datum: Y-Y"
-            # Scan for lines with "driftstörning", "planerat", dates, county names
-            lines = all_text.split('\n')
-            current_group = {}
-            
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    if current_group.get('location') and (current_group.get('start') or current_group.get('end')):
-                        outages_found.append(dict(current_group))
-                        current_group = {}
-                    continue
-                    
-                # Date lines
-                date_match = re.search(r'\d{4}-\d{2}-\d{2}', line)
-                
-                # If the line has a known Swedish county
-                from scrapers.common.translation import SWEDISH_COUNTIES, CITY_TO_COUNTY
-                for county in SWEDISH_COUNTIES:
-                    if county.lower() in line.lower():
-                        current_group['location'] = county
-                        break
-                for city in CITY_TO_COUNTY:
-                    if city.lower() in line.lower():
-                        if 'location' not in current_group:
-                            current_group['location'] = CITY_TO_COUNTY[city]
-                        break
-                
-                if 'startar' in line.lower() and date_match:
-                    current_group['start'] = line
-                elif 'klart' in line.lower() and date_match:
-                    current_group['end'] = line
-                elif 'beskrivning' in line.lower():
-                    current_group['description'] = line
-                elif date_match and not current_group.get('start'):
-                    current_group['raw_date'] = line
-                    
-            # Add last group if any
-            if current_group.get('location'):
-                outages_found.append(dict(current_group))
-                
-        except Exception as e:
-            logger.error(f"Error extracting body text: {e}")
+        outages_found = extract_outages_from_text(driver)
         
-        # Strategy 3: Check for __NEXT_DATA__ like Tre
-        try:
-            next_data_script = driver.find_element(By.ID, '__NEXT_DATA__')
-            if next_data_script:
-                data = json.loads(next_data_script.get_attribute('innerHTML'))
-                logger.info("Found __NEXT_DATA__ on Tele2 page!")
-                # Save raw data for further analysis
-                results['raw_next_data'] = str(data)[:500]
-        except:
-            pass
+        extract_next_data(driver, results)
+        extract_script_data(driver)
         
-        # Strategy 4: Check for any JSON API calls visible in Network
-        # Look for script tags that might contain outage data
-        scripts = driver.find_elements(By.TAG_NAME, 'script')
-        for script in scripts:
-            try:
-                content = script.get_attribute('innerHTML')
-                if content and ('driftstörning' in content.lower() or 'outage' in content.lower()):
-                    logger.info(f"Found relevant script content: {content[:200]}")
-            except:
-                pass
+        normalize_outages(outages_found, results)
         
-        # Normalize found outages
-        for raw_outage in outages_found:
-            location = raw_outage.get('location', '')
-            if not location:
-                continue
-            
-            start_str = raw_outage.get('start', raw_outage.get('raw_date', ''))
-            end_str = raw_outage.get('end', '')
-            desc = raw_outage.get('description', f'Driftstörning i {location}')
-            
-            start_dt = parse_tele2_date(start_str)
-            end_dt = parse_tele2_date(end_str)
-            
-            inc_id = make_tele2_id(location, start_str or datetime.utcnow().isoformat())
-            
-            outage_dict = {
-                'incident_id': inc_id,
-                'location': location,
-                'description': desc,
-                'start_time': start_dt.isoformat() if start_dt else None,
-                'end_time': end_dt.isoformat() if end_dt else None,
-                'source_url': TELE2_URL
-            }
-            results['outages'].append(outage_dict)
-        
-        # Log page source summary for diagnosis
         logger.info(f"\nPage source snippet (first 2000 chars):\n{page_source[:2000]}")
         logger.info(f"\nTotal outages found: {len(results['outages'])}")
         results['success'] = True
