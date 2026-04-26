@@ -12,17 +12,32 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
-      - name: Snyk Backend Scan
-        uses: snyk/actions/python-3.10@9adf32b1121593767fc3c057af55b55db032dc04
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          command: test
-          args: --file=backend/requirements.txt --severity-threshold=high
+          python-version: '3.10'
           
-      - name: Snyk Frontend Scan
-        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
+      - name: Install Python dependencies
+        run: pip install -r backend/requirements.txt
+        
+      - name: Snyk Setup
+        uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb # v0.0.8
+        
+      - name: Snyk Backend Scan
+        run: snyk test --file=backend/requirements.txt --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          args: --file=frontend/package.json --severity-threshold=high
+          node-version: 18
+          
+      - name: Install Node dependencies
+        working-directory: frontend
+        run: npm ci
+        
+      - name: Snyk Frontend Scan
+        run: snyk test --file=frontend/package.json --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
