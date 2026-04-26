@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from typing import List, Optional
 import hashlib
 
@@ -24,7 +24,7 @@ def extract_datetime(text: str) -> Optional[datetime]:
         month = months.get(month_str, datetime.now().month)
         year = datetime.now().year
         try:
-            return datetime(year, month, int(dd), int(hh), int(mm))
+            return datetime(year, month, int(dd), int(hh), int(mm), tzinfo=timezone.utc)
         except ValueError:
             return None
             
@@ -34,7 +34,7 @@ def extract_datetime(text: str) -> Optional[datetime]:
         dd, mm, hh, min_ = match.groups()
         year = datetime.now().year
         try:
-            return datetime(year, int(mm), int(dd), int(hh), int(min_))
+            return datetime(year, int(mm), int(dd), int(hh), int(min_), tzinfo=timezone.utc)
         except ValueError:
             return None
             
@@ -52,7 +52,7 @@ def map_tele2_to_outage(address_info: dict, status_text: str, detailed_text: str
     if not is_outage:
         return None
         
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     # Generate a deterministic ID based on address and date
     # Tele2 doesn't give a public ID for these, so we make one
