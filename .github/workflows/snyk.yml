@@ -10,7 +10,7 @@ jobs:
   snyk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@f4043f958c080e720b63012f2c0d9904d66c045b # v3.5.3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
       - name: Snyk Backend Scan
         uses: snyk/actions/python-3.10@9adf32b1121593767fc3c057af55b55db032dc04
