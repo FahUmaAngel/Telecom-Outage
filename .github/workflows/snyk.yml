@@ -3,14 +3,26 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
+    branches:
+      - main
 jobs:
   snyk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master # เปลี่ยนเป็น python, go, ruby ตามความเหมาะสม
+      
+      - name: Snyk Backend Scan
+        uses: snyk/actions/python-3.10@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
+          command: test
+          args: --file=backend/requirements.txt --severity-threshold=high
+          
+      - name: Snyk Frontend Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=frontend/package.json --severity-threshold=high
