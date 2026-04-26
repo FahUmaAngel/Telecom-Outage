@@ -11,7 +11,7 @@ def dump_html():
         try:
             page.locator("button:has-text('Acceptera alla')").click(timeout=3000)
             print("Cookies accepted.")
-        except:
+        except Exception:
             pass
             
         print("Dumping body HTML...")
