@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Dict, Any, Optional, Annotated
-from datetime import datetime
+from datetime import datetime, timezone
 from ..dependencies import get_db, RoleChecker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
@@ -32,7 +32,7 @@ def _effective_status(o: Outage):
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
             end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.utcnow():
+            if end_dt < datetime.now(timezone.utc).replace(tzinfo=None):
                 return "resolved"
         except Exception:
             pass
