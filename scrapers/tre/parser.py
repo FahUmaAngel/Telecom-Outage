@@ -116,9 +116,12 @@ def parse_markdown_text(text: str) -> List[Dict]:
                     outage['affected_services'] = list(set(services))
             
             if outage.get('location') and (outage.get('start_time') or outage.get('end_time')):
-                # Generate an ID based on location and time
+                # Generate a clean ID based on location and time
                 t_val = outage.get('start_time') or outage.get('end_time')
-                outage['id'] = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
+                raw_str = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
+                import hashlib
+                hash_str = hashlib.sha256(raw_str.encode()).hexdigest()[:6].upper()
+                outage['id'] = f"TRE-{hash_str}"
                 outages.append(outage)
                 
         except Exception as e:

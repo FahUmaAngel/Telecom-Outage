@@ -4,25 +4,33 @@ Analytics endpoints.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
+from typing import List, Annotated
 from ..dependencies import get_db
 from ..schemas import MTTRResponse, ReliabilityResponse, HistoricalTrendResponse, DailyTrend
 from scrapers.db.models import Outage, Operator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 
-@router.get("/mttr", response_model=List[MTTRResponse])
-def get_mttr(db: Session = Depends(get_db)):
-    """Calculate Mean Time To Recovery (MTTR) per operator."""
-    # SQLite logic: average(time_diff)
-    # We filter only resolved outages (where end_time and start_time are present)
+def _calculate_mttr_hours(outage: Outage) -> float:
+    """Calculate MTTR hours for a single outage with sanity checks."""
+    st = outage.start_time.replace(tzinfo=None) if outage.start_time.tzinfo else outage.start_time
+    et = outage.end_time.replace(tzinfo=None) if outage.end_time.tzinfo else outage.end_time
+    diff = et - st
+    duration_hours = diff.total_seconds() / 3600.0
     
+    # Sanity Check: Ignore negative durations or those > 1 year (data errors)
+    if 0 < duration_hours <= 8760:
+        return duration_hours
+    return 0.0
+
+@router.get("/mttr", response_model=List[MTTRResponse])
+def get_mttr(db: Annotated[Session, Depends(get_db)]):
+    """Calculate Mean Time To Recovery (MTTR) per operator."""
     operators = db.query(Operator).all()
     results = []
     
     for op in operators:
-        # Fetch outages for this operator that have both start and end times
         outages = db.query(Outage).filter(
             Outage.operator_id == op.id,
             Outage.start_time.isnot(None),
@@ -34,24 +42,27 @@ def get_mttr(db: Session = Depends(get_db)):
             continue
             
         total_hours = 0.0
+        valid_count = 0
         for o in outages:
-            diff = o.end_time - o.start_time
-            total_hours += diff.total_seconds() / 3600.0
+            duration = _calculate_mttr_hours(o)
+            if duration > 0:
+                total_hours += duration
+                valid_count += 1
             
-        avg_hours = total_hours / len(outages)
+        avg_hours = (total_hours / valid_count) if valid_count > 0 else 0.0
         results.append(MTTRResponse(
             operator_name=op.name,
             average_mttr_hours=round(avg_hours, 2),
-            outage_count=len(outages)
+            outage_count=valid_count
         ))
         
     return results
 
 @router.get("/reliability", response_model=List[ReliabilityResponse])
-def get_reliability(db: Session = Depends(get_db)):
+def get_reliability(db: Annotated[Session, Depends(get_db)]):
     """Compare operators by reliability (outage count and total downtime)."""
     # Over the last 30 days
-    since_date = datetime.utcnow() - timedelta(days=30)
+    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=30)
     
     operators = db.query(Operator).all()
     results = []
@@ -65,7 +76,9 @@ def get_reliability(db: Session = Depends(get_db)):
         total_downtime = 0.0
         for o in outages:
             if o.start_time and o.end_time:
-                diff = o.end_time - o.start_time
+                st = o.start_time.replace(tzinfo=None) if o.start_time.tzinfo else o.start_time
+                et = o.end_time.replace(tzinfo=None) if o.end_time.tzinfo else o.end_time
+                diff = et - st
                 total_downtime += diff.total_seconds() / 3600.0
             # If still active, maybe count downtime up to now? 
             # For simplicity, we only count resolved for downtime, but all for count.
@@ -79,9 +92,9 @@ def get_reliability(db: Session = Depends(get_db)):
     return results
 
 @router.get("/history", response_model=HistoricalTrendResponse)
-def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
+def get_historical_trend(db: Annotated[Session, Depends(get_db)], days: int = 30):
     """Get aggregated outage counts per day for the last X days."""
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
     
     # Query all outages created in the last X days
     outages = db.query(Outage).filter(Outage.created_at >= since_date).all()
@@ -90,8 +103,9 @@ def get_historical_trend(db: Session = Depends(get_db), days: int = 30):
     counts_by_date = {}
     
     # Initialize all dates in range with 0
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     for i in range(days + 1):
-        d = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
+        d = (now - timedelta(days=i)).strftime("%Y-%m-%d")
         counts_by_date[d] = 0
         
     for o in outages:

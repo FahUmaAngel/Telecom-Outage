@@ -106,6 +106,13 @@ export default function OutageDetailPage() {
     const hasEstimation = !!outage.estimated_fix_time;
     const hasUpdates = outage.updated_at && new Date(outage.updated_at) > new Date(outage.start_time);
 
+    const resolvedText = lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.";
+    const pendingText = lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.";
+    const resolutionDesc = isResolved ? resolvedText : pendingText;
+    
+    const defaultRegion = lang === "sv" ? "Sverige" : "Sweden";
+    const regionName = outage.region_name ? t(outage.region_name) : defaultRegion;
+
     return (
         <div className="outage-detail-container animate-fade-in">
             <header className="detail-header">
@@ -132,7 +139,9 @@ export default function OutageDetailPage() {
                                     <MapPin size={14} />
                                     <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
                                 </div>
-                                <span className="info-value">{outage.location || "Sweden"}</span>
+                                <span className="info-value">
+                                    {regionName}
+                                </span>
                             </div>
                             <div className="info-item">
                                 <div className="info-header">
@@ -235,7 +244,7 @@ export default function OutageDetailPage() {
                                         <span className="node-title">{lang === "sv" ? "Återställt" : "Resolution"}</span>
                                         {isResolved && <span className="node-time">{outage.end_time ? new Date(outage.end_time).toLocaleTimeString() : new Date(outage.updated_at).toLocaleTimeString()}</span>}
                                     </div>
-                                    <p className="node-desc">{isResolved ? (lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.") : (lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.")}</p>
+                                    <p className="node-desc">{resolutionDesc}</p>
                                 </div>
                             </div>
                         </div>

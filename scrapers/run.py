@@ -11,19 +11,22 @@ import os
 # from scrapers.telia.parser_enhanced import parse_telia_outages
 # from scrapers.telia.mapper_enhanced import map_telia_outages
 
-from scrapers.lycamobile.fetch import scrape_lyca_outages
-from scrapers.lycamobile.parser import parse_lyca_outages
-from scrapers.lycamobile.mapper import map_lyca_outages
+from scrapers.telenor.fetch import scrape_telenor_outages
+from scrapers.telenor.parser import parse_telenor_outages
+from scrapers.telenor.mapper import map_telenor_outages
 
 from scrapers.tre.fetch import scrape_tre_outages
 from scrapers.tre.parser import parse_tre_outages
 from scrapers.tre.mapper import map_tre_outages
 
+from scrapers.telia import scrape_telia_outages, parse_telia_outages, scrape_portal_granular
+
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import save_outage
+from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES
-from scrapers.common.engine import extract_region_from_text
+from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,134 +39,114 @@ def run_scrapers():
     db = SessionLocal()
     
     try:
-            # 1. Telia (with automatic fallback)
+        # 1. Telia (Enhanced API-based with regional awareness)
         try:
-            logger.info("Running Telia (Selenium V3 with Playwright fallback)...")
-            from scrapers.telia_scraper import scrape_telia_with_fallback
-            from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
-            from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
+            logger.info("Running Telia (Enhanced API Scraper)...")
             
-            telia_result = scrape_telia_with_fallback()
+            # Fetch all outages (Now includes _region_name in raw_data)
+            raw_outages = scrape_telia_outages()
+            parsed_outages = parse_telia_outages(raw_outages)
             
-            if telia_result['success']:
-                logger.info(f"✓ Telia scraper succeeded using {telia_result['method']}")
-                logger.info(f"  Fallback used: {telia_result['fallback_used']}")
-                logger.info(f"  Found {len(telia_result['outages'])} outages")
-                
-                # Save each outage to database
-                for outage in telia_result['outages']:
-                    # Extract info from whatever we have
-                    location_text = outage.get('location', '')
-                    context_text = f"{outage.get('incident_id', '')} {location_text} {outage.get('title', '')} {outage.get('description', '')}"
+            if parsed_outages:
+                logger.info(f"✓ Telia API scraper found {len(parsed_outages)} outages")
+                save_count = 0
+                for outage in parsed_outages:
+                    inc_id = outage.get('id', 'N/A')
+                    desc = outage.get('description', {})
+                    location_text = outage.get('location', 'Sweden')
                     
-                    save_title = outage.get('title')
-                    save_desc = outage.get('description')
+                    context_text = f"{inc_id} {location_text} {desc.get('sv', '')}"
                     
-                    # Create NormalizedOutage object
                     normalized = NormalizedOutage(
                         operator=OperatorEnum.TELIA,
-                        incident_id=outage['incident_id'],
-                        title={
-                            "sv": save_title or f"Incident {outage['incident_id']}",
-                            "en": save_title or f"Incident {outage['incident_id']}"
-                        },
-                        description={
-                            "sv": save_desc or f"Incident ID: {outage['incident_id']}",
-                            "en": save_desc or f"Incident ID: {outage['incident_id']}"
-                        },
-                        location=location_text or 'Unknown',
+                        incident_id=inc_id,
+                        title={"sv": inc_id, "en": inc_id},
+                        description=desc,
+                        location=location_text,
                         status=classify_status(context_text, OutageStatus.ACTIVE),
                         severity=SeverityLevel.MEDIUM,
-                        affected_services=classify_services(context_text),
+                        affected_services=outage.get('affected_services', classify_services(context_text)),
                         source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
                         started_at=parse_swedish_date(outage.get('start_time')),
-                        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
+                        estimated_fix_time=parse_swedish_date(outage.get('estimated_fix_time'))
                     )
                     
-                    # Geocoding fallback: use county coordinates if specific coords not available
                     county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
                     if county_name:
-                        coords = get_county_coordinates(county_name)
+                        normalized.location = county_name
+                        coords = get_county_coordinates(county_name, jitter=True)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
-                            logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
-                    raw_data = {
-                        'source': telia_result['method'],
-                        'fallback_used': telia_result['fallback_used'],
-                        'raw_outage': outage
-                    }
-                    
-                    save_outage(db, normalized, raw_data)
+                    save_outage(db, normalized, {"source": "telia_api_enhanced", "raw": outage})
+                    save_count += 1
                 
                 db.commit()
-                logger.info(f"Telia: saved {len(telia_result['outages'])} outages to database")
+                logger.info(f"Telia API: saved {save_count} outages")
             else:
-                logger.error(f"✗ Telia scraper failed completely")
-                logger.error(f"  Errors: {telia_result.get('errors', [])}")
-                
+                logger.warning("! Telia API scraper found no outages - falling back to Playwright Portal Scraper")
+                scrape_portal_granular()
+                logger.info("Telia Portal Scraper fallback completed")
         except Exception as e:
-            logger.error(f"Telia failed with exception: {e}", exc_info=True)
+            logger.error(f"Telia enhanced scraper failed: {e}", exc_info=True)
             db.rollback()
 
-        # 2. Lycamobile (Selenium)
+        # 2. Telenor (Selenium)
         try:
-            logger.info("Running Lycamobile (Selenium)...")
-            from scrapers.lyca_selenium_scraper import scrape_lyca_with_selenium
-            from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
-            from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
+            logger.info("Running Telenor (Selenium)...")
+            from scrapers.telenor_selenium_scraper import scrape_telenor_with_selenium
             
-            lyca_result = scrape_lyca_with_selenium()
+            telenor_result = scrape_telenor_with_selenium()
             
-            if lyca_result['success']:
-                logger.info(f"✓ Lycamobile scraper succeeded")
-                logger.info(f"  Found {len(lyca_result['outages'])} outages")
+            if telenor_result['success']:
+                logger.info(f"✓ Telenor scraper succeeded")
+                logger.info(f"  Found {len(telenor_result['outages'])} outages")
                 
                 # Save each outage to database
-                for outage in lyca_result['outages']:
+                for outage in telenor_result['outages']:
                     location_text = outage.get('location', '')
                     desc_text = outage.get('description', '')
                     title_text = outage.get('title', f"Incident {outage['incident_id']}")
                     context_text = f"{location_text} {desc_text} {title_text}"
                     
+                    from scrapers.common.translation import create_bilingual_text
+                    
                     # Create NormalizedOutage object
                     normalized = NormalizedOutage(
-                        operator=OperatorEnum.LYCAMOBILE,
+                        operator=OperatorEnum.TELENOR,
                         incident_id=outage['incident_id'],
-                        title={
-                            "sv": title_text,
-                            "en": title_text
-                        },
-                        description={
-                            "sv": desc_text or f"Incident ID: {outage['incident_id']}",
-                            "en": desc_text or f"Incident ID: {outage['incident_id']}"
-                        },
+                        title={"sv": outage['incident_id'], "en": outage['incident_id']},
+                        description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
                         location=location_text or 'Unknown',
                         status=classify_status(context_text, OutageStatus.ACTIVE),
                         severity=SeverityLevel.MEDIUM,
-                        affected_services=classify_services(context_text),
+                        affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
                         source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
                         started_at=parse_swedish_date(outage.get('start_time')),
                         estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
                     )
                     
                     # Geocoding fallback: use county coordinates if specific coords not available
-                    county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
+                    # Try location_text first, then context_text if location_text is empty or doesn't match
+                    search_text = location_text if location_text else context_text
+                    county_name = extract_region_from_text(search_text, SWEDISH_COUNTIES)
+                    
                     if county_name:
-                        coords = get_county_coordinates(county_name)
+                        normalized.location = county_name  # Ensure DB holds exact standardization
+                        coords = get_county_coordinates(county_name, jitter=True)
                         if coords:
                             normalized.latitude, normalized.longitude = coords
-                            logger.debug(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
+                            logger.info(f"  Geocoded {outage['incident_id']} to {county_name}: {coords}")
                     
-                    save_outage(db, normalized, {"source": "lyca_selenium", "raw": outage})
+                    save_outage(db, normalized, {"source": "telenor_selenium", "raw": outage})
                 
                 db.commit()
-                logger.info(f"Lycamobile: saved {len(lyca_result['outages'])} outages to database")
+                logger.info(f"Telenor: saved {len(telenor_result['outages'])} outages to database")
             else:
-                logger.error(f"✗ Lycamobile scraper failed")
+                logger.error("✗ Telenor scraper failed")
                 
         except Exception as e:
-            logger.error(f"Lycamobile failed with exception: {e}", exc_info=True)
+            logger.error(f"Telenor failed with exception: {e}", exc_info=True)
             db.rollback()
 
         # 3. Tre
@@ -181,6 +164,47 @@ def run_scrapers():
         except Exception as e:
             logger.error(f"Tre failed: {e}")
             db.rollback()
+
+        # 4. Tele2 (Spatial Probing) - DISABLED PER USER REQUEST
+        # try:
+        #     logger.info("Running Tele2 (Spatial Probing)...")
+        #     from scrapers.tele2.fetch import scrape_tele2
+        #     from scrapers.common.translation import create_bilingual_text
+        #     
+        #     tele2_outages = scrape_tele2()
+        #     
+        #     if tele2_outages:
+        #         logger.info(f"✓ Tele2 scraper found {len(tele2_outages)} potential outages")
+        #         for outage in tele2_outages:
+        #             normalized = NormalizedOutage(
+        #                 operator=OperatorEnum.TELE2,
+        #                 incident_id=outage['incident_id'],
+        #                 title=create_bilingual_text(outage['title']),
+        #                 description=create_bilingual_text(outage['description']),
+        #                 location=outage['location'],
+        #                 status=classify_status(outage['description'], OutageStatus.ACTIVE),
+        #                 severity=SeverityLevel.MEDIUM,
+        #                 affected_services=classify_services(outage['description']),
+        #                 source_url="https://www.tele2.se/driftstorning-mobilnatet",
+        #                 started_at=parse_swedish_date(outage.get('start_time')),
+        #                 estimated_fix_time=parse_swedish_date(outage.get('end_time'))
+        #             )
+        #             
+        #             # Store coordinates directly if available
+        #             if outage.get('latitude'):
+        #                 normalized.latitude = outage['latitude']
+        #                 normalized.longitude = outage['longitude']
+        #             
+        #             save_outage(db, normalized, {"source": "tele2_spatial", "raw": outage})
+        #         
+        #         db.commit()
+        #         logger.info(f"Tele2: saved {len(tele2_outages)} outages")
+        #     else:
+        #         logger.info("Tele2: No outages found in current probe")
+        #         
+        # except Exception as e:
+        #     logger.error(f"Tele2 failed: {e}")
+        #     db.rollback()
             
     finally:
         db.close()

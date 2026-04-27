@@ -7,13 +7,15 @@ import logging
 from bs4 import BeautifulSoup
 import json
 from datetime import datetime
-from common.models import OperatorEnum, RawOutage
+from scrapers.common.models import OperatorEnum, RawOutage
 
 logger = logging.getLogger(__name__)
 
 TRE_URLS = [
     "https://www.tre.se/varfor-tre/tackning/driftstorningar",
-    "https://www.tre.se/varfor-tre/tackning/tackningskarta"
+    # NOTE: tackningskarta contains the same data as driftstorningar - scraping only from 
+    # one source prevents duplicate incidents in the database.
+    # "https://www.tre.se/varfor-tre/tackning/tackningskarta"
 ]
 
 class TreFetcher:

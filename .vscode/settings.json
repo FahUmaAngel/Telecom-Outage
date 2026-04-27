@@ -1,1 +1,9 @@
-{}
+{
+    "snyk.advanced.autoSelectOrganization": true,
+    "snyk.advanced.organization": "02384caa-ebdd-4de1-9f9e-f0ba54adda65",
+    "claudeCode.useTerminal": false,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "fahumaangel",
+        "projectKey": "Telecom-Outage-Backend"
+    }
+}

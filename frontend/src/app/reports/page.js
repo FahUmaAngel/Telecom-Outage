@@ -84,9 +84,23 @@ function ReportsContent() {
             if (!matchesService) return false;
         }
 
+        // Display Status — auto-resolve when end date has passed
+        const getEffectiveStatus = (outageObj) => {
+            if (outageObj?.status?.toLowerCase() === 'resolved') return 'resolved';
+            const endDateStr = outageObj?.end_time || outageObj?.estimated_fix_time;
+            if (endDateStr) {
+                const endDate = new Date(endDateStr);
+                if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) {
+                    return 'resolved';
+                }
+            }
+            return outageObj?.status || 'active';
+        };
+        const displayStatus = getEffectiveStatus(o);
+
         // Status Filter
         if (statusFilter !== "all") {
-            if (statusFilter.toLowerCase() !== o.status.toLowerCase()) return false;
+            if (statusFilter.toLowerCase() !== displayStatus.toLowerCase()) return false;
         }
 
         return true;
@@ -99,7 +113,7 @@ function ReportsContent() {
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
         const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return "-";
+        if (Number.isNaN(d.getTime())) return "-";
 
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -150,18 +164,11 @@ function ReportsContent() {
                             className="service-select"
                         >
                             <option value="all">{lang === "sv" ? "Alla Tjänster" : "All Services"}</option>
-                            <option value="mobile">{lang === "sv" ? "Mobil" : "Mobile"}</option>
                             <option value="5g+">5G+</option>
                             <option value="5g">5G</option>
                             <option value="4g">4G</option>
                             <option value="3g">3G</option>
                             <option value="2g">2G</option>
-                            <option value="data">{lang === "sv" ? "Mobildata" : "Mobile Data"}</option>
-                            <option value="voice">{lang === "sv" ? "Röstsamtal" : "Voice Calls"}</option>
-                            <option value="sms">SMS</option>
-                            <option value="mms">MMS</option>
-                            <option value="fiber">{lang === "sv" ? "Fiber" : "Fiber"}</option>
-                            <option value="broadband">{lang === "sv" ? "Bredband" : "Broadband"}</option>
                         </select>
                     </div>
                     <div className="search-bar">
@@ -184,54 +191,70 @@ function ReportsContent() {
                             <th>{lang === "sv" ? "Händelse" : "Incident"}</th>
                             <th>{lang === "sv" ? "Tjänster" : "Services"}</th>
                             <th>{lang === "sv" ? "Plats" : "Location"}</th>
-                            <th>{lang === "sv" ? "Datum" : "Date"}</th>
+                            <th>{lang === "sv" ? "Startdatum" : "Start date"}</th>
+                            <th>{lang === "sv" ? "Slutdatum" : "End date"}</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOutages.map((outage) => (
-                            <tr key={outage.id}>
-                                <td>
-                                    <span className={`status-badge-mini ${outage.status.toLowerCase()}`}>
-                                        {outage.status}
-                                    </span>
-                                </td>
-                                <td className="operator-cell">{outage.operator_name}</td>
-                                <td className="title-cell">{t(outage.title)}</td>
-                                <td className="services-cell">
-                                    <div className="service-tags-mini">
-                                        {(() => {
-                                            const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
-                                            const sorted = [...(outage.affected_services || [])].sort((a, b) => {
-                                                const idxA = priority.indexOf(a.toLowerCase());
-                                                const idxB = priority.indexOf(b.toLowerCase());
-                                                return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-                                            });
-                                            const displayLimit = 5;
-                                            return (
-                                                <>
-                                                    {sorted.slice(0, displayLimit).map((s, i) => (
-                                                        <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
-                                                    ))}
-                                                    {sorted.length > displayLimit && (
-                                                        <span className="mini-tag more">+{sorted.length - displayLimit}</span>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                </td>
-                                <td className="location-cell">{outage.location || "Sweden"}</td>
-                                <td className="date-cell">
-                                    {formatDate(outage.start_time)}
-                                </td>
-                                <td className="actions-cell">
-                                    <Link href={`/outages/${outage.id}`} className="view-link">
-                                        {lang === "sv" ? "Visa" : "View"}
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredOutages.map((outage) => {
+                            const endDateStr = outage.end_time || outage.estimated_fix_time;
+                            const isExpired = endDateStr && new Date(endDateStr) < new Date();
+                            const isResolved = (outage?.status?.toLowerCase() === 'resolved') || isExpired;
+                            const displayStatus = isResolved ? 'resolved' : (outage?.status || 'active');
+                            const fallbackLoc = lang === "sv" ? "Sverige" : "Sweden";
+                            const locationDisplay = outage.region_name ? t(outage.region_name) : fallbackLoc;
+                            return (
+                                <tr key={outage.id}>
+                                    <td>
+                                        <span className={`status-badge-mini ${displayStatus.toLowerCase()}`}>
+                                            {displayStatus}
+                                        </span>
+                                    </td>
+                                    <td className="operator-cell">{outage.operator_name}</td>
+                                    <td className="title-cell">
+                                        {outage.incident_id || t(outage.title) || "-"}
+                                    </td>
+                                    <td className="services-cell">
+                                        <div className="service-tags-mini">
+                                            {(() => {
+                                                const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
+                                                const sorted = [...(outage.affected_services || [])].sort((a, b) => {
+                                                    const idxA = priority.indexOf(a.toLowerCase());
+                                                    const idxB = priority.indexOf(b.toLowerCase());
+                                                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                                                });
+                                                const displayLimit = 5;
+                                                return (
+                                                    <>
+                                                        {sorted.slice(0, displayLimit).map((s, i) => (
+                                                            <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
+                                                        ))}
+                                                        {sorted.length > displayLimit && (
+                                                            <span className="mini-tag more">+{sorted.length - displayLimit}</span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </td>
+                                     <td className="location-cell">
+                                        {locationDisplay}
+                                    </td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.start_time)}
+                                    </td>
+                                    <td className="date-cell">
+                                        {formatDate(outage.end_time || outage.estimated_fix_time)}
+                                    </td>
+                                    <td className="actions-cell">
+                                        <Link href={`/outages/${outage.id}`} className="view-link">
+                                            {lang === "sv" ? "Visa" : "View"}
+                                        </Link>
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
                 {filteredOutages.length === 0 && (

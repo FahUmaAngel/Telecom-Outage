@@ -31,7 +31,6 @@ const createCustomIcon = (color) => new L.DivIcon({
 const operatorColors = {
     telia: "#0070f3",
     tre: "#ff4d4f",
-    lycamobile: "#52c41a",
     telenor: "#007bff",
     unknown: "#94a3b8"
 };
