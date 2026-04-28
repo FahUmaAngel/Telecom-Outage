@@ -176,6 +176,85 @@ const OutageList = ({ outages, lang, onOutageClick }) => (
         <p>{lang === "sv" ? "Inga matchande incidenter" : "No matching incidents"}</p>
       </div>
     )}
+    <style jsx>{`
+        .event-list {
+          flex: 1;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .event-item {
+          display: block;
+          border-bottom: 1px solid var(--border-color);
+          text-decoration: none;
+        }
+        .event-item:last-child {
+          border-bottom: none;
+        }
+        .event-content {
+          padding: 12px 0;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          transition: var(--transition-base);
+        }
+        .event-item:hover .event-content {
+          padding-left: 8px;
+          background: var(--surface-hover);
+        }
+        .status-indicator-line {
+          width: 3px;
+          height: 32px;
+          border-radius: 2px;
+          flex-shrink: 0;
+        }
+        .event-text {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .event-title {
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: var(--text-primary);
+        }
+        .event-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.75rem;
+          color: var(--text-muted);
+        }
+        .sep { color: var(--text-muted); opacity: 0.5; }
+        .event-badge {
+          font-size: 0.7rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .dash-tags { display: flex; gap: 4px; }
+        .dash-tag {
+           font-size: 0.65rem;
+           background: var(--surface-hover);
+           padding: 1px 5px;
+           border-radius: 4px;
+           color: var(--text-secondary);
+           border: 1px solid var(--border-color);
+           font-weight: 600;
+        }
+        .empty-events {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          gap: 12px;
+          color: var(--text-muted);
+          opacity: 0.7;
+        }
+    `}</style>
   </div>
 );
 
@@ -385,7 +464,7 @@ export default function Home() {
         <OperatorComparison mttrData={mttrData} reliabilityData={reliabilityData} />
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .dashboard-container {
           padding: 32px;
           max-width: 1400px;
@@ -479,82 +558,6 @@ export default function Home() {
           border-radius: var(--radius-md);
           overflow: hidden;
           border: 1px solid var(--border-color);
-        }
-
-        .event-list {
-          flex: 1;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .event-item {
-          display: block;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .event-item:last-child {
-          border-bottom: none;
-        }
-
-        .event-content {
-          padding: 12px 0;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          transition: var(--transition-base);
-        }
-
-        .event-item:hover .event-content {
-          padding-left: 8px;
-          background: var(--surface-hover);
-        }
-
-        .status-indicator-line {
-          width: 3px;
-          height: 32px;
-          border-radius: 2px;
-          flex-shrink: 0;
-        }
-
-        .event-text {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .event-title {
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: var(--text-primary);
-        }
-
-        .event-meta {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.75rem;
-          color: var(--text-muted);
-        }
-
-        .event-badge {
-          font-size: 0.7rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .dash-tags { display: flex; gap: 4px; }
-        .dash-tag {
-           font-size: 0.65rem;
-           background: var(--surface-hover);
-           padding: 1px 5px;
-           border-radius: 4px;
-           color: var(--text-secondary);
-           border: 1px solid var(--border-color);
-           font-weight: 600;
         }
 
         .analysis-card {
