@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     SECRET_KEY: Optional[str] = None
     ALLOWED_ORIGINS: Optional[str] = None
+    APP_ENV: str = "development"
     
     class Config:
         env_file = ".env"

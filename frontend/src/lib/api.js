@@ -1,5 +1,13 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const getAuthToken = () => {
+    if (typeof window === "undefined") {
+        return null;
+    }
+
+    return window.localStorage.getItem("auth_token");
+};
+
 const fetcher = async (endpoint, options = {}) => {
     let url = `${BASE_URL}${endpoint}`;
 
@@ -10,23 +18,59 @@ const fetcher = async (endpoint, options = {}) => {
         }
     }
 
+    const token = getAuthToken();
+    const hasBody = options.body !== undefined;
+
     const response = await fetch(url, {
         ...options,
         headers: {
-            "Content-Type": "application/json",
+            ...(hasBody ? { "Content-Type": "application/json" } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...options.headers,
         },
     });
 
     if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Something went wrong");
+        throw new Error(error.detail || error.message || "Something went wrong");
     }
 
-    return response.json();
+    if (response.status === 204) {
+        return null;
+    }
+
+    return response.json().catch(() => null);
 };
 
 export const api = {
+    auth: {
+        login: async (username, password) => {
+            const body = new URLSearchParams({ username, password });
+            const response = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: body.toString(),
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(result.detail || "Unable to sign in");
+            }
+
+            if (typeof window !== "undefined" && result.access_token) {
+                window.localStorage.setItem("auth_token", result.access_token);
+            }
+
+            return result;
+        },
+        logout: () => {
+            if (typeof window !== "undefined") {
+                window.localStorage.removeItem("auth_token");
+            }
+        },
+    },
     operators: {
         list: () => fetcher("/api/v1/operators"),
     },

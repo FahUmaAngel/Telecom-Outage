@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useMemo } from "react";
@@ -6,7 +6,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import Link from "next/link";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { Layers, Map as MapIcon, Flame } from "lucide-react";
+import { Map as MapIcon, Flame } from "lucide-react";
 
 // Marker Cluster CSS
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -125,12 +125,7 @@ function ResizeFix() {
 export default function Map({ outages = [], hotspots = [], simple = false }) {
     const { theme } = useTheme();
     const { lang, t } = useLanguage();
-    const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const heatPoints = useMemo(() => {
         const points = [];
@@ -146,8 +141,6 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
         });
         return points;
     }, [outages, hotspots]);
-
-    if (!mounted) return null;
 
     const tileUrl = theme === "dark"
         ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

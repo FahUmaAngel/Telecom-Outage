@@ -1,16 +1,18 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const LanguageContext = createContext();
 
-export const LanguageProvider = ({ children }) => {
-    const [lang, setLang] = useState("sv");
+const getInitialLanguage = () => {
+    if (typeof window === "undefined") {
+        return "sv";
+    }
+    return localStorage.getItem("lang") || "sv";
+};
 
-    useEffect(() => {
-        const savedLang = localStorage.getItem("lang") || "sv";
-        setLang(savedLang);
-    }, []);
+export const LanguageProvider = ({ children }) => {
+    const [lang, setLang] = useState(getInitialLanguage);
 
     const toggleLanguage = () => {
         const newLang = lang === "sv" ? "en" : "sv";

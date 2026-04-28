@@ -1,14 +1,27 @@
-from geopy.geocoders import Nominatim
-from openlocationcode import openlocationcode as olc
 import re
 
+def _get_geolocator():
+    from geopy.geocoders import Nominatim
+    return Nominatim(user_agent="telecom_outage_admin")
+
+def _get_open_location_code():
+    from openlocationcode import openlocationcode as olc
+    return olc
 
 def resolve_place(query: str):
     """
     Resolves a place string (Plus Code or Address) to coordinates and a display name (Region).
     """
+    try:
+        _get_geolocator()
+    except ModuleNotFoundError:
+        return None
+
     # Try Plus Code resolution first
-    plus_code_result = _resolve_plus_code(query)
+    try:
+        plus_code_result = _resolve_plus_code(query)
+    except ModuleNotFoundError:
+        plus_code_result = None
     if plus_code_result:
         return plus_code_result
 
@@ -21,7 +34,8 @@ def _resolve_plus_code(query: str):
     Attempt to resolve a Plus Code to coordinates and region information.
     Returns a dict with latitude, longitude, display_name, and county if successful, None otherwise.
     """
-    geolocator = Nominatim(user_agent="telecom_outage_admin")
+    geolocator = _get_geolocator()
+    olc = _get_open_location_code()
     
     # 1. Check if it's a Plus Code (e.g., M2GM+R6 Göteborg)
     plus_code_match = re.search(r'([23456789CFGHJMPQRVWX]{2,8}\+[23456789CFGHJMPQRVWX]{2,})', query)
@@ -81,7 +95,7 @@ def _resolve_geocoding(query: str):
     Attempt to resolve a standard address query to coordinates and region information.
     Returns a dict with latitude, longitude, display_name, and county if successful, None otherwise.
     """
-    geolocator = Nominatim(user_agent="telecom_outage_admin")
+    geolocator = _get_geolocator()
     
     try:
         location = geolocator.geocode(query, addressdetails=True, language="sv")

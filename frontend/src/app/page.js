@@ -35,6 +35,12 @@ const OperatorComparison = dynamic(() => import("../components/Analytics/Operato
   ssr: false,
 });
 
+const getOutageText = (value, lang) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value[lang] || value.sv || value.en || "";
+};
+
 export default function Home() {
   const { lang, t } = useLanguage();
   const { addToast } = useToast();
@@ -146,26 +152,29 @@ export default function Home() {
 
   const filteredOutages = useMemo(() => {
     return outages.filter(o => {
+      const titleText = getOutageText(o.title, lang);
+      const severity = (o.severity || "").toLowerCase();
+      const status = (o.status || "").toLowerCase();
       const matchesSearch = !filters.search ||
-        o.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        titleText.toLowerCase().includes(filters.search.toLowerCase()) ||
         (o.location && o.location.toLowerCase().includes(filters.search.toLowerCase()));
 
       const matchesOperator = filters.operators.length === 0 ||
         filters.operators.includes(o.operator_name);
 
       const matchesSeverity = filters.severities.length === 0 ||
-        filters.severities.includes(o.severity);
+        filters.severities.map(item => item.toLowerCase()).includes(severity);
 
       let matchesStatus = true;
       if (filters.status === "active") {
-        matchesStatus = o.status.toLowerCase() !== "resolved";
+        matchesStatus = status !== "resolved";
       } else if (filters.status === "resolved") {
-        matchesStatus = o.status.toLowerCase() === "resolved";
+        matchesStatus = status === "resolved";
       }
 
       return matchesSearch && matchesOperator && matchesSeverity && matchesStatus;
     });
-  }, [outages, filters]);
+  }, [outages, filters, lang]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);

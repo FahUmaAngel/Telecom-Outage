@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for API responses.
 """
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -75,11 +75,11 @@ class OutageResponse(BaseModel):
     model_config = {"extra": "ignore"}
 
 class ReportCreate(BaseModel):
-    operator_name: Optional[str] = None
-    title: str
-    description: Optional[str] = None
-    latitude: float
-    longitude: float
+    operator_name: Optional[str] = Field(default=None, max_length=50)
+    title: str = Field(min_length=3, max_length=160)
+    description: Optional[str] = Field(default=None, max_length=2000)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
 
 class ReportResponse(BaseModel):
     id: int

@@ -1,7 +1,25 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../../context/LanguageContext';
+
+function CustomTooltip({ active, payload, label }) {
+    if (!active || !payload || payload.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="custom-tooltip glass">
+            <p className="label">{label}</p>
+            {payload.map((entry, index) => (
+                <p key={index} style={{ color: entry.color }}>
+                    {entry.name}: {entry.value}
+                    {entry.dataKey === 'reliability' ? '%' : entry.dataKey === 'mttr' ? 'h' : ''}
+                </p>
+            ))}
+        </div>
+    );
+}
 
 export default function OperatorComparison({ mttrData, reliabilityData }) {
     const { lang } = useLanguage();
@@ -40,39 +58,6 @@ export default function OperatorComparison({ mttrData, reliabilityData }) {
             reliability: parseFloat(reliabilityPercent)
         };
     });
-
-    const CustomTooltip = ({ active, payload, label }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="custom-tooltip glass">
-                    <p className="label">{label}</p>
-                    {payload.map((entry, index) => (
-                        <p key={index} style={{ color: entry.color }}>
-                            {entry.name}: {entry.value}
-                            {entry.dataKey === 'reliability' ? '%' : entry.dataKey === 'mttr' ? 'h' : ''}
-                        </p>
-                    ))}
-                    <style jsx>{`
-                        .custom-tooltip {
-                            padding: 12px;
-                            border-radius: 8px;
-                            border: 1px solid var(--glass-border);
-                        }
-                        .label {
-                            font-weight: 700;
-                            margin-bottom: 8px;
-                            color: var(--text-primary);
-                        }
-                        p {
-                            margin: 4px 0;
-                            font-size: 0.9rem;
-                        }
-                    `}</style>
-                </div>
-            );
-        }
-        return null;
-    };
 
     return (
         <div className="operator-comparison">
@@ -212,6 +197,20 @@ export default function OperatorComparison({ mttrData, reliabilityData }) {
                     font-size: 0.85rem;
                     color: var(--text-muted);
                     font-style: italic;
+                }
+                .custom-tooltip {
+                    padding: 12px;
+                    border-radius: 8px;
+                    border: 1px solid var(--glass-border);
+                }
+                .custom-tooltip .label {
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                    color: var(--text-primary);
+                }
+                .custom-tooltip p {
+                    margin: 4px 0;
+                    font-size: 0.9rem;
                 }
 
                 @media (max-width: 768px) {
