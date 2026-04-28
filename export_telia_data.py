@@ -9,7 +9,7 @@ def export_telia_data():
         # Try finding it in backend/ if not in root
         db_path = os.path.join('backend', 'telecom_outage.db')
         if not os.path.exists(db_path):
-            print(f"Error: telecom_outage.db not found.")
+            print("Error: telecom_outage.db not found.")
             return
 
     conn = sqlite3.connect(db_path)

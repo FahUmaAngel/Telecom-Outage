@@ -21,7 +21,7 @@ export default function PrestandaPage() {
     const fetchMTTR = useCallback(async () => {
         setLoading(true);
         try {
-            const params = { days: parseInt(period) };
+            const params = { days: Number.parseInt(period) };
             if (town) params.location = town;
             if (service) params.service = service;
 
@@ -61,6 +61,35 @@ export default function PrestandaPage() {
         return 'var(--accent-primary)';
     };
 
+    let gridContent;
+    if (mttrData.length > 0) {
+        gridContent = mttrData.map((data) => (
+            <div key={data.operator_name} className="premium-card mttr-card" style={{ '--op-color': getOperatorColor(data.operator_name) }}>
+                <div className="card-top-accent"></div>
+                <div className="card-inner">
+                    <div className="card-title-row">
+                        <h3 className="operator-name">{data.operator_name}</h3>
+                    </div>
+                    <div className="mttr-value-display">
+                        <span className="mttr-value">
+                            {data.average_mttr_hours > 0 ? data.average_mttr_hours : "---"}
+                        </span>
+                        <span className="mttr-unit">TIMMAR</span>
+                    </div>
+                    <div className="card-footer">
+                        <span className="analysis-count">
+                            {data.outage_count} {lang === "sv" ? "avbrott analyserade" : "outages analyzed"}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        ));
+    } else if (loading) {
+        gridContent = <div className="loading-placeholder">Laddar data...</div>;
+    } else {
+        gridContent = <div className="no-data">Ingen data tillgänglig för valda filter</div>;
+    }
+
     return (
         <div className="prestanda-container animate-fade-in">
             {/* Header section with refined dropdowns matching the mockup */}
@@ -89,7 +118,7 @@ export default function PrestandaPage() {
                     </div>
 
                     <div className="premium-filter">
-                        <label htmlFor="town-select">{lang === "sv" ? "REGION" : "REGION"}</label>
+                        <label htmlFor="town-select">REGION</label>
                         <div className="select-wrapper">
                             <select id="town-select" value={town} onChange={(e) => setTown(e.target.value)}>
                                 <option value="">{lang === "sv" ? "Hela Sverige" : "Entire Sweden"}</option>
@@ -130,37 +159,7 @@ export default function PrestandaPage() {
 
             {/* Operator Cards Grid */}
             <div className="operator-grid">
-                {mttrData.length > 0 ? mttrData.map((data) => {
-                    return (
-                        <div key={data.operator_name} className="premium-card mttr-card" style={{ '--op-color': getOperatorColor(data.operator_name) }}>
-                            <div className="card-top-accent"></div>
-                            <div className="card-inner">
-                                <div className="card-title-row">
-                                    <h3 className="operator-name">{data.operator_name}</h3>
-                                </div>
-
-                                <div className="mttr-value-display">
-                                    <span className="mttr-value">
-                                        {data.average_mttr_hours > 0 ? data.average_mttr_hours : "---"}
-                                    </span>
-                                    <span className="mttr-unit">TIMMAR</span>
-                                </div>
-
-                                <div className="card-footer">
-                                    <span className="analysis-count">
-                                        {data.outage_count} {lang === "sv" ? "avbrott analyserade" : "outages analyzed"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }) : (
-                    loading ? (
-                        <div className="loading-placeholder">Laddar data...</div>
-                    ) : (
-                        <div className="no-data">Ingen data tillgänglig för valda filter</div>
-                    )
-                )}
+                {gridContent}
             </div>
 
             <style jsx>{`

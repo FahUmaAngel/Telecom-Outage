@@ -19,7 +19,7 @@ def refine_excel(file_path):
     city_averages['avg_city_duration_hours'] = city_averages['avg_city_duration_hours'].round(2)
 
     # 3. Merge averages back to main dataframe
-    df = df.merge(city_averages, on='location', how='left')
+    df = df.merge(city_averages, on='location', how='left', validate='many_to_one')
 
     # 4. Fill NaN in avg_city_duration_hours (e.g. if all city records are "Missing Data")
     df['avg_city_duration_hours'] = df['avg_city_duration_hours'].fillna("Missing Data")

@@ -133,42 +133,36 @@ def _filter_by_service(outages: List[Outage], service: str) -> List[Outage]:
     ]
 
 
+def _build_outage_key(o: Outage) -> tuple:
+    return (
+        str(o.title) if o.title else "",
+        str(o.description) if o.description else "",
+        str(o.location) if o.location else "",
+        o.start_time.isoformat() if o.start_time else "",
+        o.end_time.isoformat() if o.end_time else "",
+    )
+
+def _merge_affected_services(existing: Outage, incoming: Outage) -> None:
+    if not incoming.affected_services:
+        return
+    if not existing.affected_services:
+        existing.affected_services = incoming.affected_services
+    else:
+        existing.affected_services = list(
+            set(existing.affected_services) | set(incoming.affected_services)
+        )
+
 def _get_unique_outages(outages: List[Outage]) -> List[Outage]:
     """Deduplicate outages based on title, description, location, and time."""
-    unique_outages_map = {}
+    unique_outages_map: dict = {}
     for o in outages:
-        # Must have start_time AND resolution timestamp
         if not o.start_time or not o.end_time:
             continue
-            
-        # Use only end_time as per refined requirements
-        resolved_dt = o.end_time
-        resolved_str = resolved_dt.isoformat() if resolved_dt else ""
-        
-        # FIX: Extract actual values for key and ensure they are all hashable (strings)
-        title_str = str(o.title) if o.title else ""
-        desc_str = str(o.description) if o.description else ""
-        loc_str = str(o.location) if o.location else ""
-        start_str = o.start_time.isoformat() if o.start_time else ""
-        
-        key = (title_str, desc_str, loc_str, start_str, resolved_str)
-        
+        key = _build_outage_key(o)
         if key not in unique_outages_map:
-            # First time seeing this incident, create a copy of the outage object 
-            # (or use the existing one and we'll merge into it)
             unique_outages_map[key] = o
         else:
-            # Duplicate found! Merge affected_services
-            existing = unique_outages_map[key]
-            if o.affected_services:
-                if not existing.affected_services:
-                    existing.affected_services = o.affected_services
-                else:
-                    # Merge unique services
-                    current_services = set(existing.affected_services)
-                    new_services = set(o.affected_services)
-                    existing.affected_services = list(current_services.union(new_services))
-                    
+            _merge_affected_services(unique_outages_map[key], o)
     return list(unique_outages_map.values())
 
 def _calculate_avg_mttr(outages: List[Outage]) -> float:

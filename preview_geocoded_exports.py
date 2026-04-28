@@ -41,23 +41,26 @@ def clean_to_city(loc):
         return str(loc).split(',')[0].strip()
     return str(loc).strip()
 
+def _geocode_row(df, idx, row, updated_count):
+    """Attempt geocoding for a single row; fall back to clean_to_city."""
+    if pd.notna(row['latitude']) and pd.notna(row['longitude']):
+        city = resolve_nominatim(row['latitude'], row['longitude'])
+        if city:
+            df.at[idx, 'location'] = city
+            updated_count += 1
+            if updated_count % 5 == 0:
+                print(f"  Geocoded {updated_count} records (current: {city})...")
+            return updated_count
+    df.at[idx, 'location'] = clean_to_city(row['location'])
+    return updated_count
+
 def _perform_geocoding(df):
     """Geocode all eligible records in the dataframe."""
     print("Geocoding all eligible records (respecting rate limits)...")
     updated_count = 0
     for idx, row in df.iterrows():
         if needs_geocode(row['location']):
-            if pd.notna(row['latitude']) and pd.notna(row['longitude']):
-                city = resolve_nominatim(row['latitude'], row['longitude'])
-                if city:
-                    df.at[idx, 'location'] = city
-                    updated_count += 1
-                    if updated_count % 5 == 0:
-                        print(f"  Geocoded {updated_count} records (current: {city})...")
-                else:
-                    df.at[idx, 'location'] = clean_to_city(row['location'])
-            else:
-                df.at[idx, 'location'] = clean_to_city(row['location'])
+            updated_count = _geocode_row(df, idx, row, updated_count)
         else:
             df.at[idx, 'location'] = clean_to_city(row['location'])
     return updated_count
