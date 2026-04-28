@@ -327,9 +327,10 @@ function OutageManagement({ outageMgr, lang }) {
         return outages.map((o) => {
             const rowClass = o.quality_issues?.length > 0 ? "row-low-quality" : "";
             const coordClass = o.latitude ? "" : "text-error";
+            const fallbackText = lang === "sv" ? "Saknas" : "Missing";
             const coordText = o.latitude 
                 ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` 
-                : (lang === "sv" ? "Saknas" : "Missing");
+                : fallbackText;
 
             return (
                 <tr key={o.id} className={rowClass}>
