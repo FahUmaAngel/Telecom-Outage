@@ -15,7 +15,6 @@ export default function MapPage() {
     const { lang } = useLanguage();
     const [outages, setOutages] = useState([]);
     const [hotspots, setHotspots] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,8 +27,6 @@ export default function MapPage() {
                 setHotspots(hotspotsData);
             } catch (err) {
                 console.error("Failed to fetch map data:", err);
-            } finally {
-                setLoading(false);
             }
         };
 
