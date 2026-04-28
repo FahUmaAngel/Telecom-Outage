@@ -1,28 +1,17 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
+import PropTypes from "prop-types";
+import Link from "next/link";
+import { Info } from "lucide-react";
 import { api } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
 import { useToast } from "../context/ToastContext";
-import Link from "next/link";
-import {
-  AlertTriangle,
-  Activity,
-  CheckCircle,
-  Clock,
-  ArrowUpRight,
-  BarChart3,
-  Layers,
-  Info,
-  ChevronRight,
-  Search,
-  Filter
-} from "lucide-react";
 import FilterBar from "../components/Common/FilterBar";
 
-// Dynamically import Map to avoid SSR errors with Leaflet
-const Map = dynamic(() => import("../components/Map/Map"), {
+// Dynamically import TacticalMap to avoid SSR errors with Leaflet
+const TacticalMap = dynamic(() => import("../components/Map/Map"), {
   ssr: false,
   loading: () => <div className="map-placeholder glass">Loading Map...</div>,
 });
@@ -43,7 +32,7 @@ const getOutageText = (value, lang) => {
 
 const StatsDashboard = ({ stats, lang }) => (
   <div className="stats-grid">
-    {stats.map((stat, i) => (
+    {stats.map((stat) => (
       <Link href={stat.link || "#"} key={stat.key} className="premium-card stat-card interactive">
         <div className="stat-content">
           <span className="stat-label">{lang === "sv" ? stat.label_sv : stat.label_en}</span>
@@ -100,6 +89,21 @@ const StatsDashboard = ({ stats, lang }) => (
   </div>
 );
 
+StatsDashboard.propTypes = {
+  stats: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label_sv: PropTypes.string.isRequired,
+      label_en: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
+      trend_sv: PropTypes.string.isRequired,
+      trend_en: PropTypes.string.isRequired,
+      link: PropTypes.string,
+    })
+  ).isRequired,
+  lang: PropTypes.string.isRequired,
+};
+
 const LoadingState = ({ lang }) => (
   <div className="loading-state glass">
     <div className="spinner"></div>
@@ -126,6 +130,61 @@ const LoadingState = ({ lang }) => (
   </div>
 );
 
+LoadingState.propTypes = {
+  lang: PropTypes.string.isRequired,
+};
+
+const OutageList = ({ outages, lang, onOutageClick }) => (
+  <div className="event-list custom-scrollbar">
+    {outages.length > 0 ? (
+      outages.slice(0, 15).map((outage) => (
+        <Link 
+          href={`/outages/${outage.id}`} 
+          key={outage.id} 
+          className="event-item"
+          onClick={onOutageClick ? () => onOutageClick(outage) : undefined}
+        >
+          <div className="event-content">
+            <div className="status-indicator-line" style={{ backgroundColor: outage.status.toLowerCase() === 'resolved' ? 'var(--status-success)' : 'var(--status-critical)' }}></div>
+            <div className="event-text">
+              <span className="event-title">{getOutageText(outage.title, lang)}</span>
+              <div className="event-meta">
+                <span>{outage.operator_name}</span>
+                <span className="sep">•</span>
+                <span>{outage.location || "Sweden"}</span>
+                {outage.affected_services?.length > 0 && (
+                  <>
+                    <span className="sep">•</span>
+                    <div className="dash-tags">
+                      {outage.affected_services.slice(0, 2).map((s, i) => (
+                        <span key={i} className="dash-tag">{s}</span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <span className="event-badge" style={{ color: outage.status.toLowerCase() === 'resolved' ? 'var(--status-success)' : 'var(--status-critical)' }}>
+              {outage.status}
+            </span>
+          </div>
+        </Link>
+      ))
+    ) : (
+      <div className="empty-events">
+        <Info size={24} />
+        <p>{lang === "sv" ? "Inga matchande incidenter" : "No matching incidents"}</p>
+      </div>
+    )}
+  </div>
+);
+
+OutageList.propTypes = {
+  outages: PropTypes.array.isRequired,
+  lang: PropTypes.string.isRequired,
+  onOutageClick: PropTypes.func,
+};
+
 export default function Home() {
   const { lang, t } = useLanguage();
   const { addToast } = useToast();
@@ -147,87 +206,96 @@ export default function Home() {
 
   const [stats, setStats] = useState([
     { label_sv: "Aktiva Avbrott", label_en: "Active Outages", value: "0", trend_sv: "Laddar...", trend_en: "Loading...", color: "var(--status-critical)", key: "active_outages", link: "/reports?status=active" },
-    { label_sv: "Genomsnittlig reparationstid", label_en: "Mean Time to Repair", value: "0h", trend_sv: "Beräknar...", trend_en: "Calculating...", color: "var(--accent-primary)", key: "mttr", link: "/analytics" },
+    { label_sv: "Genomsนิตrlig reparationstid", label_en: "Mean Time to Repair", value: "0h", trend_sv: "Beräknar...", trend_en: "Calculating...", color: "var(--accent-primary)", key: "mttr", link: "/analytics" },
     { label_sv: "Användarrapporter", label_en: "User Reports", value: "0", trend_sv: "Hämtar...", trend_en: "Fetching...", color: "var(--status-warning)", key: "reports", link: "/map" },
     { label_sv: "Nätverkstillförlitlighet", label_en: "Network Reliability", value: "100%", trend_sv: "Stabil", trend_en: "Stable", color: "var(--status-success)", key: "reliability", link: "/analytics" },
   ]);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [outagesData, reportsData, hotspotsData, mttrData, reliabilityData, historyData, operatorsData] = await Promise.all([
-          api.outages.list(),
-          api.reports.list(),
-          api.reports.hotspots(),
-          api.outages.mttr(),
-          api.outages.reliability(),
-          api.outages.history(),
-          api.operators.list()
-        ]);
+  const updateStatsFromData = useCallback((data) => {
+    const { outagesData, reportsData, hotspotsData, mttrData, reliabilityData } = data;
+    
+    const activeCount = outagesData.filter(o => o.status.toLowerCase() !== "resolved").length;
+    const validMttr = mttrData.filter(d => d.outage_count > 0);
+    const avgMttr = validMttr.length > 0
+      ? (validMttr.reduce((acc, curr) => acc + curr.average_mttr_hours, 0) / validMttr.length).toFixed(1)
+      : "0";
+    const totalDowntime = reliabilityData.reduce((acc, curr) => acc + curr.total_downtime_hours, 0);
+    const reliabilityScore = Math.max(0, 100 - (totalDowntime / 100)).toFixed(1);
 
-        setOutages(outagesData);
-        setOperators(operatorsData);
-        setHotspots(hotspotsData);
-        setTrendData(historyData);
-        setMttrData(mttrData);
-        setReliabilityData(reliabilityData);
-
-        const activeCount = outagesData.filter(o => o.status.toLowerCase() !== "resolved").length;
-        const validMttr = mttrData.filter(d => d.outage_count > 0);
-        const avgMttr = validMttr.length > 0
-          ? (validMttr.reduce((acc, curr) => acc + curr.average_mttr_hours, 0) / validMttr.length).toFixed(1)
-          : "0";
-        const totalDowntime = reliabilityData.reduce((acc, curr) => acc + curr.total_downtime_hours, 0);
-        const reliabilityScore = Math.max(0, 100 - (totalDowntime / 100)).toFixed(1);
-
-        setStats(prev => prev.map(s => {
-          if (s.key === "active_outages") return {
-            ...s,
-            value: activeCount.toString(),
-            trend_sv: `${outagesData.length} totalt registrerade`,
-            trend_en: `${outagesData.length} total recorded`
-          };
-          if (s.key === "mttr") return {
-            ...s,
-            value: avgMttr === "0" ? (lang === "sv" ? "Insamling..." : "Collecting...") : `${avgMttr}h`,
-            trend_sv: validMttr.length > 0 ? `Snitt över ${validMttr.length} operatörer` : "Ingen data för lösta avbrott",
-            trend_en: validMttr.length > 0 ? `Avg across ${validMttr.length} operators` : "No resolved outages yet"
-          };
-          if (s.key === "reports") return {
-            ...s,
-            value: reportsData.length.toString(),
-            trend_sv: `${hotspotsData.length} aktiva hotspots`,
-            trend_en: `${hotspotsData.length} active hotspots`
-          };
-          if (s.key === "reliability") return {
-            ...s,
-            value: `${reliabilityScore}%`,
-            trend_sv: "Senaste 30 dagarna",
-            trend_en: "Last 30 days"
-          };
-          return s;
-        }));
-
-        if (previousOutageIds.current.size > 0) {
-          const newOutages = outagesData.filter(o => !previousOutageIds.current.has(o.id));
-          if (newOutages.length > 0) {
-            const message = lang === "sv"
-              ? `${newOutages.length} ny${newOutages.length > 1 ? 'a' : 't'} avbrott upptäckt!`
-              : `${newOutages.length} new outage${newOutages.length > 1 ? 's' : ''} detected!`;
-            addToast(message, 'warning', 6000);
-          }
-        }
-        previousOutageIds.current = new Set(outagesData.map(o => o.id));
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err);
+    setStats(prev => prev.map(s => {
+      const updated = { ...s };
+      
+      switch (s.key) {
+        case "active_outages":
+          updated.value = activeCount.toString();
+          updated.trend_sv = `${outagesData.length} totalt registrerade`;
+          updated.trend_en = `${outagesData.length} total recorded`;
+          break;
+        case "mttr":
+          const mttrVal = avgMttr === "0" ? (lang === "sv" ? "Insamling..." : "Collecting...") : `${avgMttr}h`;
+          updated.value = mttrVal;
+          updated.trend_sv = validMttr.length > 0 ? `Snitt över ${validMttr.length} operatörer` : "Ingen data för lösta avbrott";
+          updated.trend_en = validMttr.length > 0 ? `Avg across ${validMttr.length} operators` : "No resolved outages yet";
+          break;
+        case "reports":
+          updated.value = reportsData.length.toString();
+          updated.trend_sv = `${hotspotsData.length} aktiva hotspots`;
+          updated.trend_en = `${hotspotsData.length} active hotspots`;
+          break;
+        case "reliability":
+          updated.value = `${reliabilityScore}%`;
+          updated.trend_sv = "Senaste 30 dagarna";
+          updated.trend_en = "Last 30 days";
+          break;
       }
-    };
+      return updated;
+    }));
 
+    if (previousOutageIds.current.size > 0) {
+      const newOutages = outagesData.filter(o => !previousOutageIds.current.has(o.id));
+      if (newOutages.length > 0) {
+        const msgSv = `${newOutages.length} ny${newOutages.length > 1 ? 'a' : 't'} avbrott upptäckt!`;
+        const msgEn = `${newOutages.length} new outage${newOutages.length > 1 ? 's' : ''} detected!`;
+        addToast(lang === "sv" ? msgSv : msgEn, 'warning', 6000);
+      }
+    }
+    previousOutageIds.current = new Set(outagesData.map(o => o.id));
+  }, [lang, addToast]);
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const [outagesData, reportsData, hotspotsData, mttrData, reliabilityData, historyData, operatorsData] = await Promise.all([
+        api.outages.list(),
+        api.reports.list(),
+        api.reports.hotspots(),
+        api.outages.mttr(),
+        api.outages.reliability(),
+        api.outages.history(),
+        api.operators.list()
+      ]);
+
+      setOutages(outagesData);
+      setOperators(operatorsData);
+      setHotspots(hotspotsData);
+      setTrendData(historyData);
+      setMttrData(mttrData);
+      setReliabilityData(reliabilityData);
+
+      updateStatsFromData({
+        outagesData, reportsData, hotspotsData, mttrData, reliabilityData
+      });
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch dashboard data:", err);
+    }
+  }, [updateStatsFromData]);
+
+  useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(fetchDashboardData, 5 * 60 * 1000); // 5m
     return () => clearInterval(interval);
-  }, [lang, addToast]);
+  }, [fetchDashboardData]);
 
   const filteredOutages = useMemo(() => {
     return outages.filter(o => {
@@ -294,7 +362,7 @@ export default function Home() {
             </div>
           </div>
           <div className="map-area">
-            <Map outages={filteredOutages} hotspots={hotspots} simple={true} />
+            <TacticalMap outages={filteredOutages} hotspots={hotspots} simple={true} />
           </div>
         </div>
 
@@ -303,43 +371,7 @@ export default function Home() {
             <h3 className="section-title">{lang === "sv" ? "Händelseflöde" : "Event Stream"}</h3>
             <div className="count-badge">{filteredOutages.length}</div>
           </div>
-          <div className="event-list custom-scrollbar">
-            {filteredOutages.length > 0 ? (
-              filteredOutages.slice(0, 15).map((outage) => (
-                <Link href={`/outages/${outage.id}`} key={outage.id} className="event-item">
-                  <div className="event-content">
-                    <div className="status-indicator-line" style={{ backgroundColor: outage.status.toLowerCase() === 'resolved' ? 'var(--status-success)' : 'var(--status-critical)' }}></div>
-                    <div className="event-text">
-                      <span className="event-title">{t(outage.title)}</span>
-                      <div className="event-meta">
-                        <span>{outage.operator_name}</span>
-                        <span className="sep">•</span>
-                        <span>{outage.location || "Sweden"}</span>
-                        {outage.affected_services?.length > 0 && (
-                          <>
-                            <span className="sep">•</span>
-                            <div className="dash-tags">
-                              {outage.affected_services.slice(0, 2).map((s, i) => (
-                                <span key={i} className="dash-tag">{s}</span>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <span className="event-badge" style={{ color: outage.status.toLowerCase() === 'resolved' ? 'var(--status-success)' : 'var(--status-critical)' }}>
-                      {outage.status}
-                    </span>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="empty-events">
-                <Info size={24} />
-                <p>{lang === "sv" ? "Inga matchande incidenter" : "No matching incidents"}</p>
-              </div>
-            )}
-          </div>
+          <OutageList outages={filteredOutages} lang={lang} />
         </div>
       </div>
 
@@ -510,14 +542,6 @@ export default function Home() {
         .event-badge {
           font-size: 0.7rem;
           font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .view-link {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: var(--accent-primary);
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }

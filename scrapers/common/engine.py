@@ -1,13 +1,12 @@
 """
 Core Engine Services: Severity Scoring and Analytics tools.
 """
-from typing import List
+from typing import List, Optional
+from datetime import datetime, timedelta, timezone
+import re
 from .models import OutageStatus, SeverityLevel, ServiceType
 
-from datetime import datetime, timedelta
-import re
-
-def parse_swedish_date(date_str: str) -> datetime:
+def parse_swedish_date(date_str: str) -> Optional[datetime]:
     """
     Parse Swedish date strings into datetime objects.
     Supported formats:
@@ -24,7 +23,7 @@ def parse_swedish_date(date_str: str) -> datetime:
         try:
             clean = date_str.replace('kl', '').replace('  ', ' ').strip()
             return datetime.strptime(clean, "%Y-%m-%d %H:%M")
-        except:
+        except Exception:
             pass
 
     # Telia/Lyca Format: 'ons 18.feb 14:55'
@@ -58,13 +57,13 @@ def parse_swedish_date(date_str: str) -> datetime:
                 
                 dt_str = f"{year}-{month:02d}-{day:02d} {time_part}"
                 return datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-    except:
+    except Exception:
         pass
 
     # Basic ISO format fallback
     try:
         return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-    except:
+    except Exception:
         pass
         
     return None
@@ -98,7 +97,7 @@ def calculate_severity_score(severity: SeverityLevel, affected_services: List[Se
     score = (base_weight * service_multiplier) * 5.0
     return min(10.0, score)
 
-def extract_region_from_text(text: str, counties: List[str]) -> str:
+def extract_region_from_text(text: str, counties: List[str]) -> Optional[str]:
     """
     Extract a region (county) from a text string.
     Uses direct matching, base name matching (handling possessive 's'), and city-to-county mapping.

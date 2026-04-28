@@ -136,7 +136,7 @@ class UserResponse(UserBase):
 
 class HotspotResponse(BaseModel):
     operator_name: str
-    region_name: Optional[Dict[str, str]]
+    region_name: Optional[Dict[str, str]] = None
     latitude: float
     longitude: float
     report_count: int

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
@@ -26,7 +27,6 @@ function useAdminData() {
             setReports(reportsData);
         } catch (err) {
             console.error("Failed to fetch admin data:", err);
-            // We re-throw to allow component-level handling if needed, but we caught it for logging.
             throw err;
         } finally {
             setLoading(false);
@@ -229,6 +229,11 @@ function ScraperHealth({ scrapers, lang }) {
     );
 }
 
+ScraperHealth.propTypes = {
+    scrapers: PropTypes.array.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
 /**
  * Component for Report Moderation Table
  */
@@ -281,18 +286,29 @@ function ReportModeration({ reports, handleReportAction, lang }) {
     );
 }
 
+ReportModeration.propTypes = {
+    reports: PropTypes.array.isRequired,
+    handleReportAction: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
 /**
  * Component for Outage Management Table
  */
 function OutageManagement({ outageMgr, lang }) {
-    const { outages, outagesLoading, startEditing, page, hasMore, fetchOutages, searchQuery, filterOperator, filterStatus, setPage } = outageMgr;
+    const { 
+        outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
+        searchQuery, filterOperator, filterStatus, setPage, setSearchQuery,
+        setFilterOperator, setFilterStatus, handleFilterChange, searchTimerRef,
+        filterMissingCoords, setFilterMissingCoords, filterMissingEndDate, setFilterMissingEndDate
+    } = outageMgr;
     
     const outageList = useMemo(() => {
         if (outagesLoading) {
             return (
                 <tr>
-                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
-                        <div className="loading-spinner" style={{ margin: "0 auto" }}></div>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "3rem" }}>
+                        <div className="loading-spinner"></div>
                     </td>
                 </tr>
             );
@@ -301,7 +317,7 @@ function OutageManagement({ outageMgr, lang }) {
         if (outages.length === 0) {
             return (
                 <tr>
-                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "3rem", opacity: 0.5 }}>
                         {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
                     </td>
                 </tr>
@@ -348,76 +364,80 @@ function OutageManagement({ outageMgr, lang }) {
                 <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{lang === "sv" ? "Hantera driftstörningar" : "Outage Management"}</h2>
 
                 <div className="filter-controls">
-                    <input
-                        type="text"
-                        placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
-                        value={outageMgr.searchQuery}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            outageMgr.setSearchQuery(val);
-                            clearTimeout(outageMgr.searchTimerRef.current);
-                            outageMgr.searchTimerRef.current = setTimeout(() => {
-                                outageMgr.handleFilterChange(val, outageMgr.filterOperator, outageMgr.filterStatus);
-                            }, 400);
-                        }}
-                        className="search-input"
-                    />
-                    <select
-                        value={outageMgr.filterOperator}
-                        onChange={(e) => { outageMgr.setFilterOperator(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, e.target.value, outageMgr.filterStatus); }}
-                        className="filter-select"
-                    >
-                        <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
-                        <option value="telia">Telia</option>
-                        <option value="telenor">Telenor</option>
-                        <option value="tre">Tre</option>
-                    </select>
-                    <select
-                        value={outageMgr.filterStatus}
-                        onChange={(e) => { outageMgr.setFilterStatus(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, e.target.value); }}
-                        className="filter-select"
-                    >
-                        <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
-                        <option value="scheduled">Scheduled</option>
-                    </select>
+                    <div className="filter-group">
+                        <input
+                            type="text"
+                            placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchQuery(val);
+                                clearTimeout(searchTimerRef.current);
+                                searchTimerRef.current = setTimeout(() => {
+                                    handleFilterChange(val, filterOperator, filterStatus);
+                                }, 400);
+                            }}
+                            className="search-input"
+                        />
+                    </div>
+                    <div className="filter-group">
+                        <select
+                            value={filterOperator}
+                            onChange={(e) => { setFilterOperator(e.target.value); handleFilterChange(searchQuery, e.target.value, filterStatus); }}
+                            className="filter-select"
+                        >
+                            <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
+                            <option value="telia">Telia</option>
+                            <option value="telenor">Telenor</option>
+                            <option value="tre">Tre</option>
+                        </select>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => { setFilterStatus(e.target.value); handleFilterChange(searchQuery, filterOperator, e.target.value); }}
+                            className="filter-select"
+                        >
+                            <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
+                            <option value="scheduled">Scheduled</option>
+                        </select>
+                    </div>
                     <div className="quality-filters">
                         <label className="filter-checkbox">
                             <input 
                                 type="checkbox" 
-                                checked={outageMgr.filterMissingCoords} 
+                                checked={filterMissingCoords} 
                                 onChange={(e) => {
-                                    outageMgr.setFilterMissingCoords(e.target.checked);
-                                    outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, e.target.checked, outageMgr.filterMissingEndDate);
+                                    setFilterMissingCoords(e.target.checked);
+                                    handleFilterChange(searchQuery, filterOperator, filterStatus, e.target.checked, filterMissingEndDate);
                                 }} 
                             />
-                            {lang === "sv" ? "Saknar koordinater" : "Missing Coords"}
+                            <span>{lang === "sv" ? "Saknar koordinater" : "Missing Coords"}</span>
                         </label>
                         <label className="filter-checkbox">
                             <input 
                                 type="checkbox" 
-                                checked={outageMgr.filterMissingEndDate} 
+                                checked={filterMissingEndDate} 
                                 onChange={(e) => {
-                                    outageMgr.setFilterMissingEndDate(e.target.checked);
-                                    outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, outageMgr.filterMissingCoords, e.target.checked);
+                                    setFilterMissingEndDate(e.target.checked);
+                                    handleFilterChange(searchQuery, filterOperator, filterStatus, filterMissingCoords, e.target.checked);
                                 }} 
                             />
-                            {lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}
+                            <span>{lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div className="network-sharing-note" style={{ margin: '15px 0', padding: '15px 20px', backgroundColor: 'rgba(56, 189, 248, 0.05)', borderLeft: '4px solid var(--accent-primary)', borderRadius: '0 6px 6px 0' }}>
-                <h4 style={{ margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
-                    <span style={{ fontSize: '1.2rem' }}>ℹ️</span> 
+            <div className="network-sharing-note">
+                <h4 className="sharing-title">
+                    <span className="icon">ℹ️</span> 
                     {lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)"}
                 </h4>
-                <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                <p className="sharing-text">
                     {lang === "sv" 
                         ? "Flera varumärken hyร in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" 
                         : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:"}
                 </p>
-                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                <ul className="sharing-list">
                     <li><strong>Telia:</strong> Halebop, Fello</li>
                     <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
                     <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
@@ -425,7 +445,7 @@ function OutageManagement({ outageMgr, lang }) {
                 </ul>
             </div>
 
-            <div className="premium-card table-card" style={{ marginTop: '20px' }}>
+            <div className="premium-card table-card">
                 <div className="table-wrapper custom-scrollbar">
                     <table className="admin-table">
                         <thead>
@@ -444,7 +464,7 @@ function OutageManagement({ outageMgr, lang }) {
                     </table>
                 </div>
 
-                <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', padding: '10px 0' }}>
+                <div className="pagination-controls">
                     <button
                         className="btn-secondary"
                         disabled={page === 0 || outagesLoading}
@@ -456,7 +476,7 @@ function OutageManagement({ outageMgr, lang }) {
                     >
                         {lang === "sv" ? "← Föregående" : "← Previous"}
                     </button>
-                    <span style={{ alignSelf: 'center', opacity: 0.7 }}>
+                    <span className="page-indicator">
                         {lang === "sv" ? `Sida ${page + 1}` : `Page ${page + 1}`}
                     </span>
                     <button
@@ -475,6 +495,11 @@ function OutageManagement({ outageMgr, lang }) {
         </section>
     );
 }
+
+OutageManagement.propTypes = {
+    outageMgr: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired,
+};
 
 /**
  * Main Admin Page Component
@@ -677,70 +702,104 @@ export default function AdminPage() {
                 document.body
             )}
 
-            <style jsx>{`
-                .admin-container { padding: 32px; max-width: 1200px; margin: 0 auto; }
-                .admin-header { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color); }
-                .admin-header h1 { font-size: 1.8rem; margin-bottom: 4px; }
-                .subtitle { color: var(--text-muted); font-size: 0.95rem; }
-                .admin-section { margin-bottom: 48px; }
-                .section-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
-                .filter-controls { display: flex; gap: 12px; flex-wrap: wrap; }
-                .search-input { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-primary); color: var(--text-primary); font-size: 0.9rem; min-width: 250px; }
-                .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-primary); color: var(--text-primary); font-size: 0.9rem; cursor: pointer; }
-                .quality-filters { display: flex; gap: 16px; align-items: center; margin-left: 8px; }
-                .filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none; }
-                .filter-checkbox input { width: 14px; height: 14px; cursor: pointer; }
-                .section-title { margin-bottom: 20px; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
-                .scraper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-                .scraper-card { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
-                .scraper-main { display: flex; align-items: center; gap: 12px; }
-                .status-dot { width: 6px; height: 6px; border-radius: 50%; }
-                .online { background: var(--status-success); }
-                .stale { background: var(--status-warning); }
-                .operator-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
-                .last-scrape { font-size: 0.8rem; color: var(--text-muted); display: block; }
-                .scraper-date { font-size: 0.8rem; color: var(--text-muted); }
-                .table-card { padding: 0; overflow: hidden; }
-                .table-wrapper { overflow-x: auto; }
-                .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-                .admin-table th { padding: 14px 20px; background: var(--surface-hover); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color); }
-                .admin-table td { padding: 14px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
-                .row-low-quality { background: rgba(255, 107, 107, 0.05); }
-                .row-low-quality:hover { background: rgba(255, 107, 107, 0.08) !important; }
-                .quality-tag { margin-left: 6px; font-size: 0.9rem; vertical-align: middle; cursor: help; }
+            <style jsx global>{`
+                .admin-container { padding: 40px; max-width: 1400px; margin: 0 auto; }
+                .admin-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border-color); }
+                .admin-header h1 { font-size: 2.4rem; margin-bottom: 8px; }
+                .subtitle { color: var(--text-muted); font-size: 1rem; }
+                .admin-section { margin-bottom: 64px; }
+                
+                /* Layout controls */
+                .section-header-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; }
+                .filter-controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--surface-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+                .filter-group { display: flex; gap: 8px; align-items: center; }
+                
+                .search-input { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-size: 0.9rem; min-width: 280px; transition: border-color 0.2s; }
+                .search-input:focus { border-color: var(--accent-primary); outline: none; }
+                .filter-select { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-size: 0.9rem; cursor: pointer; transition: border-color 0.2s; }
+                .filter-select:hover { border-color: var(--accent-primary); }
+                
+                .quality-filters { display: flex; gap: 20px; align-items: center; padding: 0 12px; border-left: 1px solid var(--border-color); }
+                .filter-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; user-select: none; transition: color 0.2s; }
+                .filter-checkbox:hover { color: var(--text-primary); }
+                .filter-checkbox input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-primary); }
+                
+                .section-title { margin-bottom: 24px; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+                
+                /* Scraper Cards */
+                .scraper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+                .scraper-card { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; }
+                .scraper-main { display: flex; align-items: center; gap: 16px; }
+                .status-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+                .online { background: var(--status-success); color: var(--status-success); }
+                .stale { background: var(--status-warning); color: var(--status-warning); }
+                .operator-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); letter-spacing: 0.02em; }
+                .last-scrape { font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 2px; }
+                .scraper-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+                
+                /* Tables */
+                .table-card { padding: 0; overflow: hidden; box-shadow: var(--shadow-md); }
+                .table-wrapper { overflow-x: auto; max-height: 800px; }
+                .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+                .admin-table th { position: sticky; top: 0; z-index: 10; padding: 16px 24px; background: var(--surface-hover); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 800; border-bottom: 2px solid var(--border-color); }
+                .admin-table td { padding: 18px 24px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; vertical-align: middle; }
+                .admin-table tr:last-child td { border-bottom: none; }
+                .admin-table tr:hover td { background: var(--bg-color); }
+                
+                .row-low-quality { background: rgba(225, 29, 72, 0.03); }
+                .row-low-quality:hover td { background: rgba(225, 29, 72, 0.05) !important; }
+                .quality-tag { margin-left: 8px; font-size: 1rem; vertical-align: middle; cursor: help; }
                 .text-error { color: var(--status-critical); font-weight: 600; }
                 .op-cell { font-weight: 700; color: var(--accent-primary); }
-                .id-cell { font-family: monospace; color: var(--text-muted); font-size: 0.75rem; }
-                .status-badge-mini { padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
-                .status-badge-mini.active { border: 1px solid var(--status-success); color: var(--status-success); }
-                .status-badge-mini.pending { background: var(--surface-hover); color: var(--status-warning); border: 1px solid var(--border-color); }
-                .status-badge-mini.verified { border: 1px solid var(--status-success); color: var(--status-success); }
-                .status-badge-mini.rejected { border: 1px solid var(--status-critical); color: var(--status-critical); }
-                .action-btns { display: flex; gap: 8px; }
-                .action-btns button, .btn-edit { padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border: 1px solid var(--border-color); background: transparent; cursor: pointer; transition: all 0.2s; }
-                .btn-edit:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
-                .btn-verify:hover { border-color: var(--status-success); color: var(--status-success); }
-                .btn-reject:hover { border-color: var(--status-critical); color: var(--status-critical); }
+                .id-cell { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 0.8rem; }
+                .title-cell { font-weight: 500; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                
+                .status-badge-mini { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; display: inline-block; }
+                .status-badge-mini.active { background: rgba(5, 150, 105, 0.1); color: var(--status-success); }
+                .status-badge-mini.pending { background: rgba(217, 119, 6, 0.1); color: var(--status-warning); }
+                .status-badge-mini.scheduled { background: rgba(79, 70, 229, 0.1); color: var(--accent-primary); }
+                .status-badge-mini.resolved { background: var(--surface-hover); color: var(--text-muted); }
+                
+                .action-btns { display: flex; gap: 10px; }
+                .btn-verify, .btn-reject, .btn-edit { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; border: 1px solid var(--border-color); background: var(--surface-color); cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+                .btn-edit:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: var(--accent-glow); }
+                .btn-verify:hover { border-color: var(--status-success); color: var(--status-success); background: rgba(5, 150, 105, 0.05); }
+                .btn-reject:hover { border-color: var(--status-critical); color: var(--status-critical); background: rgba(225, 29, 72, 0.05); }
+                
+                /* Sharing Note */
+                .network-sharing-note { margin: 24px 0; padding: 24px; background: var(--accent-glow); border-left: 5px solid var(--accent-primary); border-radius: 0 12px 12px 0; }
+                .sharing-title { margin: 0 0 12px 0; display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 1.1rem; }
+                .sharing-text { margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-secondary); opacity: 0.9; }
+                .sharing-list { margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-primary); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+                
+                /* Pagination */
+                .pagination-controls { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--surface-hover); border-top: 1px solid var(--border-color); }
+                .page-indicator { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+                
+                /* Modal & Forms */
+                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+                .modal-content { width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; background: var(--surface-color); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); }
+                .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 32px; border-bottom: 1px solid var(--border-color); }
+                .modal-header h3 { font-size: 1.25rem; }
+                .close-btn { font-size: 2rem; color: var(--text-muted); line-height: 1; }
+                .close-btn:hover { color: var(--text-primary); }
+                .edit-form { padding: 32px; }
+                .form-group { margin-bottom: 24px; }
+                .form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+                .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border-radius: 8px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 1rem; transition: border-color 0.2s; }
+                .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-primary); outline: none; }
+                .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                .modal-footer { margin-top: 40px; display: flex; justify-content: flex-end; gap: 16px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+                
+                .btn-primary { background: var(--accent-primary); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px var(--accent-glow); }
+                .btn-primary:hover { background: var(--accent-secondary); transform: translateY(-1px); }
+                
+                /* Loading */
+                .loading { display: flex; align-items: center; justify-content: center; min-height: 80vh; font-size: 1.2rem; font-weight: 600; color: var(--accent-primary); }
+                .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--accent-glow); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+                @keyframes spin { to { transform: rotate(360deg); } }
 
-                /* Modal Styles */
-                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-                .modal-content { width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; background: var(--surface-primary); border: 1px solid var(--border-color); }
-                .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
-                .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-                .edit-form { padding: 24px; }
-                .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-                .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-                .form-group input, .form-group textarea, .form-group select { padding: 10px 12px; border-radius: 6px; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.9rem; }
-                .form-group textarea { min-height: 80px; resize: vertical; }
-                .checkbox-group { display: flex; gap: 16px; flex-wrap: wrap; padding: 8px 0; }
-                .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-primary); cursor: pointer; text-transform: none !important; font-weight: normal !important; }
-                .checkbox-label input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
-                .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-                .modal-footer { margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; }
-                .btn-primary { background: var(--accent-primary) !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer; font-weight: 700; }
-                .btn-secondary { background: var(--surface-hover) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer; }
-
-                @media (max-width: 768px) { .admin-container { padding: 20px; } .scraper-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+                @media (max-width: 1024px) { .admin-container { padding: 24px; } .filter-controls { flex-direction: column; align-items: stretch; } .quality-filters { border-left: none; border-top: 1px solid var(--border-color); padding: 12px 0 0 0; } }
             `}</style>
         </div>
     );

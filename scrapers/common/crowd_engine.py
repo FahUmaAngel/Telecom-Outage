@@ -2,7 +2,7 @@
 Crowd Detection Engine: Analyzes user reports and 3rd party signals.
 """
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ..db.models import UserReport, Region, Operator
 from ..crowd.mock_aggregator import MockAggregator
 from .translation import create_bilingual_text
@@ -16,7 +16,7 @@ def detect_hotspots(db: Session) -> List[Dict]:
     """
     Cluster UserReport entries and identify hotspots.
     """
-    cutoff = datetime.utcnow() - timedelta(minutes=TIME_WINDOW_MINUTES)
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=TIME_WINDOW_MINUTES)
     
     # Query pending reports within the time window
     reports = db.query(UserReport).filter(
@@ -50,7 +50,7 @@ def detect_hotspots(db: Session) -> List[Dict]:
                 "longitude": avg_lon,
                 "report_count": len(group),
                 "type": "USER_CLUSTER",
-                "detected_at": datetime.utcnow()
+                "detected_at": datetime.now(timezone.utc)
             })
             
     return hotspots
@@ -81,7 +81,7 @@ def run_crowd_listener(db: Session):
     """
     Main entry point for the crowd detection process.
     """
-    print(f"[{datetime.utcnow()}] Running Crowd Listener...")
+    print(f"[{datetime.now(timezone.utc)}] Running Crowd Listener...")
     
     # 1. Detect hotspots from internal reports
     hotspots = detect_hotspots(db)

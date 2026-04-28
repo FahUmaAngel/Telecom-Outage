@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useLanguage } from "../../context/LanguageContext";
-import { useToast } from "../../context/ToastContext";
-import { api } from "../../lib/api";
+import { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import {
     Wifi,
     Smartphone,
@@ -16,6 +14,173 @@ import {
     AlertCircle,
     Activity
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { useToast } from "../../context/ToastContext";
+import { api } from "../../lib/api";
+
+const Step1Problem = ({ formData, setFormData, handleInputChange, lang, operators }) => (
+    <div className="step-fade-in">
+        <h3 className="step-title">
+            <Activity className="text-accent" />
+            {lang === "sv" ? "Vad är problemet?" : "What's the issue?"}
+        </h3>
+
+        <div className="form-group">
+            <label htmlFor="operator-select">{lang === "sv" ? "Operatör" : "Operator"}</label>
+            <div className="pill-selector">
+                {operators.map(op => (
+                    <button
+                        key={op.id}
+                        type="button"
+                        id={`op-${op.id}`}
+                        className={formData.operator_name === op.name ? "active" : ""}
+                        onClick={() => setFormData(prev => ({ ...prev, operator_name: op.name }))}
+                    >
+                        {op.name}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div className="form-group">
+            <label>{lang === "sv" ? "Tjänst" : "Service"}</label>
+            <div className="service-grid">
+                {[
+                    { id: 'Mobile', icon: Smartphone, label: lang === "sv" ? "Mobil" : "Mobile" },
+                    { id: 'Fiber', icon: Wifi, label: "Fiber" },
+                    { id: 'Home', icon: Home, label: lang === "sv" ? "Hem" : "Home" }
+                ].map(item => (
+                    <button
+                        key={item.id}
+                        type="button"
+                        className={`service-card ${formData.service_type === item.id ? 'active' : ''}`}
+                        onClick={() => setFormData(prev => ({ ...prev, service_type: item.id }))}
+                    >
+                        <item.icon size={24} />
+                        <span>{item.label}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div className="form-group">
+            <label htmlFor="impact-select">Impact</label>
+            <select 
+                id="impact-select"
+                name="impact" 
+                value={formData.impact} 
+                onChange={handleInputChange} 
+                className="premium-select"
+            >
+                <option value="No Service">{lang === "sv" ? "Ingen tjänst" : "No Service"}</option>
+                <option value="Slow Connection">{lang === "sv" ? "Långsam anslutning" : "Slow Connection"}</option>
+                <option value="Intermittent">{lang === "sv" ? "Ostabil anslutning" : "Intermittent Issues"}</option>
+            </select>
+        </div>
+    </div>
+);
+
+Step1Problem.propTypes = {
+    formData: PropTypes.object.isRequired,
+    setFormData: PropTypes.func.isRequired,
+    handleInputChange: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+    operators: PropTypes.array.isRequired,
+};
+
+const Step2Location = ({ formData, getLocation, locationLoading, locationError, handleInputChange, lang }) => {
+    const geoBtnText = formData.latitude 
+        ? (lang === "sv" ? "Platshämtad" : "Location Captured") 
+        : (lang === "sv" ? "Dela min plats" : "Share My Location");
+
+    return (
+        <div className="step-fade-in">
+            <h3 className="step-title">
+                <MapPin className="text-accent" />
+                {lang === "sv" ? "Var är du?" : "Where are you?"}
+            </h3>
+
+            <div className="location-box glass">
+                <button
+                    type="button"
+                    onClick={getLocation}
+                    disabled={locationLoading}
+                    className={`geo-btn ${formData.latitude ? 'success' : ''}`}
+                >
+                    {locationLoading ? <div className="spinner-sm" /> : <MapPin size={20} />}
+                    {geoBtnText}
+                </button>
+                {locationError && <p className="label-error"><AlertCircle size={14} /> {locationError}</p>}
+            </div>
+
+            <div className="divider"><span>{lang === "sv" ? "ELLER" : "OR"}</span></div>
+
+            <div className="form-group">
+                <label htmlFor="location-input">{lang === "sv" ? "Stad / Område" : "City / Area"}</label>
+                <input
+                    id="location-input"
+                    type="text"
+                    name="location_name"
+                    value={formData.location_name}
+                    onChange={handleInputChange}
+                    placeholder={lang === "sv" ? "T.ex. Stockholm, Södermalm" : "e.g. London, Soho"}
+                    className="premium-input"
+                />
+            </div>
+        </div>
+    );
+};
+
+Step2Location.propTypes = {
+    formData: PropTypes.object.isRequired,
+    getLocation: PropTypes.func.isRequired,
+    locationLoading: PropTypes.bool.isRequired,
+    locationError: PropTypes.string,
+    handleInputChange: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+const Step3Details = ({ formData, handleInputChange, lang }) => (
+    <div className="step-fade-in">
+        <h3 className="step-title">
+            <Info className="text-accent" />
+            {lang === "sv" ? "Berätta mer" : "Tell us more"}
+        </h3>
+
+        <div className="form-group">
+            <label htmlFor="title-input">{lang === "sv" ? "Kort rubrik" : "Short Title"}</label>
+            <input
+                id="title-input"
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder={lang === "sv" ? "T.ex. Inget internet sedan kl 10" : "e.g. No internet since 10 AM"}
+                className="premium-input"
+                required
+            />
+        </div>
+
+        <div className="form-group">
+            <label htmlFor="description-input">{lang === "sv" ? "Beskrivning" : "Details"}</label>
+            <textarea
+                id="description-input"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder={lang === "sv" ? "Eventuella detaljer..." : "Any specific details..."}
+                className="premium-textarea"
+                rows={4}
+            />
+        </div>
+    </div>
+);
+
+Step3Details.propTypes = {
+    formData: PropTypes.object.isRequired,
+    handleInputChange: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+};
 
 export default function ReportForm({ operators }) {
     const { lang } = useLanguage();
@@ -37,10 +202,10 @@ export default function ReportForm({ operators }) {
         longitude: null
     });
 
-    const handleInputChange = (e) => {
+    const handleInputChange = useCallback((e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    };
+    }, []);
 
     const nextStep = () => {
         if (step === 1 && !formData.operator_name) {
@@ -76,7 +241,7 @@ export default function ReportForm({ operators }) {
                 setLocationLoading(false);
                 addToast(lang === "sv" ? "Plats hämtad!" : "Location captured!", "success", 2000);
             },
-            (error) => {
+            () => {
                 setLocationError(lang === "sv" ? "Kunde inte hämta plats" : "Unable to retrieve location");
                 setLocationLoading(false);
             }
@@ -92,12 +257,11 @@ export default function ReportForm({ operators }) {
 
         setLoading(true);
         try {
-            // Prepare data for backend (ensuring it matches expected schema)
             const submissionData = {
                 operator_name: formData.operator_name,
                 title: `${formData.service_type}: ${formData.title}`,
                 description: `Impact: ${formData.impact}. Location: ${formData.location_name}. ${formData.description}`,
-                latitude: formData.latitude || 59.3293, // Fallback to Stockholm if missing but title provided
+                latitude: formData.latitude || 59.3293,
                 longitude: formData.longitude || 18.0686
             };
 
@@ -120,16 +284,19 @@ export default function ReportForm({ operators }) {
                 </div>
                 <h2>{lang === "sv" ? "Rapporten Skickad" : "Report Submitted"}</h2>
                 <p>{lang === "sv" ? "Ditt bidrag hjälper andra att hålla sig informerade. Vi undersöker saken." : "Your contribution helps others stay informed. We are looking into it."}</p>
-                <button onClick={() => window.location.reload()} className="premium-btn">
+                <button onClick={() => globalThis.location.reload()} className="premium-btn">
                     {lang === "sv" ? "Skicka en till rapport" : "Submit another report"}
                 </button>
             </div>
         );
     }
 
+    const submitBtnText = loading 
+        ? (lang === "sv" ? "Skickar..." : "Submitting...") 
+        : (lang === "sv" ? "Skicka Rapport" : "Submit Report");
+
     return (
         <div className="report-wizard glass">
-            {/* Progress Header */}
             <div className="wizard-header">
                 <div className="progress-bar">
                     <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
@@ -145,128 +312,30 @@ export default function ReportForm({ operators }) {
 
             <form onSubmit={handleSubmit} className="wizard-content">
                 {step === 1 && (
-                    <div className="step-fade-in">
-                        <h3 className="step-title">
-                            <Activity className="text-accent" />
-                            {lang === "sv" ? "Vad är problemet?" : "What's the issue?"}
-                        </h3>
-
-                        <div className="form-group">
-                            <label>{lang === "sv" ? "Operatör" : "Operator"}</label>
-                            <div className="pill-selector">
-                                {operators.map(op => (
-                                    <button
-                                        key={op.id}
-                                        type="button"
-                                        className={formData.operator_name === op.name ? "active" : ""}
-                                        onClick={() => setFormData(prev => ({ ...prev, operator_name: op.name }))}
-                                    >
-                                        {op.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label>{lang === "sv" ? "Tjänst" : "Service"}</label>
-                            <div className="service-grid">
-                                {[
-                                    { id: 'Mobile', icon: Smartphone, label: lang === "sv" ? "Mobil" : "Mobile" },
-                                    { id: 'Fiber', icon: Wifi, label: "Fiber" },
-                                    { id: 'Home', icon: Home, label: lang === "sv" ? "Hem" : "Home" }
-                                ].map(item => (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        className={`service-card ${formData.service_type === item.id ? 'active' : ''}`}
-                                        onClick={() => setFormData(prev => ({ ...prev, service_type: item.id }))}
-                                    >
-                                        <item.icon size={24} />
-                                        <span>{item.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Impact</label>
-                            <select name="impact" value={formData.impact} onChange={handleInputChange} className="premium-select">
-                                <option value="No Service">{lang === "sv" ? "Ingen tjänst" : "No Service"}</option>
-                                <option value="Slow Connection">{lang === "sv" ? "Långsam anslutning" : "Slow Connection"}</option>
-                                <option value="Intermittent">{lang === "sv" ? "Ostabil anslutning" : "Intermittent Issues"}</option>
-                            </select>
-                        </div>
-                    </div>
+                    <Step1Problem 
+                        formData={formData} 
+                        setFormData={setFormData} 
+                        handleInputChange={handleInputChange} 
+                        lang={lang} 
+                        operators={operators} 
+                    />
                 )}
-
                 {step === 2 && (
-                    <div className="step-fade-in">
-                        <h3 className="step-title">
-                            <MapPin className="text-accent" />
-                            {lang === "sv" ? "Var är du?" : "Where are you?"}
-                        </h3>
-
-                        <div className="location-box glass">
-                            <button
-                                type="button"
-                                onClick={getLocation}
-                                disabled={locationLoading}
-                                className={`geo-btn ${formData.latitude ? 'success' : ''}`}
-                            >
-                                {locationLoading ? <div className="spinner-sm" /> : <MapPin size={20} />}
-                                {formData.latitude ? (lang === "sv" ? "Platshämtad" : "Location Captured") : (lang === "sv" ? "Dela min plats" : "Share My Location")}
-                            </button>
-                            {locationError && <p className="label-error"><AlertCircle size={14} /> {locationError}</p>}
-                        </div>
-
-                        <div className="divider"><span>{lang === "sv" ? "ELLER" : "OR"}</span></div>
-
-                        <div className="form-group">
-                            <label>{lang === "sv" ? "Stad / Område" : "City / Area"}</label>
-                            <input
-                                type="text"
-                                name="location_name"
-                                value={formData.location_name}
-                                onChange={handleInputChange}
-                                placeholder={lang === "sv" ? "T.ex. Stockholm, Södermalm" : "e.g. London, Soho"}
-                                className="premium-input"
-                            />
-                        </div>
-                    </div>
+                    <Step2Location 
+                        formData={formData} 
+                        getLocation={getLocation} 
+                        locationLoading={locationLoading} 
+                        locationError={locationError} 
+                        handleInputChange={handleInputChange} 
+                        lang={lang} 
+                    />
                 )}
-
                 {step === 3 && (
-                    <div className="step-fade-in">
-                        <h3 className="step-title">
-                            <Info className="text-accent" />
-                            {lang === "sv" ? "Berätta mer" : "Tell us more"}
-                        </h3>
-
-                        <div className="form-group">
-                            <label>{lang === "sv" ? "Kort rubrik" : "Short Title"}</label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                placeholder={lang === "sv" ? "T.ex. Inget internet sedan kl 10" : "e.g. No internet since 10 AM"}
-                                className="premium-input"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>{lang === "sv" ? "Beskrivning" : "Details"}</label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder={lang === "sv" ? "Eventuella detaljer..." : "Any specific details..."}
-                                className="premium-textarea"
-                                rows={4}
-                            />
-                        </div>
-                    </div>
+                    <Step3Details 
+                        formData={formData} 
+                        handleInputChange={handleInputChange} 
+                        lang={lang} 
+                    />
                 )}
 
                 <div className="wizard-footer">
@@ -284,7 +353,7 @@ export default function ReportForm({ operators }) {
                         </button>
                     ) : (
                         <button type="submit" disabled={loading} className="submit-btn-premium">
-                            {loading ? (lang === "sv" ? "Skickar..." : "Submitting...") : (lang === "sv" ? "Skicka Rapport" : "Submit Report")}
+                            {submitBtnText}
                             <CheckCircle2 size={20} />
                         </button>
                     )}
@@ -292,193 +361,46 @@ export default function ReportForm({ operators }) {
             </form>
 
             <style jsx>{`
-                .report-wizard {
-                    padding: 32px;
-                    border-radius: 24px;
-                    max-width: 500px;
-                    margin: 0 auto;
-                }
+                .report-wizard { padding: 32px; border-radius: 24px; max-width: 500px; margin: 0 auto; }
                 .wizard-header { margin-bottom: 32px; }
-                .progress-bar { 
-                    height: 4px; 
-                    background: var(--surface-light); 
-                    border-radius: 2px; 
-                    margin-bottom: 24px;
-                    overflow: hidden;
-                }
-                .progress-fill { 
-                    height: 100%; 
-                    background: var(--accent-primary); 
-                    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                }
+                .progress-bar { height: 4px; background: var(--surface-light); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+                .progress-fill { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
                 .steps-indicator { display: flex; justify-content: space-between; }
-                .step-dot {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    background: var(--surface-color);
-                    border: 1px solid var(--border-color);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 0.8rem;
-                    font-weight: 700;
-                    color: var(--text-muted);
-                    transition: all 0.3s;
-                }
-                .step-dot.active {
-                    background: var(--accent-primary);
-                    border-color: var(--accent-primary);
-                    color: white;
-                    box-shadow: 0 0 15px var(--accent-glow);
-                }
-
-                .step-title {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    font-size: 1.4rem;
-                    margin-bottom: 24px;
-                    color: var(--text-primary);
-                }
+                .step-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s; }
+                .step-dot.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--accent-glow); }
+                .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
                 .text-accent { color: var(--accent-primary); }
-
                 .pill-selector { display: flex; flex-wrap: wrap; gap: 10px; }
-                .pill-selector button {
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    border: 1px solid var(--border-color);
-                    background: transparent;
-                    color: var(--text-secondary);
-                    cursor: pointer;
-                    transition: 0.2s;
-                    font-size: 0.9rem;
-                }
-                .pill-selector button.active {
-                    background: var(--accent-primary);
-                    border-color: var(--accent-primary);
-                    color: white;
-                }
-
-                .service-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 12px;
-                }
-                .service-card {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 20px 10px;
-                    border-radius: 16px;
-                    background: var(--surface-color);
-                    border: 1px solid var(--border-color);
-                    color: var(--text-muted);
-                    cursor: pointer;
-                    transition: 0.3s;
-                }
-                .service-card.active {
-                    background: var(--accent-glow);
-                    border-color: var(--accent-primary);
-                    color: var(--accent-primary);
-                }
-
-                .geo-btn {
-                    width: 100%;
-                    padding: 16px;
-                    border-radius: 12px;
-                    border: 2px dashed var(--border-color);
-                    background: transparent;
-                    color: var(--text-primary);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 12px;
-                    cursor: pointer;
-                    font-weight: 700;
-                    transition: 0.3s;
-                }
+                .pill-selector button { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+                .pill-selector button.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+                .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+                .service-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 10px; border-radius: 16px; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+                .service-card.active { background: var(--accent-glow); border-color: var(--accent-primary); color: var(--accent-primary); }
+                .geo-btn { width: 100%; padding: 16px; border-radius: 12px; border: 2px dashed var(--border-color); background: transparent; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; }
                 .geo-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
                 .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.05); }
-
                 .divider { text-align: center; margin: 24px 0; position: relative; }
                 .divider::before { content: ''; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
                 .divider span { position: relative; z-index: 2; background: var(--bg-color); padding: 0 12px; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
-
-                .premium-input, .premium-select, .premium-textarea {
-                    width: 100%;
-                    padding: 12px 16px;
-                    border-radius: 12px;
-                    border: 1px solid var(--border-color);
-                    background: var(--surface-color);
-                    color: var(--text-primary);
-                    font-size: 1rem;
-                    transition: 0.3s;
-                }
+                .premium-input, .premium-select, .premium-textarea { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
                 .premium-input:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); }
-
-                .wizard-footer {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 40px;
-                    gap: 12px;
-                }
-                .back-btn {
-                    padding: 12px 20px;
-                    border-radius: 12px;
-                    border: 1px solid var(--border-color);
-                    background: transparent;
-                    color: var(--text-secondary);
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .next-btn, .submit-btn-premium {
-                    flex: 1;
-                    padding: 12px 24px;
-                    border-radius: 12px;
-                    background: var(--accent-primary);
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    font-weight: 700;
-                    transition: 0.3s;
-                }
+                .wizard-footer { display: flex; justify-content: space-between; margin-top: 40px; gap: 12px; }
+                .back-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+                .next-btn, .submit-btn-premium { flex: 1; padding: 12px 24px; border-radius: 12px; background: var(--accent-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; transition: 0.3s; }
                 .submit-btn-premium { background: var(--status-success); }
                 .next-btn:hover, .submit-btn-premium:hover { filter: brightness(1.1); transform: translateY(-2px); }
-
-                .success-screen {
-                    text-align: center;
-                    padding: 60px 40px;
-                    border-radius: 32px;
-                }
+                .success-screen { text-align: center; padding: 60px 40px; border-radius: 32px; }
                 .success-icon { margin-bottom: 24px; }
                 .success-screen h2 { font-size: 2rem; margin-bottom: 16px; }
                 .success-screen p { color: var(--text-secondary); margin-bottom: 32px; }
-                .premium-btn {
-                    padding: 14px 28px;
-                    background: var(--accent-primary);
-                    color: white;
-                    border-radius: 14px;
-                    border: none;
-                    font-weight: 700;
-                    cursor: pointer;
-                }
-
-                .step-fade-in {
-                    animation: fadeIn 0.4s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
+                .premium-btn { padding: 14px 28px; background: var(--accent-primary); color: white; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; }
+                .step-fade-in { animation: fadeIn 0.4s ease-out; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `}</style>
         </div>
     );
 }
+
+ReportForm.propTypes = {
+    operators: PropTypes.array.isRequired
+};
