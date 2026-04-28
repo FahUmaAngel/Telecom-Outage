@@ -15,10 +15,10 @@ since_date = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-
 cursor.execute(f"""
     SELECT start_time, end_time, updated_at, status
     FROM outages 
-    WHERE operator_id = {tre_id} 
+    WHERE operator_id = %s 
     AND start_time IS NOT NULL 
     AND (end_time IS NOT NULL OR status LIKE 'resolved');
-""")
+""", tre_id)
 
 outages = cursor.fetchall()
 

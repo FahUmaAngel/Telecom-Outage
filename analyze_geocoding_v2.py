@@ -12,16 +12,16 @@ def analyze_locations():
     analysis = {}
     for op_id, op_name in operators:
         # Total
-        cursor.execute(f"SELECT COUNT(*) FROM outages WHERE operator_id = {op_id}")
+        cursor.execute("SELECT COUNT(*) FROM outages WHERE operator_id = %s", (op_id,))
         total = cursor.fetchone()[0]
         
         # Missing City (location is NULL, Empty, Unknown, or just shows a County ' län')
-        cursor.execute(f"""
+        cursor.execute("""
             SELECT COUNT(*) FROM outages 
-            WHERE operator_id = {op_id}
+            WHERE operator_id = %s
             AND latitude IS NOT NULL AND longitude IS NOT NULL
             AND (location IS NULL OR location = 'Unknown' OR location = '' OR location NOT LIKE '%,%')
-        """)
+        """, (op_id,))
         needs_update = cursor.fetchone()[0]
         
         analysis[op_name] = {

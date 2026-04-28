@@ -11,7 +11,7 @@ tre_id = cursor.fetchone()[0]
 print(f"Status dump for ALL records for Tre (ID: {tre_id})")
 
 # Fetch status and incident_id for ALL records
-cursor.execute(f"SELECT status, incident_id FROM outages WHERE operator_id = {tre_id};")
+cursor.execute("SELECT status, incident_id FROM outages WHERE operator_id = %s;", tre_id)
 rows = cursor.fetchall()
 
 status_map = {}

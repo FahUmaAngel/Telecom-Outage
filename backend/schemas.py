@@ -27,8 +27,7 @@ class RegionResponse(BaseModel):
     name: Dict[str, str]
     outage_count: Optional[int] = 0
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class OutageResponse(BaseModel):
     id: int
@@ -73,8 +72,7 @@ class OutageResponse(BaseModel):
         if v is None: return v
         return str(v).lower()
 
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class ReportCreate(BaseModel):
     operator_name: Optional[str] = None
@@ -93,8 +91,7 @@ class ReportResponse(BaseModel):
     status: str
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class MTTRResponse(BaseModel):
     operator_name: str
