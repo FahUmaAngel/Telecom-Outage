@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
 
+/**
+ * Custom hook for general admin data (scrapers and reports)
+ */
 function useAdminData() {
     const { lang } = useLanguage();
     const { addToast } = useToast();
@@ -13,7 +16,7 @@ function useAdminData() {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const [scrapersData, reportsData] = await Promise.all([
                 api.admin.scrapers(),
@@ -23,11 +26,12 @@ function useAdminData() {
             setReports(reportsData);
         } catch (err) {
             console.error("Failed to fetch admin data:", err);
+            // We re-throw to allow component-level handling if needed, but we caught it for logging.
             throw err;
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     const handleReportAction = async (id, action) => {
         try {
@@ -39,6 +43,7 @@ function useAdminData() {
             addToast(lang === "sv" ? "Rapport uppdaterad" : "Report updated", "success");
             fetchData();
         } catch (err) {
+            console.error(`Failed to ${action} report ${id}:`, err);
             addToast(lang === "sv" ? "Kunde inte uppdatera rapport" : "Failed to update report", "error");
         }
     };
@@ -46,6 +51,9 @@ function useAdminData() {
     return { scrapers, reports, loading, fetchData, handleReportAction };
 }
 
+/**
+ * Custom hook for outage management logic
+ */
 function useOutageManagement() {
     const { lang } = useLanguage();
     const { addToast } = useToast();
@@ -85,7 +93,7 @@ function useOutageManagement() {
         } finally {
             setOutagesLoading(false);
         }
-    }, [searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate]);
+    }, [searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate, addToast, lang]);
 
     const handleFilterChange = (
         newSearch = searchQuery,
@@ -143,6 +151,7 @@ function useOutageManagement() {
             }));
             addToast(lang === "sv" ? "Plats identifierad" : "Place resolved", "success");
         } catch (err) {
+            console.error("Failed to resolve place:", err);
             addToast(lang === "sv" ? "Kunde inte hämta platsen" : "Failed to resolve place", "error");
         }
     };
@@ -173,6 +182,7 @@ function useOutageManagement() {
             setEditingOutage(null);
             fetchOutages(page, searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate);
         } catch (err) {
+            console.error("Failed to update outage:", err);
             addToast(lang === "sv" ? "Kunde inte uppdatera" : "Failed to update", "error");
         }
     };
@@ -186,19 +196,304 @@ function useOutageManagement() {
     };
 }
 
+/**
+ * Component for Scraper Health Section
+ */
+function ScraperHealth({ scrapers, lang }) {
+    return (
+        <section className="admin-section">
+            <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
+            <div className="scraper-grid">
+                {scrapers.filter(s => s.operator !== 'tele2').map((s) => {
+                    const isOnline = Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
+                    return (
+                    <div key={s.operator} className="premium-card scraper-card">
+                        <div className="scraper-main">
+                            <div className={`status-dot ${isOnline ? 'online' : 'stale'}`}></div>
+                            <div className="scraper-info">
+                                <span className="operator-name">{s.operator.toUpperCase()}</span>
+                                <span className="last-scrape">
+                                    {lang === "sv" ? "Senaste: " : "Last Sync: "}
+                                    {new Date(s.last_scraped_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="scraper-date">
+                            {new Date(s.last_scraped_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
+/**
+ * Component for Report Moderation Table
+ */
+function ReportModeration({ reports, handleReportAction, lang }) {
+    return (
+        <section className="admin-section">
+            <h2 className="section-title font-heading">{lang === "sv" ? "Ärendehantering" : "User Report Moderation"}</h2>
+            <div className="premium-card table-card">
+                <div className="table-wrapper custom-scrollbar">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
+                                <th>{lang === "sv" ? "Ärende" : "Title"}</th>
+                                <th>Status</th>
+                                <th>{lang === "sv" ? "Datum" : "Date"}</th>
+                                <th>{lang === "sv" ? "Åtgärd" : "Actions"}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {reports.map((r) => (
+                                <tr key={r.id}>
+                                    <td className="op-cell">{r.operator_name || "General"}</td>
+                                    <td className="title-cell">{r.title}</td>
+                                    <td>
+                                        <span className={`status-badge-mini ${r.status}`}>
+                                            {r.status}
+                                        </span>
+                                    </td>
+                                    <td className="date-cell">
+                                        {r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}
+                                    </td>
+                                    <td className="actions-cell">
+                                        {r.status === "pending" ? (
+                                            <div className="action-btns">
+                                                <button onClick={() => handleReportAction(r.id, "verify")} className="btn-verify">Verify</button>
+                                                <button onClick={() => handleReportAction(r.id, "reject")} className="btn-reject">Reject</button>
+                                            </div>
+                                        ) : (
+                                            <span className="processed-label">Processed</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+/**
+ * Component for Outage Management Table
+ */
+function OutageManagement({ outageMgr, lang }) {
+    const { outages, outagesLoading, startEditing, page, hasMore, fetchOutages, searchQuery, filterOperator, filterStatus, setPage } = outageMgr;
+    
+    const outageList = useMemo(() => {
+        if (outagesLoading) {
+            return (
+                <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
+                        <div className="loading-spinner" style={{ margin: "0 auto" }}></div>
+                    </td>
+                </tr>
+            );
+        }
+        
+        if (outages.length === 0) {
+            return (
+                <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
+                        {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
+                    </td>
+                </tr>
+            );
+        }
+
+        return outages.map((o) => {
+            const rowClass = o.quality_issues?.length > 0 ? "row-low-quality" : "";
+            const coordClass = o.latitude ? "" : "text-error";
+            const coordText = o.latitude 
+                ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` 
+                : (lang === "sv" ? "Saknas" : "Missing");
+
+            return (
+                <tr key={o.id} className={rowClass}>
+                    <td className="id-cell">
+                        #{o.id}
+                        {o.quality_issues?.includes("missing_coords") && <span className="quality-tag" title="Missing Coordinates">📍</span>}
+                        {o.quality_issues?.includes("missing_end_date") && <span className="quality-tag" title="Missing End Date">⏱️</span>}
+                    </td>
+                    <td className="op-cell">{o.operator_name}</td>
+                    <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
+                    <td>
+                        <span className={`status-badge-mini ${o.status}`}>
+                            {o.status}
+                        </span>
+                    </td>
+                    <td className={`coord-cell ${coordClass}`}>
+                        {coordText}
+                    </td>
+                    <td className="actions-cell">
+                        <button onClick={() => startEditing(o)} className="btn-edit">
+                            {lang === "sv" ? "Redigera" : "Edit"}
+                        </button>
+                    </td>
+                </tr>
+            );
+        });
+    }, [outages, outagesLoading, lang, startEditing]);
+
+    return (
+        <section className="admin-section">
+            <div className="section-header-row">
+                <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{lang === "sv" ? "Hantera driftstörningar" : "Outage Management"}</h2>
+
+                <div className="filter-controls">
+                    <input
+                        type="text"
+                        placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
+                        value={outageMgr.searchQuery}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            outageMgr.setSearchQuery(val);
+                            clearTimeout(outageMgr.searchTimerRef.current);
+                            outageMgr.searchTimerRef.current = setTimeout(() => {
+                                outageMgr.handleFilterChange(val, outageMgr.filterOperator, outageMgr.filterStatus);
+                            }, 400);
+                        }}
+                        className="search-input"
+                    />
+                    <select
+                        value={outageMgr.filterOperator}
+                        onChange={(e) => { outageMgr.setFilterOperator(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, e.target.value, outageMgr.filterStatus); }}
+                        className="filter-select"
+                    >
+                        <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
+                        <option value="telia">Telia</option>
+                        <option value="telenor">Telenor</option>
+                        <option value="tre">Tre</option>
+                    </select>
+                    <select
+                        value={outageMgr.filterStatus}
+                        onChange={(e) => { outageMgr.setFilterStatus(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, e.target.value); }}
+                        className="filter-select"
+                    >
+                        <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
+                        <option value="scheduled">Scheduled</option>
+                    </select>
+                    <div className="quality-filters">
+                        <label className="filter-checkbox">
+                            <input 
+                                type="checkbox" 
+                                checked={outageMgr.filterMissingCoords} 
+                                onChange={(e) => {
+                                    outageMgr.setFilterMissingCoords(e.target.checked);
+                                    outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, e.target.checked, outageMgr.filterMissingEndDate);
+                                }} 
+                            />
+                            {lang === "sv" ? "Saknar koordinater" : "Missing Coords"}
+                        </label>
+                        <label className="filter-checkbox">
+                            <input 
+                                type="checkbox" 
+                                checked={outageMgr.filterMissingEndDate} 
+                                onChange={(e) => {
+                                    outageMgr.setFilterMissingEndDate(e.target.checked);
+                                    outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, outageMgr.filterMissingCoords, e.target.checked);
+                                }} 
+                            />
+                            {lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div className="network-sharing-note" style={{ margin: '15px 0', padding: '15px 20px', backgroundColor: 'rgba(56, 189, 248, 0.05)', borderLeft: '4px solid var(--accent-primary)', borderRadius: '0 6px 6px 0' }}>
+                <h4 style={{ margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
+                    <span style={{ fontSize: '1.2rem' }}>ℹ️</span> 
+                    {lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)"}
+                </h4>
+                <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    {lang === "sv" 
+                        ? "Flera varumärken hyร in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" 
+                        : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:"}
+                </p>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                    <li><strong>Telia:</strong> Halebop, Fello</li>
+                    <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
+                    <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
+                    <li><strong>Tre:</strong> Hallon</li>
+                </ul>
+            </div>
+
+            <div className="premium-card table-card" style={{ marginTop: '20px' }}>
+                <div className="table-wrapper custom-scrollbar">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
+                                <th>{lang === "sv" ? "Titel" : "Title"}</th>
+                                <th>Status</th>
+                                <th>{lang === "sv" ? "Position" : "Coordinates"}</th>
+                                <th>{lang === "sv" ? "Åtgärd" : "Actions"}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {outageList}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', padding: '10px 0' }}>
+                    <button
+                        className="btn-secondary"
+                        disabled={page === 0 || outagesLoading}
+                        onClick={() => {
+                            const newPage = page - 1;
+                            setPage(newPage);
+                            fetchOutages(newPage);
+                        }}
+                    >
+                        {lang === "sv" ? "← Föregående" : "← Previous"}
+                    </button>
+                    <span style={{ alignSelf: 'center', opacity: 0.7 }}>
+                        {lang === "sv" ? `Sida ${page + 1}` : `Page ${page + 1}`}
+                    </span>
+                    <button
+                        className="btn-secondary"
+                        disabled={!hasMore || outagesLoading}
+                        onClick={() => {
+                            const newPage = page + 1;
+                            setPage(newPage);
+                            fetchOutages(newPage);
+                        }}
+                    >
+                        {lang === "sv" ? "Nästa →" : "Next →"}
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+/**
+ * Main Admin Page Component
+ */
 export default function AdminPage() {
     const { lang } = useLanguage();
-    const { addToast } = useToast();
     const [mounted, setMounted] = useState(false);
     
     const adminData = useAdminData();
     const outageMgr = useOutageManagement();
     
+    const { fetchData } = adminData;
+    const { fetchOutages } = outageMgr;
+
     useEffect(() => {
         setMounted(true);
-        adminData.fetchData();
-        outageMgr.fetchOutages(0);
-    }, []);
+        fetchData();
+        fetchOutages(0);
+    }, [fetchData, fetchOutages]);
 
     useEffect(() => {
         if (outageMgr.editingOutage) {
@@ -209,7 +504,7 @@ export default function AdminPage() {
         return () => { document.body.style.overflow = 'unset'; };
     }, [outageMgr.editingOutage]);
 
-    if (adminData.loading) return <div className="loading">Loading...</div>;
+    if (!mounted || adminData.loading) return <div className="loading">Loading...</div>;
 
     return (
         <div className="admin-container animate-fade-in">
@@ -222,246 +517,17 @@ export default function AdminPage() {
                 </p>
             </header>
 
-            <section className="admin-section">
-                <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
-                <div className="scraper-grid">
-                    {adminData.scrapers.filter(s => s.operator !== 'tele2').map((s) => {
-                        const isOnline = new Date() - new Date(s.last_scraped_at) < 3600000;
-                        return (
-                        <div key={s.operator} className="premium-card scraper-card">
-                            <div className="scraper-main">
-                                <div className={`status-dot ${isOnline ? 'online' : 'stale'}`}></div>
-                                <div className="scraper-info">
-                                    <span className="operator-name">{s.operator.toUpperCase()}</span>
-                                    <span className="last-scrape">
-                                        {lang === "sv" ? "Senaste: " : "Last Sync: "}
-                                        {new Date(s.last_scraped_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="scraper-date">
-                                {new Date(s.last_scraped_at).toLocaleDateString()}
-                            </div>
-                        </div>
-                        );
-                    })}
-                </div>
-            </section>
+            <ScraperHealth scrapers={adminData.scrapers} lang={lang} />
+            
+            <ReportModeration 
+                reports={adminData.reports} 
+                handleReportAction={adminData.handleReportAction} 
+                lang={lang} 
+            />
 
-            <section className="admin-section">
-                <h2 className="section-title font-heading">{lang === "sv" ? "Ärendehantering" : "User Report Moderation"}</h2>
-                <div className="premium-card table-card">
-                    <div className="table-wrapper custom-scrollbar">
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                    <th>{lang === "sv" ? "Ärende" : "Title"}</th>
-                                    <th>{lang === "sv" ? "Status" : "Status"}</th>
-                                    <th>{lang === "sv" ? "Datum" : "Date"}</th>
-                                    <th>{lang === "sv" ? "Åtgärd" : "Actions"}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {adminData.reports.map((r) => (
-                                    <tr key={r.id}>
-                                        <td className="op-cell">{r.operator_name || "General"}</td>
-                                        <td className="title-cell">{r.title}</td>
-                                        <td>
-                                            <span className={`status-badge-mini ${r.status}`}>
-                                                {r.status}
-                                            </span>
-                                        </td>
-                                        <td className="date-cell">
-                                            {r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}
-                                        </td>
-                                        <td className="actions-cell">
-                                            {r.status === "pending" ? (
-                                                <div className="action-btns">
-                                                    <button onClick={() => adminData.handleReportAction(r.id, "verify")} className="btn-verify">Verify</button>
-                                                    <button onClick={() => adminData.handleReportAction(r.id, "reject")} className="btn-reject">Reject</button>
-                                                </div>
-                                            ) : (
-                                                <span className="processed-label">Processed</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+            <OutageManagement outageMgr={outageMgr} lang={lang} />
 
-            <section className="admin-section">
-                <div className="section-header-row">
-                    <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{lang === "sv" ? "Hantera driftstörningar" : "Outage Management"}</h2>
-
-                    <div className="filter-controls">
-                        <input
-                            type="text"
-                            placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
-                            value={outageMgr.searchQuery}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                outageMgr.setSearchQuery(val);
-                                clearTimeout(outageMgr.searchTimerRef.current);
-                                outageMgr.searchTimerRef.current = setTimeout(() => {
-                                    outageMgr.handleFilterChange(val, outageMgr.filterOperator, outageMgr.filterStatus);
-                                }, 400);
-                            }}
-                            className="search-input"
-                        />
-                        <select
-                            value={outageMgr.filterOperator}
-                            onChange={(e) => { outageMgr.setFilterOperator(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, e.target.value, outageMgr.filterStatus); }}
-                            className="filter-select"
-                        >
-                            <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
-                            <option value="telia">Telia</option>
-                            <option value="telenor">Telenor</option>
-                            <option value="tre">Tre</option>
-                        </select>
-                        <select
-                            value={outageMgr.filterStatus}
-                            onChange={(e) => { outageMgr.setFilterStatus(e.target.value); outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, e.target.value); }}
-                            className="filter-select"
-                        >
-                            <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
-                            <option value="scheduled">Scheduled</option>
-                        </select>
-                        <div className="quality-filters">
-                            <label className="filter-checkbox">
-                                <input 
-                                    type="checkbox" 
-                                    checked={outageMgr.filterMissingCoords} 
-                                    onChange={(e) => {
-                                        outageMgr.setFilterMissingCoords(e.target.checked);
-                                        outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, e.target.checked, outageMgr.filterMissingEndDate);
-                                    }} 
-                                />
-                                {lang === "sv" ? "Saknar koordinater" : "Missing Coords"}
-                            </label>
-                            <label className="filter-checkbox">
-                                <input 
-                                    type="checkbox" 
-                                    checked={outageMgr.filterMissingEndDate} 
-                                    onChange={(e) => {
-                                        outageMgr.setFilterMissingEndDate(e.target.checked);
-                                        outageMgr.handleFilterChange(outageMgr.searchQuery, outageMgr.filterOperator, outageMgr.filterStatus, outageMgr.filterMissingCoords, e.target.checked);
-                                    }} 
-                                />
-                                {lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="network-sharing-note" style={{ margin: '15px 0', padding: '15px 20px', backgroundColor: 'rgba(56, 189, 248, 0.05)', borderLeft: '4px solid var(--accent-primary)', borderRadius: '0 6px 6px 0' }}>
-                    <h4 style={{ margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
-                        <span style={{ fontSize: '1.2rem' }}>ℹ️</span> 
-                        {lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)"}
-                    </h4>
-                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                        {lang === "sv" 
-                            ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" 
-                            : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:"}
-                    </p>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
-                        <li><strong>Telia:</strong> Halebop, Fello</li>
-                        <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
-                        <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
-                        <li><strong>Tre:</strong> Hallon</li>
-                    </ul>
-                </div>
-
-                <div className="premium-card table-card" style={{ marginTop: '20px' }}>
-                    <div className="table-wrapper custom-scrollbar">
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                    <th>{lang === "sv" ? "Titel" : "Title"}</th>
-                                    <th>{lang === "sv" ? "Status" : "Status"}</th>
-                                    <th>{lang === "sv" ? "Position" : "Coordinates"}</th>
-                                    <th>{lang === "sv" ? "Åtgärd" : "Actions"}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {outageMgr.outagesLoading ? (
-                                    <tr>
-                                        <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
-                                            <div className="loading-spinner" style={{ margin: "0 auto" }}></div>
-                                        </td>
-                                    </tr>
-                                ) : outageMgr.outages.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" style={{ textAlign: "center", padding: "2rem" }}>
-                                            {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    outageMgr.outages.map((o) => (
-                                        <tr key={o.id} className={o.quality_issues?.length > 0 ? "row-low-quality" : ""}>
-                                            <td className="id-cell">
-                                                #{o.id}
-                                                {o.quality_issues?.includes("missing_coords") && <span className="quality-tag" title="Missing Coordinates">📍</span>}
-                                                {o.quality_issues?.includes("missing_end_date") && <span className="quality-tag" title="Missing End Date">⏱️</span>}
-                                            </td>
-                                            <td className="op-cell">{o.operator_name}</td>
-                                            <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
-                                            <td>
-                                                <span className={`status-badge-mini ${o.status}`}>
-                                                    {o.status}
-                                                </span>
-                                            </td>
-                                            <td className={`coord-cell ${!o.latitude ? "text-error" : ""}`}>
-                                                {o.latitude ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` : (lang === "sv" ? "Saknas" : "Missing")}
-                                            </td>
-                                            <td className="actions-cell">
-                                                <button onClick={() => outageMgr.startEditing(o)} className="btn-edit">
-                                                    {lang === "sv" ? "Redigera" : "Edit"}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', padding: '10px 0' }}>
-                        <button
-                            className="btn-secondary"
-                            disabled={outageMgr.page === 0 || outageMgr.outagesLoading}
-                            onClick={() => {
-                                const newPage = outageMgr.page - 1;
-                                outageMgr.setPage(newPage);
-                                outageMgr.fetchOutages(newPage);
-                            }}
-                        >
-                            {lang === "sv" ? "← Föregående" : "← Previous"}
-                        </button>
-                        <span style={{ alignSelf: 'center', opacity: 0.7 }}>
-                            {lang === "sv" ? `Sida ${outageMgr.page + 1}` : `Page ${outageMgr.page + 1}`}
-                        </span>
-                        <button
-                            className="btn-secondary"
-                            disabled={!outageMgr.hasMore || outageMgr.outagesLoading}
-                            onClick={() => {
-                                const newPage = outageMgr.page + 1;
-                                outageMgr.setPage(newPage);
-                                outageMgr.fetchOutages(newPage);
-                            }}
-                        >
-                            {lang === "sv" ? "Nästa →" : "Next →"}
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {mounted && outageMgr.editingOutage && createPortal(
+            {outageMgr.editingOutage && createPortal(
                 <div className="modal-overlay">
                     <div className="premium-card modal-content animate-slide-up">
                         <header className="modal-header">
@@ -678,4 +744,4 @@ export default function AdminPage() {
             `}</style>
         </div>
     );
- }
+}
