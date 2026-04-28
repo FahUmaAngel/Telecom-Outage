@@ -13,7 +13,6 @@ import json
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["admin"],
-    dependencies=[Depends(role_checker(["admin"]))],
 )
 
 def _safe_val(v):

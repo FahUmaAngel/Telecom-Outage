@@ -2,6 +2,7 @@
 
 import { Search, Filter, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

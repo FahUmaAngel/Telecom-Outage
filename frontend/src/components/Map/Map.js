@@ -223,7 +223,7 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
                                 <Popup className="premium-popup">
                                     <div className="popup-content">
                                         <h3 className="font-heading" style={{ color: "#faad14" }}>
-                                            {lang === "sv" ? "Hotspot (Crowd)" : "Hotspot (Crowd)"}
+                                            Hotspot (Crowd)
                                         </h3>
                                         <p><strong>Operator:</strong> {hotspot.operator_name}</p>
                                         <p><strong>Reports:</strong> {hotspot.report_count}</p>

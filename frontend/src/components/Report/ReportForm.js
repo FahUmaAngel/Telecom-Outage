@@ -189,7 +189,7 @@ export default function ReportForm({ operators }) {
                         </div>
 
                         <div className="form-group">
-                            <label>{lang === "sv" ? "Impact" : "Impact"}</label>
+                            <label>Impact</label>
                             <select name="impact" value={formData.impact} onChange={handleInputChange} className="premium-select">
                                 <option value="No Service">{lang === "sv" ? "Ingen tjänst" : "No Service"}</option>
                                 <option value="Slow Connection">{lang === "sv" ? "Långsam anslutning" : "Slow Connection"}</option>

@@ -74,32 +74,7 @@ const ErrorState = ({ error, lang, onBack }) => (
     </div>
 );
 
-export default function OutageDetailPage() {
-    const { id } = useParams();
-    const router = useRouter();
-    const { lang, t } = useLanguage();
-    const [outage, setOutage] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchOutage = async () => {
-            try {
-                const data = await api.outages.get(id);
-                setOutage(data);
-            } catch (err) {
-                console.error("Failed to fetch outage details:", err);
-                setError(lang === "sv" ? "Kunde inte hämta information om avbrottet." : "Failed to fetch outage details.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) fetchOutage();
-    }, [id, lang]);
-
-    if (loading) return <LoadingState />;
-    if (error || !outage) return <ErrorState error={error} lang={lang} onBack={() => router.back()} />;
 
 const OutageTimeline = ({ outage, lang, hasUpdates, isResolved, hasEstimation, resolutionDesc }) => (
     <section className="premium-card history-section">

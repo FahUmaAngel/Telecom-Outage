@@ -227,8 +227,8 @@ function ReportsContent() {
                                                 const displayLimit = 5;
                                                 return (
                                                     <>
-                                                        {sorted.slice(0, displayLimit).map((s, i) => (
-                                                            <span key={i} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
+                                                        {sorted.slice(0, displayLimit).map((s) => (
+                                                            <span key={s} className={`mini-tag ${["5g+", "5g", "4g", "3g", "2g"].includes(s.toLowerCase()) ? 'mobile' : ''}`}>{s}</span>
                                                         ))}
                                                         {sorted.length > displayLimit && (
                                                             <span className="mini-tag more">+{sorted.length - displayLimit}</span>

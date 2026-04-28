@@ -15,13 +15,13 @@ export const ThemeProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.dataset.theme = theme;
     }, [theme]);
 
     const toggleTheme = () => {
         const newTheme = theme === "light" ? "dark" : "light";
         setTheme(newTheme);
-        document.documentElement.setAttribute("data-theme", newTheme);
+        document.documentElement.dataset.theme = newTheme;
         localStorage.setItem("theme", newTheme);
     };
 
