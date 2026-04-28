@@ -17,7 +17,7 @@ down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-CURRENT_TIMESTAMP_SQL = CURRENT_TIMESTAMP_SQL
+CURRENT_TIMESTAMP_SQL = sa.text('(CURRENT_TIMESTAMP)')
 
 
 def upgrade() -> None:

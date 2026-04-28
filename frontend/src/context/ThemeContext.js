@@ -4,15 +4,15 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
-const getInitialTheme = () => {
-    if (typeof window === "undefined") {
-        return "dark";
-    }
-    return localStorage.getItem("theme") || "dark";
-};
-
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState(getInitialTheme);
+    const [theme, setTheme] = useState("dark"); // Default to match server
+
+    useEffect(() => {
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme && storedTheme !== "dark") {
+            setTheme(storedTheme);
+        }
+    }, []);
 
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);
