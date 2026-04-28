@@ -7,6 +7,7 @@ from ..dependencies import get_db, RoleChecker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
 from ..utils.geocoding import resolve_place
+from ..constants import OutageStatus
 import json
 
 router = APIRouter(
@@ -163,7 +164,7 @@ def verify_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
         
-    report.status = "verified"
+    report.status = OutageStatus.VERIFIED
     db.commit()
     db.refresh(report)
     
@@ -185,7 +186,7 @@ def reject_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
         
-    report.status = "rejected"
+    report.status = OutageStatus.REJECTED
     db.commit()
     db.refresh(report)
     

@@ -809,7 +809,7 @@ export default function AdminPage() {
                 <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
                 <div className="scraper-grid">
                     {scrapers.filter(s => s.operator !== 'tele2').map((s) => (
-                        <div key={s.operator} className="premium-card scraper-card">
+                        <div key={`scraper-${s.operator}`} className="premium-card scraper-card">
                             <div className="scraper-main">
                                 <div className={`status-dot ${new Date() - new Date(s.last_scraped_at) < 3600000 ? 'online' : 'stale'}`}></div>
                                 <div className="scraper-info">
@@ -844,7 +844,7 @@ export default function AdminPage() {
                             </thead>
                             <tbody>
                                 {reports.map((r) => (
-                                    <tr key={r.id}>
+                                    <tr key={`report-${r.id}`}>
                                         <td className="op-cell">{r.operator_name || "General"}</td>
                                         <td className="title-cell">{r.title}</td>
                                         <td>
@@ -878,7 +878,9 @@ export default function AdminPage() {
                     <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{lang === "sv" ? "Hantera driftstörningar" : "Outage Management"}</h2>
 
                     <div className="filter-controls">
+                        <label htmlFor="search-outages-input" className="sr-only">Search Outages</label>
                         <input
+                            id="search-outages-input"
                             type="text"
                             placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
                             value={searchQuery}
@@ -892,7 +894,9 @@ export default function AdminPage() {
                             }}
                             className="search-input"
                         />
+                        <label htmlFor="operator-filter" className="sr-only">Operator Filter</label>
                         <select
+                            id="operator-filter"
                             value={filterOperator}
                             onChange={(e) => { setFilterOperator(e.target.value); handleFilterChange(searchQuery, e.target.value, filterStatus); }}
                             className="filter-select"
@@ -902,7 +906,9 @@ export default function AdminPage() {
                             <option value="telenor">Telenor</option>
                             <option value="tre">Tre</option>
                         </select>
+                        <label htmlFor="status-filter" className="sr-only">Status Filter</label>
                         <select
+                            id="status-filter"
                             value={filterStatus}
                             onChange={(e) => { setFilterStatus(e.target.value); handleFilterChange(searchQuery, filterOperator, e.target.value); }}
                             className="filter-select"
@@ -911,8 +917,9 @@ export default function AdminPage() {
                             <option value="scheduled">Scheduled</option>
                         </select>
                         <div className="quality-filters">
-                            <label className="filter-checkbox">
+                            <label htmlFor="missing-coords-check" className="filter-checkbox">
                                 <input 
+                                    id="missing-coords-check"
                                     type="checkbox" 
                                     checked={filterMissingCoords} 
                                     onChange={(e) => {
@@ -922,8 +929,9 @@ export default function AdminPage() {
                                 />
                                 {lang === "sv" ? "Saknar koordinater" : "Missing Coords"}
                             </label>
-                            <label className="filter-checkbox">
+                            <label htmlFor="missing-end-check" className="filter-checkbox">
                                 <input 
+                                    id="missing-end-check"
                                     type="checkbox" 
                                     checked={filterMissingEndDate} 
                                     onChange={(e) => {
@@ -983,7 +991,7 @@ export default function AdminPage() {
                                     </tr>
                                 ) : (
                                     outages.map((o) => (
-                                        <tr key={o.id} className={o.quality_issues?.length > 0 ? "row-low-quality" : ""}>
+                                        <tr key={`outage-${o.id}`} className={o.quality_issues?.length > 0 ? "row-low-quality" : ""}>
                                             <td className="id-cell">
                                                 #{o.id}
                                                 {o.quality_issues?.includes("missing_coords") && <span className="quality-tag" title="Missing Coordinates">📍</span>}

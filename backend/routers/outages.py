@@ -3,7 +3,7 @@ Outage endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
 from scrapers.db.models import Outage, Operator, Region
@@ -30,7 +30,6 @@ def _effective_status(o):
             # Make end_dt timezone aware (UTC) if it's naive
             if end_dt.tzinfo is None:
                 end_dt = end_dt.replace(tzinfo=timezone.utc)
-            # Compare with current UTC time
             if end_dt < datetime.now(timezone.utc):
                 return 'resolved'
         except Exception:
@@ -39,7 +38,7 @@ def _effective_status(o):
 
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     days: int = 7
 ):
@@ -84,7 +83,7 @@ def get_outage_history(
 
 @router.get("/", response_model=List[OutageResponse])
 def get_outages(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     status: Optional[str] = None,
     lat: Optional[float] = None,
@@ -148,7 +147,7 @@ def get_outages(
     return response_list
 
 @router.get("/{outage_id}", response_model=OutageResponse)
-def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
+def get_outage_detail(outage_id: int, db: Annotated[Session, Depends(get_db)]):
     outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
     if not outage:
         raise HTTPException(status_code=404, detail="Outage not found")

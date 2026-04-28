@@ -112,7 +112,7 @@ def read_root():
 @app.get("/api/v1/scheduler/status")
 def scheduler_status():
     """Check scheduler status and next run times"""
-    if not scheduler:
+    if not scheduler or not scheduler.running:
         return {"status": "disabled", "message": "Scheduler is not running"}
     
     jobs = []
