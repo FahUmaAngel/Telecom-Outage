@@ -27,8 +27,10 @@ def _effective_status(o):
     if end:
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
-            end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.now(timezone.utc).replace(tzinfo=None):
+            # Make end_dt timezone aware (UTC) if it's naive
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            if end_dt < datetime.now(timezone.utc):
                 return 'resolved'
         except Exception:
             pass
@@ -43,7 +45,7 @@ def get_outage_history(
     """
     Get resolved outages history.
     """
-    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
+    since_date = datetime.now(timezone.utc) - timedelta(days=days)
     query = db.query(Outage).join(Operator).filter(
         Outage.status == "resolved",
         Outage.end_time >= since_date
@@ -160,7 +162,7 @@ def get_outage_detail(outage_id: int, db: Annotated[Session, Depends(get_db)]):
         raw_data_id=outage.raw_data_id,
         title=outage.title if outage.title else {},
         description=outage.description,
-        status=_safe_val(outage.status),
+        status=_effective_status(outage),
         severity=_safe_val(outage.severity),
         start_time=outage.start_time,
         end_time=outage.end_time,

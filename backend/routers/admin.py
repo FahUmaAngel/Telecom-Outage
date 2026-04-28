@@ -1,20 +1,44 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Dict, Any, Optional, Annotated
-from ..dependencies import get_db
+from datetime import datetime, timezone
+from ..dependencies import get_db, RoleChecker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
 from ..utils.geocoding import resolve_place
-from ..constants import OutageStatus, QualityIssue
+from ..constants import OutageStatus
+import json
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(
+    prefix="/api/v1/admin",
+    tags=["admin"],
+    dependencies=[Depends(RoleChecker(["admin"]))],
+)
 
 def _safe_val(v):
     """Safely extract the value from an Enum or return as is."""
     if v is None:
         return None
     return v.value if hasattr(v, 'value') else v
+
+def _effective_status(o: Outage):
+    """Keep detail and list responses aligned when the ETA has already passed."""
+    raw = _safe_val(o.status) or "active"
+    if raw.lower() == "resolved":
+        return raw
+
+    end = o.end_time or o.estimated_fix_time
+    if end:
+        try:
+            end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
+            end_dt = end_dt.replace(tzinfo=None)
+            if end_dt < datetime.now(timezone.utc).replace(tzinfo=None):
+                return "resolved"
+        except Exception:
+            pass
+
+    return raw
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
 def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
@@ -32,14 +56,46 @@ def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
         for r in results
     ]
 
+def _map_outage_to_response(o: Outage) -> OutageResponse:
+    """Helper to map Outage model to OutageResponse schema."""
+    issues = []
+    if o.latitude is None or o.longitude is None:
+        issues.append("missing_coords")
+    if o.end_time is None:
+        issues.append("missing_end_date")
+        
+    return OutageResponse(
+        id=o.id,
+        incident_id=o.incident_id,
+        operator_id=o.operator_id,
+        operator_name=o.operator.name,
+        region_id=o.region_id,
+        region_name=o.region.name if o.region else None,
+        raw_data_id=o.raw_data_id,
+        title=o.title if o.title else {},
+        description=o.description,
+        status=_effective_status(o),
+        severity=_safe_val(o.severity),
+        start_time=o.start_time,
+        end_time=o.end_time,
+        estimated_fix_time=o.estimated_fix_time,
+        location=o.location,
+        latitude=o.latitude,
+        longitude=o.longitude,
+        affected_services=o.affected_services if o.affected_services else [],
+        place=o.place,
+        quality_issues=issues,
+        updated_at=o.updated_at
+    )
+
 @router.get("/outages", response_model=List[OutageResponse])
 def admin_get_outages(
     db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     status: Optional[str] = None,
     search: Optional[str] = None,
-    missing_coords: Optional[bool] = Query(None),
-    missing_end_date: Optional[bool] = Query(None),
+    missing_coords: Annotated[Optional[bool], Query()] = None,
+    missing_end_date: Annotated[Optional[bool], Query()] = None,
     limit: int = 100,
     offset: int = 0,
 ):
@@ -79,42 +135,9 @@ def admin_get_outages(
     ).order_by(Outage.updated_at.desc())
     
     outages = query.offset(offset).limit(limit).all()
-    
-    results = []
-    for o in outages:
-        issues = []
-        if o.latitude is None or o.longitude is None:
-            issues.append(QualityIssue.MISSING_COORDS)
-        if o.end_time is None:
-            issues.append(QualityIssue.MISSING_END_DATE)
-            
-        results.append(OutageResponse(
-            id=o.id,
-            incident_id=o.incident_id,
-            operator_id=o.operator_id,
-            operator_name=o.operator.name,
-            region_id=o.region_id,
-            region_name=o.region.name if o.region else None,
-            raw_data_id=o.raw_data_id,
-            title=o.title if o.title else {},
-            description=o.description,
-            status=_safe_val(o.status),
-            severity=_safe_val(o.severity),
-            start_time=o.start_time,
-            end_time=o.end_time,
-            estimated_fix_time=o.estimated_fix_time,
-            location=o.location,
-            latitude=o.latitude,
-            longitude=o.longitude,
-            affected_services=o.affected_services if o.affected_services else [],
-            place=o.place,
-            quality_issues=issues,
-            updated_at=o.updated_at
-        ))
-    
-    return results
+    return [_map_outage_to_response(o) for o in outages]
 
-@router.put("/outages/{outage_id}", response_model=OutageResponse)
+@router.put("/outages/{outage_id}", response_model=OutageResponse, responses={404: {"description": "Outage not found"}})
 def update_outage(
     outage_id: int, 
     update_data: OutageUpdate,
@@ -132,37 +155,9 @@ def update_outage(
     db.commit()
     db.refresh(outage)
     
-    issues = []
-    if outage.latitude is None or outage.longitude is None:
-        issues.append(QualityIssue.MISSING_COORDS)
-    if outage.end_time is None:
-        issues.append(QualityIssue.MISSING_END_DATE)
+    return _map_outage_to_response(outage)
 
-    return OutageResponse(
-        id=outage.id,
-        incident_id=outage.incident_id,
-        operator_id=outage.operator_id,
-        operator_name=outage.operator.name,
-        region_id=outage.region_id,
-        region_name=outage.region.name if outage.region else None,
-        raw_data_id=outage.raw_data_id,
-        title=outage.title if outage.title else {},
-        description=outage.description,
-        status=_safe_val(outage.status),
-        severity=_safe_val(outage.severity),
-        start_time=outage.start_time,
-        end_time=outage.end_time,
-        estimated_fix_time=outage.estimated_fix_time,
-        location=outage.location,
-        latitude=outage.latitude,
-        longitude=outage.longitude,
-        affected_services=outage.affected_services if outage.affected_services else [],
-        place=outage.place,
-        quality_issues=issues,
-        updated_at=outage.updated_at
-    )
-
-@router.post("/reports/{report_id}/verify", response_model=ReportResponse)
+@router.post("/reports/{report_id}/verify", response_model=ReportResponse, responses={404: {"description": "Report not found"}})
 def verify_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     """Verify a user report."""
     report = db.query(UserReport).filter(UserReport.id == report_id).first()
@@ -184,7 +179,7 @@ def verify_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
         created_at=report.created_at
     )
 
-@router.post("/reports/{report_id}/reject", response_model=ReportResponse)
+@router.post("/reports/{report_id}/reject", response_model=ReportResponse, responses={404: {"description": "Report not found"}})
 def reject_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
     """Reject a user report."""
     report = db.query(UserReport).filter(UserReport.id == report_id).first()
@@ -206,14 +201,10 @@ def reject_report(report_id: int, db: Annotated[Session, Depends(get_db)]):
         created_at=report.created_at
     )
 
-@router.post("/resolve-place", response_model=ResolvePlaceResponse)
-def admin_resolve_place(
-    request: ResolvePlaceRequest, 
-    db: Annotated[Session, Depends(get_db)]
-):
+@router.post("/resolve-place", response_model=ResolvePlaceResponse, responses={404: {"description": "Place not found"}})
+def admin_resolve_place(request: ResolvePlaceRequest, db: Annotated[Session, Depends(get_db)]):
     """Resolve a place string to coordinates and Map to Region."""
     from scrapers.db.models import Region
-    import json
     
     result = resolve_place(request.query)
     if not result:
@@ -245,7 +236,7 @@ def admin_resolve_place(
                 try:
                     name_dict = json.loads(db_region.name)
                     result['display_name'] = name_dict.get('sv') or result['display_name']
-                except Exception:
+                except json.JSONDecodeError:
                     pass
             elif isinstance(db_region.name, dict):
                 result['display_name'] = db_region.name.get('sv') or result['display_name']

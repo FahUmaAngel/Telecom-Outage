@@ -80,7 +80,9 @@ app = FastAPI(
 )
 
 # CORS Configuration
-allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or "http://localhost:3000,http://localhost:8080"
+allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or (
+    "https://localhost:3000,https://localhost:8080"
+)
 origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 
 app.add_middleware(SecurityHeadersMiddleware)

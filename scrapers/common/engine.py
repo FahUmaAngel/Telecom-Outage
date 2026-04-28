@@ -162,7 +162,7 @@ def classify_services(text: str) -> List[ServiceType]:
     if not services:
         return [ServiceType.MOBILE_4G, ServiceType.MOBILE_5G]
 
-    return sorted(list(services))
+    return sorted(services)
 
 
 def classify_status(text: str, current_status: OutageStatus = OutageStatus.ACTIVE) -> OutageStatus:

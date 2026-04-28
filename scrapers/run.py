@@ -143,7 +143,7 @@ def run_scrapers():
                 db.commit()
                 logger.info(f"Telenor: saved {len(telenor_result['outages'])} outages to database")
             else:
-                logger.error(f"✗ Telenor scraper failed")
+                logger.error("✗ Telenor scraper failed")
                 
         except Exception as e:
             logger.error(f"Telenor failed with exception: {e}", exc_info=True)

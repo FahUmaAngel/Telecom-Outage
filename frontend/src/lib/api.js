@@ -58,7 +58,8 @@ export const api = {
         outages: {
             list: (params = {}) => {
                 const query = new URLSearchParams(params).toString();
-                return fetcher(`/api/v1/admin/outages${query ? `?${query}` : ""}`);
+                const queryString = query ? `?${query}` : "";
+                return fetcher(`/api/v1/admin/outages${queryString}`);
             },
             update: (id, data) => fetcher(`/api/v1/admin/outages/${id}`, {
                 method: "PUT",

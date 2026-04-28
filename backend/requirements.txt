@@ -1,5 +1,9 @@
-fastapi>=0.100.0
-uvicorn[standard]>=0.20.0
-sqlalchemy>=2.0.0
-pydantic>=2.0.0
-python-dotenv>=1.0.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+sqlalchemy>=2.0.29
+pydantic>=2.7.0
+python-dotenv>=1.2.2
+h11>=0.16.0
+starlette>=0.37.2
+anyio>=4.4.0
+zipp>=3.19.1
