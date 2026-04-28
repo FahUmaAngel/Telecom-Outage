@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from typing import Annotated
 from ..dependencies import get_db
 from ..auth import authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from ..schemas import Token
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     response: Response,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[Session, Depends(get_db)]
 ):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:

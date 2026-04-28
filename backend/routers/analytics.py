@@ -94,6 +94,9 @@ def get_reliability(db: Annotated[Session, Depends(get_db)]):
 @router.get("/history", response_model=HistoricalTrendResponse)
 def get_historical_trend(db: Annotated[Session, Depends(get_db)], days: int = 30):
     """Get aggregated outage counts per day for the last X days."""
+    # Cap days to 365 to prevent DoS from large loop bounds
+    if days > 365:
+        days = 365
     since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
     
     # Query all outages created in the last X days

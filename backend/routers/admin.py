@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Dict, Any, Optional, Annotated
 from datetime import datetime, timezone
-from ..dependencies import get_db, RoleChecker
+from ..dependencies import get_db, role_checker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
 from ..utils.geocoding import resolve_place
@@ -13,7 +13,7 @@ import json
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["admin"],
-    dependencies=[Depends(RoleChecker(["admin"]))],
+    dependencies=[Depends(role_checker(["admin"]))],
 )
 
 def _safe_val(v):

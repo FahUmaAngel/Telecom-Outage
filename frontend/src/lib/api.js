@@ -1,7 +1,30 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const AUTH_TOKEN_STORAGE_KEY = "telecom-outage-auth-token";
 let authToken = null;
 
+const loadStoredAuthToken = () => {
+    if (typeof window === "undefined") {
+        return null;
+    }
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+};
+
+const persistAuthToken = (token) => {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    if (token) {
+        window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    } else {
+        window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    }
+};
+
 const getAuthToken = () => {
+    if (!authToken) {
+        authToken = loadStoredAuthToken();
+    }
     return authToken;
 };
 
@@ -28,6 +51,10 @@ const fetcher = async (endpoint, options = {}) => {
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            authToken = null;
+            persistAuthToken(null);
+        }
         const error = await response.json().catch(() => ({}));
         throw new Error(error.detail || error.message || "Something went wrong");
     }
@@ -58,13 +85,16 @@ export const api = {
 
             if (result.access_token) {
                 authToken = result.access_token;
+                persistAuthToken(result.access_token);
             }
 
             return result;
         },
         logout: () => {
             authToken = null;
+            persistAuthToken(null);
         },
+        getToken: () => getAuthToken(),
     },
     operators: {
         list: () => fetcher("/api/v1/operators"),

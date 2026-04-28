@@ -31,7 +31,7 @@ class RegionResponse(BaseModel):
 
 class OutageResponse(BaseModel):
     id: int
-    incident_id: Optional[str]
+    incident_id: Optional[str] = None
     operator_id: Optional[int] = None
     operator_name: str
     region_id: Optional[int] = None
@@ -39,23 +39,23 @@ class OutageResponse(BaseModel):
     raw_data_id: Optional[int] = None
     
     title: Dict[str, str] # Bilingual
-    description: Optional[Dict[str, str]]
+    description: Optional[Dict[str, str]] = None
     
     status: Optional[OutageStatus] = None
     severity: Optional[SeverityLevel] = None
     
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
-    estimated_fix_time: Optional[datetime]
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
     
-    location: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     
-    affected_services: List[str]
+    affected_services: List[str] = []
     place: Optional[str] = None
     quality_issues: Optional[List[str]] = None
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
     
     @field_validator('status', mode='before')
     @classmethod
@@ -83,9 +83,9 @@ class ReportCreate(BaseModel):
 
 class ReportResponse(BaseModel):
     id: int
-    operator_name: Optional[str]
+    operator_name: Optional[str] = None
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     latitude: float
     longitude: float
     status: str
@@ -152,7 +152,7 @@ class OperatorResponse(BaseModel):
         from_attributes = True
 
 class OutageUpdate(BaseModel):
-    incident_id: Optional[str] = None
+    incident_id: Optional[str] = None = None
     operator_id: Optional[int] = None
     region_id: Optional[int] = None
     raw_data_id: Optional[int] = None
