@@ -18,7 +18,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
 
-const Step1Problem = ({ formData, setFormData, handleInputChange, lang, operators }) => (
+const Step1Problem = ({ formData, setFormData, lang, operators }) => (
     <div className="step-fade-in">
         <h3 className="step-title">
             <Activity className="text-accent" />
@@ -69,7 +69,7 @@ const Step1Problem = ({ formData, setFormData, handleInputChange, lang, operator
                 id="impact-select"
                 name="impact" 
                 value={formData.impact} 
-                onChange={handleInputChange} 
+                onChange={(e) => setFormData(prev => ({ ...prev, impact: e.target.value }))} 
                 className="premium-select"
             >
                 <option value="No Service">{lang === "sv" ? "Ingen tjänst" : "No Service"}</option>
@@ -77,13 +77,30 @@ const Step1Problem = ({ formData, setFormData, handleInputChange, lang, operator
                 <option value="Intermittent">{lang === "sv" ? "Ostabil anslutning" : "Intermittent Issues"}</option>
             </select>
         </div>
+        <style jsx>{`
+            .step-fade-in { animation: fadeIn 0.4s ease-out; }
+            .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
+            .text-accent { color: var(--accent-primary); }
+            .form-group { margin-bottom: 24px; }
+            .form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+            .pill-selector { display: flex; flex-wrap: wrap; gap: 10px; }
+            .pill-selector button { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+            .pill-selector button:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+            .pill-selector button.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 4px 12px var(--accent-glow); }
+            .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            .service-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 10px; border-radius: 16px; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+            .service-card:hover { border-color: var(--accent-primary); color: var(--text-primary); }
+            .service-card.active { background: var(--accent-glow); border-color: var(--accent-primary); color: var(--accent-primary); }
+            .premium-select { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
+            .premium-select:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        `}</style>
     </div>
 );
 
 Step1Problem.propTypes = {
     formData: PropTypes.object.isRequired,
     setFormData: PropTypes.func.isRequired,
-    handleInputChange: PropTypes.func.isRequired,
     lang: PropTypes.string.isRequired,
     operators: PropTypes.array.isRequired,
 };
@@ -100,7 +117,7 @@ const Step2Location = ({ formData, getLocation, locationLoading, locationError, 
                 {lang === "sv" ? "Var är du?" : "Where are you?"}
             </h3>
 
-            <div className="location-box glass">
+            <div className="location-box">
                 <button
                     type="button"
                     onClick={getLocation}
@@ -127,6 +144,26 @@ const Step2Location = ({ formData, getLocation, locationLoading, locationError, 
                     className="premium-input"
                 />
             </div>
+            <style jsx>{`
+                .step-fade-in { animation: fadeIn 0.4s ease-out; }
+                .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
+                .text-accent { color: var(--accent-primary); }
+                .form-group { margin-bottom: 24px; }
+                .form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+                .location-box { margin-bottom: 24px; }
+                .geo-btn { width: 100%; padding: 16px; border-radius: 12px; border: 2px dashed var(--border-color); background: var(--surface-color); color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; }
+                .geo-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+                .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.05); }
+                .spinner-sm { width: 20px; height: 20px; border: 2px solid var(--accent-glow); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+                .label-error { color: var(--status-critical); font-size: 0.8rem; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+                .divider { text-align: center; margin: 24px 0; position: relative; }
+                .divider::before { content: ''; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
+                .divider span { position: relative; z-index: 2; background: var(--bg-color); padding: 0 12px; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
+                .premium-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
+                .premium-input:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
         </div>
     );
 };
@@ -173,6 +210,16 @@ const Step3Details = ({ formData, handleInputChange, lang }) => (
                 rows={4}
             />
         </div>
+        <style jsx>{`
+            .step-fade-in { animation: fadeIn 0.4s ease-out; }
+            .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
+            .text-accent { color: var(--accent-primary); }
+            .form-group { margin-bottom: 24px; }
+            .form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+            .premium-input, .premium-textarea { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
+            .premium-input:focus, .premium-textarea:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        `}</style>
     </div>
 );
 
@@ -278,7 +325,7 @@ export default function ReportForm({ operators }) {
 
     if (success) {
         return (
-            <div className="success-screen glass animate-scale-up">
+            <div className="success-screen animate-scale-up">
                 <div className="success-icon">
                     <CheckCircle2 size={64} color="var(--status-success)" />
                 </div>
@@ -287,6 +334,14 @@ export default function ReportForm({ operators }) {
                 <button onClick={() => globalThis.location.reload()} className="premium-btn">
                     {lang === "sv" ? "Skicka en till rapport" : "Submit another report"}
                 </button>
+                <style jsx>{`
+                    .success-screen { text-align: center; padding: 40px; border-radius: 24px; background: var(--surface-color); border: 1px solid var(--border-color); }
+                    .success-icon { margin-bottom: 24px; }
+                    .success-screen h2 { font-size: 2rem; margin-bottom: 16px; }
+                    .success-screen p { color: var(--text-secondary); margin-bottom: 32px; }
+                    .premium-btn { padding: 14px 28px; background: var(--accent-primary); color: white; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; }
+                    .premium-btn:hover { background: var(--accent-secondary); transform: translateY(-2px); }
+                `}</style>
             </div>
         );
     }
@@ -296,7 +351,7 @@ export default function ReportForm({ operators }) {
         : (lang === "sv" ? "Skicka Rapport" : "Submit Report");
 
     return (
-        <div className="report-wizard glass">
+        <div className="report-wizard">
             <div className="wizard-header">
                 <div className="progress-bar">
                     <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
@@ -315,7 +370,6 @@ export default function ReportForm({ operators }) {
                     <Step1Problem 
                         formData={formData} 
                         setFormData={setFormData} 
-                        handleInputChange={handleInputChange} 
                         lang={lang} 
                         operators={operators} 
                     />
@@ -361,41 +415,19 @@ export default function ReportForm({ operators }) {
             </form>
 
             <style jsx>{`
-                .report-wizard { padding: 32px; border-radius: 24px; max-width: 500px; margin: 0 auto; }
+                .report-wizard { border-radius: 24px; max-width: 500px; margin: 0 auto; }
                 .wizard-header { margin-bottom: 32px; }
                 .progress-bar { height: 4px; background: var(--surface-light); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
                 .progress-fill { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
                 .steps-indicator { display: flex; justify-content: space-between; }
                 .step-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s; }
                 .step-dot.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--accent-glow); }
-                .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
-                .text-accent { color: var(--accent-primary); }
-                .pill-selector { display: flex; flex-wrap: wrap; gap: 10px; }
-                .pill-selector button { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-                .pill-selector button.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
-                .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-                .service-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 10px; border-radius: 16px; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; transition: 0.3s; }
-                .service-card.active { background: var(--accent-glow); border-color: var(--accent-primary); color: var(--accent-primary); }
-                .geo-btn { width: 100%; padding: 16px; border-radius: 12px; border: 2px dashed var(--border-color); background: transparent; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; }
-                .geo-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
-                .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.05); }
-                .divider { text-align: center; margin: 24px 0; position: relative; }
-                .divider::before { content: ''; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
-                .divider span { position: relative; z-index: 2; background: var(--bg-color); padding: 0 12px; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
-                .premium-input, .premium-select, .premium-textarea { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
-                .premium-input:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); }
                 .wizard-footer { display: flex; justify-content: space-between; margin-top: 40px; gap: 12px; }
-                .back-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+                .back-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: 0.3s; }
+                .back-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
                 .next-btn, .submit-btn-premium { flex: 1; padding: 12px 24px; border-radius: 12px; background: var(--accent-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; transition: 0.3s; }
                 .submit-btn-premium { background: var(--status-success); }
                 .next-btn:hover, .submit-btn-premium:hover { filter: brightness(1.1); transform: translateY(-2px); }
-                .success-screen { text-align: center; padding: 60px 40px; border-radius: 32px; }
-                .success-icon { margin-bottom: 24px; }
-                .success-screen h2 { font-size: 2rem; margin-bottom: 16px; }
-                .success-screen p { color: var(--text-secondary); margin-bottom: 32px; }
-                .premium-btn { padding: 14px 28px; background: var(--accent-primary); color: white; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; }
-                .step-fade-in { animation: fadeIn 0.4s ease-out; }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `}</style>
         </div>
     );

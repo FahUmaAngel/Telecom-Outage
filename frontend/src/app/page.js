@@ -466,7 +466,7 @@ export default function Home() {
         <OperatorComparison mttrData={mttrData} reliabilityData={reliabilityData} />
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         .dashboard-container {
           padding: 32px;
           max-width: 1400px;
