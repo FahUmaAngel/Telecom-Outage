@@ -1,19 +1,19 @@
 """
 Authentication router.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from ..dependencies import get_db
-from ..auth import authenticate_user, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
-from ..schemas import Token, UserCreate, UserResponse
-from scrapers.db.models import User
+from ..auth import authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from ..schemas import Token
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
+    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
@@ -29,4 +29,6 @@ async def login_for_access_token(
         data={"sub": user.username, "role": user.role},
         expires_delta=access_token_expires
     )
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
     return {"access_token": access_token, "token_type": "bearer"}

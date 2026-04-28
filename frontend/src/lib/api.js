@@ -1,11 +1,8 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+let authToken = null;
 
 const getAuthToken = () => {
-    if (typeof window === "undefined") {
-        return null;
-    }
-
-    return window.localStorage.getItem("auth_token");
+    return authToken;
 };
 
 const fetcher = async (endpoint, options = {}) => {
@@ -59,16 +56,14 @@ export const api = {
                 throw new Error(result.detail || "Unable to sign in");
             }
 
-            if (typeof window !== "undefined" && result.access_token) {
-                window.localStorage.setItem("auth_token", result.access_token);
+            if (result.access_token) {
+                authToken = result.access_token;
             }
 
             return result;
         },
         logout: () => {
-            if (typeof window !== "undefined") {
-                window.localStorage.removeItem("auth_token");
-            }
+            authToken = null;
         },
     },
     operators: {
