@@ -156,8 +156,8 @@ const OutageList = ({ outages, lang, onOutageClick }) => (
                   <>
                     <span className="sep">•</span>
                     <div className="dash-tags">
-                      {outage.affected_services.slice(0, 2).map((s, i) => (
-                        <span key={i} className="dash-tag">{s}</span>
+                      {outage.affected_services.slice(0, 2).map((s) => (
+                        <span key={`${outage.id}-${s}`} className="dash-tag">{s}</span>
                       ))}
                     </div>
                   </>
@@ -265,7 +265,7 @@ OutageList.propTypes = {
 };
 
 export default function Home() {
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const { addToast } = useToast();
   const [outages, setOutages] = useState([]);
   const [operators, setOperators] = useState([]);
@@ -310,12 +310,14 @@ export default function Home() {
           updated.trend_sv = `${outagesData.length} totalt registrerade`;
           updated.trend_en = `${outagesData.length} total recorded`;
           break;
-        case "mttr":
-          const mttrVal = avgMttr === "0" ? (lang === "sv" ? "Insamling..." : "Collecting...") : `${avgMttr}h`;
+        case "mttr": {
+          const collectingText = lang === "sv" ? "Insamling..." : "Collecting...";
+          const mttrVal = avgMttr === "0" ? collectingText : `${avgMttr}h`;
           updated.value = mttrVal;
           updated.trend_sv = validMttr.length > 0 ? `Snitt över ${validMttr.length} operatörer` : "Ingen data för lösta avbrott";
           updated.trend_en = validMttr.length > 0 ? `Avg across ${validMttr.length} operators` : "No resolved outages yet";
           break;
+        }
         case "reports":
           updated.value = reportsData.length.toString();
           updated.trend_sv = `${hotspotsData.length} aktiva hotspots`;
@@ -383,7 +385,7 @@ export default function Home() {
       const status = (o.status || "").toLowerCase();
       const matchesSearch = !filters.search ||
         titleText.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (o.location && o.location.toLowerCase().includes(filters.search.toLowerCase()));
+        o.location?.toLowerCase().includes(filters.search.toLowerCase());
 
       const matchesOperator = filters.operators.length === 0 ||
         filters.operators.includes(o.operator_name);
@@ -437,7 +439,7 @@ export default function Home() {
             <h3 className="section-title">{lang === "sv" ? "Regional Distribution" : "Incident Map"}</h3>
             <div className="map-legend">
               <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-critical)' }}></span> {lang === "sv" ? "Avbrott" : "Outages"}</span>
-              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-warning)' }}></span> {lang === "sv" ? "Hotspots" : "Hotspots"}</span>
+              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-warning)' }}></span> {lang === "sv" ? "Fokusområden" : "Hotspots"}</span>
             </div>
           </div>
           <div className="map-area">
