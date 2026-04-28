@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import {
@@ -18,7 +18,7 @@ export default function PrestandaPage() {
     const [town, setTown] = useState("");
     const [service, setService] = useState("");
 
-    const fetchMTTR = async () => {
+    const fetchMTTR = useCallback(async () => {
         setLoading(true);
         try {
             const params = { days: parseInt(period) };
@@ -32,24 +32,24 @@ export default function PrestandaPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [period, town, service]);
 
-    const fetchLocations = async () => {
+    const fetchLocations = useCallback(async () => {
         try {
             const data = await api.outages.locations();
             setLocations(data);
         } catch (err) {
             console.error("Failed to fetch locations:", err);
         }
-    };
-
-    useEffect(() => {
-        fetchLocations();
     }, []);
 
     useEffect(() => {
+        fetchLocations();
+    }, [fetchLocations]);
+
+    useEffect(() => {
         fetchMTTR();
-    }, [period, town, service]);
+    }, [fetchMTTR]);
 
     const getOperatorColor = (name) => {
         const n = name.toLowerCase();
@@ -131,7 +131,6 @@ export default function PrestandaPage() {
             {/* Operator Cards Grid */}
             <div className="operator-grid">
                 {mttrData.length > 0 ? mttrData.map((data) => {
-                    const isPlaceholder = data.operator_name !== "TRE";
                     return (
                         <div key={data.operator_name} className="premium-card mttr-card" style={{ '--op-color': getOperatorColor(data.operator_name) }}>
                             <div className="card-top-accent"></div>
