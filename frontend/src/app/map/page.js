@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 
-// Dynamic import for Map to avoid SSR issues with Leaflet
-const Map = dynamic(() => import("../../components/Map/Map"), {
+// Dynamic import for OutageMap to avoid SSR issues with Leaflet
+const OutageMap = dynamic(() => import("../../components/Map/Map"), {
     ssr: false,
     loading: () => <div className="map-placeholder glass">Initializing Navigation Satellite...</div>
 });
@@ -48,7 +48,7 @@ export default function MapPage() {
             </div>
 
             <div className="map-container-main">
-                <Map outages={outages} hotspots={hotspots} />
+                <OutageMap outages={outages} hotspots={hotspots} />
 
                 <div className="map-legend premium-card glass">
                     <h4 className="font-heading">Legend</h4>

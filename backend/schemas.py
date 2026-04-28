@@ -152,7 +152,7 @@ class OperatorResponse(BaseModel):
         from_attributes = True
 
 class OutageUpdate(BaseModel):
-    incident_id: Optional[str] = None = None
+    incident_id: Optional[str] = None
     operator_id: Optional[int] = None
     region_id: Optional[int] = None
     raw_data_id: Optional[int] = None

@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     SECRET_KEY: Optional[str] = None
     ALLOWED_ORIGINS: Optional[str] = None
     APP_ENV: str = "development"
+    ADMIN_USERNAME: Optional[str] = None
+    ADMIN_PASSWORD: Optional[str] = None
     
     class Config:
         env_file = ".env"

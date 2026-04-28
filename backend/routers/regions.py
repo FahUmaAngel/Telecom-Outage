@@ -35,7 +35,7 @@ def get_regions(db: Annotated[Session, Depends(get_db)]):
         
     return regions
 
-@router.get("/{id}", response_model=schemas.RegionResponse)
+@router.get("/{id}", response_model=schemas.RegionResponse, responses={404: {"description": "Region not found"}})
 def get_region(id: int, db: Annotated[Session, Depends(get_db)]):
     region = db.query(Region).filter(Region.id == id).first()
     if not region:

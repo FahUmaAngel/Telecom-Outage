@@ -5,7 +5,7 @@ Simulates high report counts to test the detection engine.
 from typing import List
 from .base import BaseCrowdAggregator, CrowdSignal
 from datetime import datetime
-import random
+import secrets
 
 class MockAggregator(BaseCrowdAggregator):
     def __init__(self):
@@ -19,7 +19,7 @@ class MockAggregator(BaseCrowdAggregator):
                 region_name="Stockholms län",
                 latitude=59.3293,
                 longitude=18.0686,
-                count=random.randint(50, 200),
+                count=50 + secrets.randbelow(151),
                 source_name=self.name
             ),
             CrowdSignal(
@@ -27,7 +27,7 @@ class MockAggregator(BaseCrowdAggregator):
                 region_name="Västra Götalands län",
                 latitude=57.7089,
                 longitude=11.9746,
-                count=random.randint(10, 30),
+                count=10 + secrets.randbelow(21),
                 source_name=self.name
             )
         ]

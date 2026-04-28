@@ -41,6 +41,91 @@ const getOutageText = (value, lang) => {
   return value[lang] || value.sv || value.en || "";
 };
 
+const StatsDashboard = ({ stats, lang }) => (
+  <div className="stats-grid">
+    {stats.map((stat, i) => (
+      <Link href={stat.link || "#"} key={stat.key} className="premium-card stat-card interactive">
+        <div className="stat-content">
+          <span className="stat-label">{lang === "sv" ? stat.label_sv : stat.label_en}</span>
+          <h2 className="stat-value">{stat.value}</h2>
+          <span className="stat-meta">{lang === "sv" ? stat.trend_sv : stat.trend_en}</span>
+        </div>
+      </Link>
+    ))}
+    <style jsx>{`
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+      .stat-card {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .stat-card.interactive:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--accent-primary);
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+      }
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+      }
+      .stat-meta {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      @media (max-width: 1400px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: 1fr; }
+      }
+    `}</style>
+  </div>
+);
+
+const LoadingState = ({ lang }) => (
+  <div className="loading-state glass">
+    <div className="spinner"></div>
+    <p>{lang === "sv" ? "Laddar dashboard..." : "Loading dashboard..."}</p>
+    <style jsx>{`
+      .loading-state {
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid var(--surface-light);
+        border-top-color: var(--accent-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    `}</style>
+  </div>
+);
+
 export default function Home() {
   const { lang, t } = useLanguage();
   const { addToast } = useToast();
@@ -88,14 +173,10 @@ export default function Home() {
         setReliabilityData(reliabilityData);
 
         const activeCount = outagesData.filter(o => o.status.toLowerCase() !== "resolved").length;
-
-        // Calculate aggregate MTTR
         const validMttr = mttrData.filter(d => d.outage_count > 0);
         const avgMttr = validMttr.length > 0
           ? (validMttr.reduce((acc, curr) => acc + curr.average_mttr_hours, 0) / validMttr.length).toFixed(1)
           : "0";
-
-        // Calculate aggregate Reliability
         const totalDowntime = reliabilityData.reduce((acc, curr) => acc + curr.total_downtime_hours, 0);
         const reliabilityScore = Math.max(0, 100 - (totalDowntime / 100)).toFixed(1);
 
@@ -127,7 +208,6 @@ export default function Home() {
           return s;
         }));
 
-        // Detect new outages and show toast
         if (previousOutageIds.current.size > 0) {
           const newOutages = outagesData.filter(o => !previousOutageIds.current.has(o.id));
           if (newOutages.length > 0) {
@@ -137,7 +217,6 @@ export default function Home() {
             addToast(message, 'warning', 6000);
           }
         }
-
         previousOutageIds.current = new Set(outagesData.map(o => o.id));
         setLoading(false);
       } catch (err) {
@@ -176,37 +255,7 @@ export default function Home() {
     });
   }, [outages, filters, lang]);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  if (loading) {
-    return (
-      <div className="loading-state glass">
-        <div className="spinner"></div>
-        <p>{lang === "sv" ? "Laddar dashboard..." : "Loading dashboard..."}</p>
-        <style jsx>{`
-          .loading-state {
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-          }
-          .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--surface-light);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin { to { transform: rotate(360deg); } }
-        `}</style>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState lang={lang} />;
 
   return (
     <div className="dashboard-container animate-fade-in">
@@ -227,21 +276,11 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="stats-grid">
-        {stats.map((stat, i) => (
-          <Link href={stat.link || "#"} key={i} className="premium-card stat-card interactive">
-            <div className="stat-content">
-              <span className="stat-label">{lang === "sv" ? stat.label_sv : stat.label_en}</span>
-              <h2 className="stat-value">{stat.value}</h2>
-              <span className="stat-meta">{lang === "sv" ? stat.trend_sv : stat.trend_en}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <StatsDashboard stats={stats} lang={lang} />
 
       <FilterBar
         operators={operators}
-        onFilterChange={handleFilterChange}
+        onFilterChange={setFilters}
         initialFilters={filters}
       />
 
@@ -356,49 +395,6 @@ export default function Home() {
           height: 6px;
           background: var(--status-success);
           border-radius: 50%;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-          margin-bottom: 32px;
-        }
-
-        .stat-card {
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          text-decoration: none;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .stat-card.interactive:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lg);
-          border-color: var(--accent-primary);
-        }
-
-        .stat-label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-bottom: 8px;
-        }
-
-        .stat-value {
-          font-size: 1.75rem;
-          font-weight: 700;
-          margin-bottom: 4px;
-          color: var(--text-primary);
-        }
-
-        .stat-meta {
-          font-size: 0.75rem;
-          color: var(--text-muted);
         }
 
         .dashboard-main-grid {
