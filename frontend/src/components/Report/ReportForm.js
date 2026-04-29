@@ -106,9 +106,12 @@ Step1Problem.propTypes = {
 };
 
 const Step2Location = ({ formData, getLocation, locationLoading, locationError, handleInputChange, lang }) => {
-    const geoBtnText = formData.latitude 
-        ? (lang === "sv" ? "Platshämtad" : "Location Captured") 
-        : (lang === "sv" ? "Dela min plats" : "Share My Location");
+    let geoBtnText;
+    if (formData.latitude) {
+        geoBtnText = lang === "sv" ? "Platshämtad" : "Location Captured";
+    } else {
+        geoBtnText = lang === "sv" ? "Dela min plats" : "Share My Location";
+    }
 
     return (
         <div className="step-fade-in">
@@ -346,9 +349,12 @@ export default function ReportForm({ operators }) {
         );
     }
 
-    const submitBtnText = loading 
-        ? (lang === "sv" ? "Skickar..." : "Submitting...") 
-        : (lang === "sv" ? "Skicka Rapport" : "Submit Report");
+    let submitBtnText;
+    if (loading) {
+        submitBtnText = lang === "sv" ? "Skickar..." : "Submitting...";
+    } else {
+        submitBtnText = lang === "sv" ? "Skicka Rapport" : "Submit Report";
+    }
 
     return (
         <div className="report-wizard">
