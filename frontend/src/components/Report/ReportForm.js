@@ -251,6 +251,8 @@ const handleGetLocation = (setLocationLoading, setLocationError, setFormData, ad
         return;
     }
 
+    // SECURITY & PRIVACY: Geolocation is critical for identifying crowd-sourced outage hotspots.
+    // It is only triggered by explicit user interaction (button click).
     navigator.geolocation.getCurrentPosition(
         (position) => {
             setFormData(prev => ({
