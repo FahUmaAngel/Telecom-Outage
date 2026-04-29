@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 
 const ToastContext = createContext();
 
+let toastCounter = 0;
+
 export function ToastProvider({ children }) {
     const [toasts, setToasts] = useState([]);
 
@@ -15,7 +17,7 @@ export function ToastProvider({ children }) {
     const addToast = useCallback((message, type = 'info', duration = 5000) => {
         const id = globalThis.crypto?.randomUUID?.() || 
                    globalThis.crypto?.getRandomValues?.(new Uint32Array(1))[0].toString(36) || 
-                   `toast-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                   `toast-${Date.now()}-${toastCounter++}`;
         const toast = { id, message, type, duration };
 
         setToasts(prev => [...prev, toast]);
