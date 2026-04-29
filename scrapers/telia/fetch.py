@@ -74,7 +74,7 @@ def fetch_telia_api(api_url: str, timeout: int = 30) -> Optional[dict]:
         response.raise_for_status()
         
         data = response.json()
-        logger.info(f"Successfully fetched Telia API data")
+        logger.info("Successfully fetched Telia API data")
         return data
         
     except requests.exceptions.RequestException as e:
