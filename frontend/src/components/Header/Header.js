@@ -7,9 +7,9 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage } = useLanguage();
 
-  const themeToggleLabel = theme === "light"
-    ? (lang === "sv" ? "MÖRKT" : "DARK")
-    : (lang === "sv" ? "LJUST" : "LIGHT");
+  const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";
+  const lightLabel = lang === "sv" ? "LJUST" : "LIGHT";
+  const themeToggleLabel = theme === "light" ? darkLabel : lightLabel;
 
   return (
     <header className="header glass animate-fade-in">
