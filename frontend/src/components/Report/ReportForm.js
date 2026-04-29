@@ -127,14 +127,16 @@ LocationConsent.propTypes = {
     onConsentChange: PropTypes.func.isRequired
 };
 
+const geoLabels = {
+    captured: { sv: "Platshämtad", en: "Location Captured" },
+    share: { sv: "Dela min plats", en: "Share My Location" },
+    consentNeeded: { sv: "Vänligen ge samtycke först", en: "Please provide consent first" }
+};
+
 const GeoButton = ({ lang, hasLocation, hasConsent, locationLoading, getLocation }) => {
-    const geoBtnText = hasLocation 
-        ? (lang === "sv" ? "Platshämtad" : "Location Captured")
-        : (lang === "sv" ? "Dela min plats" : "Share My Location");
-        
-    const consentTooltip = hasConsent
-        ? ""
-        : (lang === "sv" ? "Vänligen ge samtycke först" : "Please provide consent first");
+    const textKey = hasLocation ? "captured" : "share";
+    const geoBtnText = geoLabels[textKey][lang] || geoLabels[textKey].en;
+    const consentTooltip = hasConsent ? "" : (geoLabels.consentNeeded[lang] || geoLabels.consentNeeded.en);
 
     return (
         <button
@@ -225,6 +227,7 @@ const Step2Location = ({ formData, setFormData, getLocation, locationLoading, lo
 
 Step2Location.propTypes = {
     formData: PropTypes.object.isRequired,
+    setFormData: PropTypes.func.isRequired,
     getLocation: PropTypes.func.isRequired,
     locationLoading: PropTypes.bool.isRequired,
     locationError: PropTypes.string,
