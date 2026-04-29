@@ -416,6 +416,29 @@ OutageTableBody.propTypes = {
 };
 
 function OutageManagement({ outageMgr, lang }) {
+    const t = {
+        heading: lang === "sv" ? "Hantera driftstörningar" : "Outage Management",
+        searchPlaceholder: lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)...",
+        allOps: lang === "sv" ? "Alla operatörer" : "All Operators",
+        allStats: lang === "sv" ? "Alla statusar" : "All Statuses",
+        active: lang === "sv" ? "Aktiv" : "Active",
+        investigating: lang === "sv" ? "Undersöker" : "Investigating",
+        scheduled: lang === "sv" ? "Planerad" : "Scheduled",
+        resolved: lang === "sv" ? "Löst" : "Resolved",
+        closed: lang === "sv" ? "Stängd" : "Closed",
+        missingCoords: lang === "sv" ? "Saknar koordinater" : "Missing Coords",
+        missingEndDate: lang === "sv" ? "Saknar slutdatum" : "Missing End Date",
+        networkSharingTitle: lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)",
+        networkSharingDesc: lang === "sv" ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:",
+        operator: lang === "sv" ? "Operatör" : "Operator",
+        title: lang === "sv" ? "Titel" : "Title",
+        coordinates: lang === "sv" ? "Position" : "Coordinates",
+        actions: lang === "sv" ? "Åtgärd" : "Actions",
+        prevPage: lang === "sv" ? "← Föregående" : "← Previous",
+        nextPage: lang === "sv" ? "Nästa →" : "Next →",
+        pageIndicator: (p) => lang === "sv" ? `Sida ${p + 1}` : `Page ${p + 1}`
+    };
+
     const { 
         outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
         searchQuery, filterOperator, filterStatus, setPage, setSearchQuery,
@@ -467,13 +490,13 @@ function OutageManagement({ outageMgr, lang }) {
     return (
         <section className="admin-section">
             <div className="section-header-row">
-                <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{lang === "sv" ? "Hantera driftstörningar" : "Outage Management"}</h2>
+                <h2 className="section-title font-heading" style={{ marginBottom: 0 }}>{t.heading}</h2>
 
                 <div className="filter-controls">
                     <div className="filter-group">
                         <input
                             type="text"
-                            placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
+                            placeholder={t.searchPlaceholder}
                             value={searchQuery}
                             onChange={onSearchChange}
                             className="search-input"
@@ -485,7 +508,7 @@ function OutageManagement({ outageMgr, lang }) {
                             onChange={onOperatorChange}
                             className="filter-select"
                         >
-                            <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
+                            <option value="">{t.allOps}</option>
                             <option value="telia">Telia</option>
                             <option value="telenor">Telenor</option>
                             <option value="tre">Tre</option>
@@ -495,12 +518,12 @@ function OutageManagement({ outageMgr, lang }) {
                             onChange={onStatusChange}
                             className="filter-select"
                         >
-                            <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
-                            <option value="active">{lang === "sv" ? "Aktiv" : "Active"}</option>
-                            <option value="investigating">{lang === "sv" ? "Undersöker" : "Investigating"}</option>
-                            <option value="scheduled">{lang === "sv" ? "Planerad" : "Scheduled"}</option>
-                            <option value="resolved">{lang === "sv" ? "Löst" : "Resolved"}</option>
-                            <option value="closed">{lang === "sv" ? "Stängd" : "Closed"}</option>
+                            <option value="">{t.allStats}</option>
+                            <option value="active">{t.active}</option>
+                            <option value="investigating">{t.investigating}</option>
+                            <option value="scheduled">{t.scheduled}</option>
+                            <option value="resolved">{t.resolved}</option>
+                            <option value="closed">{t.closed}</option>
                         </select>
                     </div>
                     <div className="quality-filters">
@@ -510,7 +533,7 @@ function OutageManagement({ outageMgr, lang }) {
                                 checked={filterMissingCoords} 
                                 onChange={onMissingCoordsChange} 
                             />
-                            <span>{lang === "sv" ? "Saknar koordinater" : "Missing Coords"}</span>
+                            <span>{t.missingCoords}</span>
                         </label>
                         <label className="filter-checkbox">
                             <input 
@@ -518,7 +541,7 @@ function OutageManagement({ outageMgr, lang }) {
                                 checked={filterMissingEndDate} 
                                 onChange={onMissingEndDateChange} 
                             />
-                            <span>{lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}</span>
+                            <span>{t.missingEndDate}</span>
                         </label>
                     </div>
                 </div>
@@ -527,12 +550,10 @@ function OutageManagement({ outageMgr, lang }) {
             <div className="network-sharing-note">
                 <h4 className="sharing-title">
                     <span className="icon">ℹ️</span> 
-                    {lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)"}
+                    {t.networkSharingTitle}
                 </h4>
                 <p className="sharing-text">
-                    {lang === "sv" 
-                        ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" 
-                        : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:"}
+                    {t.networkSharingDesc}
                 </p>
                 <ul className="sharing-list">
                     <li><strong>Telia:</strong> Halebop, Fello</li>
@@ -548,11 +569,11 @@ function OutageManagement({ outageMgr, lang }) {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                <th>{lang === "sv" ? "Titel" : "Title"}</th>
+                                <th>{t.operator}</th>
+                                <th>{t.title}</th>
                                 <th>Status</th>
-                                <th>{lang === "sv" ? "Position" : "Coordinates"}</th>
-                                <th>{lang === "sv" ? "Åtgärd" : "Actions"}</th>
+                                <th>{t.coordinates}</th>
+                                <th>{t.actions}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -567,17 +588,17 @@ function OutageManagement({ outageMgr, lang }) {
                         disabled={page === 0 || outagesLoading}
                         onClick={handlePrevPage}
                     >
-                        {lang === "sv" ? "← Föregående" : "← Previous"}
+                        {t.prevPage}
                     </button>
                     <span className="page-indicator">
-                        {lang === "sv" ? `Sida ${page + 1}` : `Page ${page + 1}`}
+                        {t.pageIndicator(page)}
                     </span>
                     <button
                         className="btn-secondary"
                         disabled={!hasMore || outagesLoading}
                         onClick={handleNextPage}
                     >
-                        {lang === "sv" ? "Nästa →" : "Next →"}
+                        {t.nextPage}
                     </button>
                 </div>
             </div>
