@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import PropTypes from "prop-types";
 
 const LanguageContext = createContext();
 
@@ -14,22 +15,36 @@ export const LanguageProvider = ({ children }) => {
         }
     }, []);
 
-    const toggleLanguage = () => {
-        const newLang = lang === "sv" ? "en" : "sv";
-        setLang(newLang);
-        localStorage.setItem("lang", newLang);
-    };
+    const toggleLanguage = useCallback(() => {
+        setLang(prev => {
+            const newLang = prev === "sv" ? "en" : "sv";
+            localStorage.setItem("lang", newLang);
+            return newLang;
+        });
+    }, []);
 
-    const t = (bilingualObj) => {
+    const t = useCallback((bilingualObj) => {
         if (!bilingualObj) return "";
         return bilingualObj[lang] || bilingualObj["sv"] || "";
-    };
+    }, [lang]);
+
+    const value = useMemo(() => ({ lang, toggleLanguage, t }), [lang, toggleLanguage, t]);
 
     return (
-        <LanguageContext.Provider value={{ lang, toggleLanguage, t }}>
+        <LanguageContext.Provider value={value}>
             {children}
         </LanguageContext.Provider>
     );
 };
 
-export const useLanguage = () => useContext(LanguageContext);
+LanguageProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
+
+export const useLanguage = () => {
+    const context = useContext(LanguageContext);
+    if (!context) {
+        throw new Error("useLanguage must be used within a LanguageProvider");
+    }
+    return context;
+};
