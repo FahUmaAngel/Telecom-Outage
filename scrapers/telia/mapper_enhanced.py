@@ -64,9 +64,8 @@ def map_services(services: List[str]) -> List[ServiceType]:
         service_lower = service.lower()
         # Simple substring match for robustness
         for key, value in service_map.items():
-            if key in service_lower:
-                if value not in mapped:
-                    mapped.append(value)
+            if key in service_lower and value not in mapped:
+                mapped.append(value)
     
     return mapped if mapped else [ServiceType.MOBILE]
 
