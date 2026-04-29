@@ -50,7 +50,7 @@ export default function AdminPage() {
         }
     }, [searchQuery, filterOperator, filterStatus, filterMissingCoords, filterMissingEndDate]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const [scrapersData, reportsData] = await Promise.all([
                 api.admin.scrapers(),
@@ -64,7 +64,7 @@ export default function AdminPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [lang, addToast]);
 
     const handleFilterChange = (newSearch, newOperator, newStatus, newMissingCoords, newMissingEndDate) => {
         setPage(0);
@@ -75,7 +75,7 @@ export default function AdminPage() {
         setMounted(true);
         fetchData();
         fetchOutages(0);
-    }, []);
+    }, [fetchData, fetchOutages]);
 
     useEffect(() => {
         if (editingOutage) {

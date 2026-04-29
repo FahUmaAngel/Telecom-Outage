@@ -8,6 +8,8 @@ import logging
 import json
 import sys
 import os
+import re 
+from bs4 import BeautifulSoup
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

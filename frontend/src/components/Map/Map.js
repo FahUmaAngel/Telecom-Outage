@@ -129,6 +129,7 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
 
     useEffect(() => {
+        // eslint-disable-next-line
         setMounted(true);
     }, []);
 
