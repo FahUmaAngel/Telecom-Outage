@@ -27,11 +27,12 @@ def test_mim_api():
     # Tele2 might use POST for address lookup
     print("\n2. Trying address lookup via POST (Guessing structure)")
     # A wild guess based on typical graphql or search structures
+    ADDRESS = "Drottninggatan 1, Stockholm"
     payloads = [
-        {"query": "Drottninggatan 1, Stockholm"},
-        {"address": "Drottninggatan 1, Stockholm"},
-        {"location": {"address": "Drottninggatan 1, Stockholm"}},
-        {"search": "Drottninggatan 1, Stockholm"}
+        {"query": ADDRESS},
+        {"address": ADDRESS},
+        {"location": {"address": ADDRESS}},
+        {"search": ADDRESS}
     ]
     
     for p in payloads:

@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger("TeliaPlaywrightRecovery")
 
 BASE_URL = "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
+COVERAGE_PORTAL_URL = "https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage"
 SWEDISH_COUNTIES = [
     "Stockholms län", "Uppsala län", "Södermanlands län", "Östergötlands län",
     "Jönköpings län", "Kronobergs län", "Kalmar län", "Gotlands län",
@@ -30,148 +31,118 @@ SWEDISH_COUNTIES = [
     "Västerbottens län", "Norrbottens län"
 ]
 
+def setup_context(browser):
+    """Sets up browser context with user agent."""
+    return browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
+
+def handle_recovery_response(response, captured):
+    """Intercepts AreaTicketList responses."""
+    if "AreaTicketList" in response.url and response.status == 200:
+        try:
+            data = response.json()
+            if isinstance(data, list) and data:
+                logger.info(f"Intercepted {len(data)} incidents")
+                captured.extend(data)
+        except Exception as e:
+            logger.debug(f"JSON error: {e}")
+
+def trigger_date_navigation(page, target_date_str):
+    """Triggers date navigation via JS."""
+    try:
+        hist_xpath = "//div[@aria-label='Nätverkshistorik'] | //label[contains(text(), 'Nätverkshistorik')]"
+        page.locator(hist_xpath).first.click(timeout=5000)
+        page.wait_for_timeout(2000)
+
+        date_input = page.locator("//input[@placeholder='Välj datum']").first
+        js_script = f"""
+            var el = arguments[0];
+            el.value = '{target_date_str}';
+            el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            el.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            if (window.jQuery) {{ window.jQuery(el).trigger('change'); }}
+        """
+        page.evaluate(js_script, date_input.element_handle())
+        date_input.press("Enter")
+        page.wait_for_timeout(5000)
+        return True
+    except Exception as e:
+        logger.warning(f"Nav fail: {e}")
+        return False
+
 def run_recovery():
     db = SessionLocal()
-    captured_incidents = []
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = setup_context(browser)
+            page = context.new_page()
+            captured = []
+            page.on("response", lambda r: handle_recovery_response(r, captured))
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
-        page = context.new_page()
-
-        def handle_response(response):
-            if "AreaTicketList" in response.url or "RegionFaultList" in response.url:
-                try:
-                    if response.status == 200:
-                        data = response.json()
-                        if isinstance(data, list) and len(data) > 0:
-                            logger.info(f"Intercepted {len(data)} incidents from {response.url}")
-                            captured_incidents.extend(data)
-                except Exception as e:
-                    logger.debug(f"Error parsing response: {e}")
-
-        page.on("response", handle_response)
-
-        start_date = datetime(2026, 4, 18)
-        end_date = datetime(2026, 4, 21)
-        current_date = start_date
-
-        while current_date <= end_date:
-            date_str = current_date.strftime("%Y-%m-%d")
-            logger.info(f"--- Recovering Telia for {date_str} ---")
-            
-            try:
-                page.goto(BASE_URL, wait_until="networkidle", timeout=60000)
+            current = datetime(2026, 4, 18)
+            end = datetime(2026, 4, 21)
+            while current <= end:
+                date_str = current.strftime("%Y-%m-%d")
+                logger.info(f"Recovering {date_str}...")
+                page.goto(COVERAGE_PORTAL_URL, wait_until="networkidle")
                 
-                # Click 'Nätverkshistorik'
-                hist_btn = page.locator("//div[@aria-label='Nätverkshistorik'] | //label[contains(text(), 'Nätverkshistorik')]").first
-                if hist_btn.is_visible():
-                    hist_btn.click()
-                    page.wait_for_timeout(2000)
+                if trigger_date_navigation(page, date_str):
+                    process_incidents(db, captured, date_str)
+                    captured.clear()
                 
-                # Set Date
-                date_input = page.locator("//input[@placeholder='Välj datum']").first
-                if date_input.is_visible():
-                    # Clear and type is better than JS for triggering app state sometimes
-                    date_input.click()
-                    # Use JS to set value to be sure
-                    page.evaluate(f"el => {{ el.value = '{date_str}'; el.dispatchEvent(new Event('change', {{ bubbles: true }})); }}", date_input.element_handle())
-                    page.keyboard.press("Enter")
-                    
-                    # Wait for data to load
-                    logger.info(f"Waiting for incidents for {date_str}...")
-                    page.wait_for_timeout(10000)
-                    
-                    # If no incidents intercepted yet, try clicking the map or some counties
-                    try:
-                        if not captured_incidents:
-                            logger.info("No incidents intercepted yet, clicking a few counties...")
-                            visa_links = page.locator("text=Visa område")
-                            v_count = visa_links.count()
-                            if v_count > 0:
-                                for i in range(min(v_count, 3)):
-                                    try:
-                                        visa_links.nth(i).click(timeout=5000)
-                                        page.wait_for_timeout(3000)
-                                    except: pass
-                    except: pass
-                
-                # Process captured for this day (MOVED OUTSIDE UI INTERACTION TRY)
-                if captured_incidents:
-                    saved = process_incidents(db, captured_incidents, date_str)
-                    logger.info(f"✓ Saved {saved} unique incidents for {date_str}")
-                    captured_incidents = [] # Reset for next day
-                else:
-                    logger.warning(f"! No incidents found for {date_str}")
+                current += timedelta(days=1)
+            browser.close()
+    finally:
+        db.close()
 
-            except Exception as e:
-                logger.error(f"Error on {date_str}: {e}")
-            
-            current_date += timedelta(days=1)
-
-        browser.close()
-    db.close()
-
-def process_incidents(db, incidents, recovery_date):
-    unique_map = {}
-    for item in incidents:
-        inc_id = item.get("ExternalId") or item.get("incident_id")
-        if inc_id:
-            unique_map[inc_id] = item
+def map_and_save_recovery_incident(db, item, target_date_str):
+    """Maps a single raw incident to NormalizedOutage and saves it."""
+    inc_id = item.get("ExternalId")
+    if not inc_id: return False
     
-    saved_count = 0
-    timestamp = datetime.now().isoformat()
+    loc_text = item.get("CountyName") or item.get("AreaName") or "Sverige"
+    desc_sv = item.get("Description") or item.get("Text") or ""
     
-    for inc_id, item in unique_map.items():
+    normalized = NormalizedOutage(
+        operator=OperatorEnum.TELIA,
+        incident_id=inc_id,
+        title={"sv": inc_id, "en": inc_id},
+        description={"sv": desc_sv, "en": ""},
+        location=loc_text,
+        status=OutageStatus.RESOLVED,
+        severity=SeverityLevel.MEDIUM,
+        affected_services=classify_services(desc_sv + " " + (item.get("AffectedServices") or "")),
+        source_url=COVERAGE_PORTAL_URL,
+        started_at=parse_swedish_date(item.get("StartTimeStr")),
+        estimated_fix_time=parse_swedish_date(item.get("EstimatedEndTimeStr"))
+    )
+    
+    county = extract_region_from_text(loc_text, SWEDISH_COUNTIES)
+    if county:
+        normalized.location = county
+        coords = get_county_coordinates(county, jitter=True)
+        if coords: normalized.latitude, normalized.longitude = coords
+    
+    save_outage(db, normalized, {"source": "telia_recovery", "raw": item, "date": target_date_str})
+    return True
+
+def process_incidents(db, items, target_date_str):
+    """Batch processes a list of raw incidents."""
+    unique = {it.get("ExternalId"): it for it in items if it.get("ExternalId")}
+    logger.info(f"Processing {len(unique)} unique incidents for {target_date_str}")
+    
+    count = 0
+    for item in unique.values():
         try:
-            # Basic normalization
-            desc_sv = item.get("Description") or item.get("Text") or ""
-            area_name = item.get("AreaName") or ""
-            county_name = item.get("CountyName") or ""
-            
-            location_text = f"{area_name}, {county_name}" if area_name and county_name else (area_name or county_name or "Sverige")
-            
-            # Dates
-            def parse_date(val):
-                if not val: return None
-                if "/Date(" in str(val):
-                    m = re.search(r'\d+', str(val))
-                    if m: return datetime.fromtimestamp(int(m.group())/1000).isoformat() + "+01:00"
-                return parse_swedish_date(val)
-
-            start_time = parse_date(item.get("StartTimeStr") or item.get("EventTime"))
-            
-            normalized = NormalizedOutage(
-                operator=OperatorEnum.TELIA,
-                incident_id=inc_id,
-                title={"sv": inc_id, "en": inc_id},
-                description={"sv": desc_sv, "en": ""},
-                location=location_text,
-                status=OutageStatus.RESOLVED,
-                severity=SeverityLevel.MEDIUM,
-                affected_services=classify_services(desc_sv),
-                source_url=BASE_URL,
-                started_at=start_time,
-                estimated_fix_time=parse_date(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
-            )
-            
-            # Regional Geocoding
-            std_region = extract_region_from_text(location_text, SWEDISH_COUNTIES)
-            if std_region:
-                normalized.location = std_region
-                coords = get_county_coordinates(std_region, jitter=True)
-                if coords:
-                    normalized.latitude, normalized.longitude = coords
-            
-            save_outage(db, normalized, {"source": "telia_playwright_recovery", "raw": item, "recovery_date": recovery_date})
-            saved_count += 1
+            if map_and_save_recovery_incident(db, item, target_date_str):
+                count += 1
         except Exception as e:
-            logger.error(f"Save error for {inc_id}: {e}")
+            logger.error(f"Save error for {item.get('ExternalId')}: {e}")
             
     db.commit()
-    return saved_count
+    logger.info(f"Saved {count} incidents for {target_date_str}")
 
 if __name__ == "__main__":
     run_recovery()

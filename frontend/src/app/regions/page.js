@@ -25,6 +25,13 @@ export default function RegionsPage() {
 
     if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
 
+    const getStatusText = (region) => {
+        if (region.outage_count > 0) {
+            return `${region.outage_count} ${lang === "sv" ? "aktiva incidenter" : "active incidents"}`;
+        }
+        return lang === "sv" ? "Inga störningar" : "No disruptions";
+    };
+
     return (
         <div className="regions-container animate-fade-in">
             <header className="page-header">
@@ -44,9 +51,7 @@ export default function RegionsPage() {
                             <div className="region-status">
                                 <span className={`status-dot ${region.outage_count > 0 ? "warning" : "stable"}`}></span>
                                 <span className="status-label">
-                                    {region.outage_count > 0
-                                        ? `${region.outage_count} ${lang === "sv" ? "aktiva incidenter" : "active incidents"}`
-                                        : (lang === "sv" ? "Inga störningar" : "No disruptions")}
+                                    {getStatusText(region)}
                                 </span>
                             </div>
                         </div>

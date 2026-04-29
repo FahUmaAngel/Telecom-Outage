@@ -23,7 +23,7 @@ def audit_lyca():
         try:
             data = json.loads(raw_json) if isinstance(raw_json, str) else raw_json
             results[inc_id] = data
-        except:
+        except (json.JSONDecodeError, TypeError):
             results[inc_id] = "Error parsing"
             
     with open('lyca_raw_audit_results.json', 'w', encoding='utf-8') as f:

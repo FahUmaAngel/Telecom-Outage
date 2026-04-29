@@ -3,7 +3,7 @@ Enhanced Telia mapper - converts parsed data to NormalizedOutage format.
 Includes bilingual support and improved data mapping.
 """
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import sys
 import os
@@ -132,20 +132,20 @@ def map_to_normalized_outage(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         if 'start_time' in parsed_outage:
             try:
                 start_time = datetime.fromisoformat(parsed_outage['start_time'].replace('Z', '+00:00'))
-            except:
+            except (ValueError, TypeError):
                 pass
         
         estimated_fix_time = None
         if 'estimated_fix_time' in parsed_outage:
             try:
                 estimated_fix_time = datetime.fromisoformat(parsed_outage['estimated_fix_time'].replace('Z', '+00:00'))
-            except:
+            except (ValueError, TypeError):
                 pass
         
         # Create NormalizedOutage
         outage = NormalizedOutage(
             operator=OperatorEnum.TELIA,
-            outage_id=parsed_outage.get('id', f"telia_{datetime.now().timestamp()}"),
+            outage_id=parsed_outage.get('id', f"telia_{datetime.now(timezone.utc).timestamp()}"),
             title={
                 'sv': f"Störning i {parsed_outage.get('location', 'Sverige')}",
                 'en': f"Outage in {parsed_outage.get('location', 'Sweden')}"
@@ -155,7 +155,7 @@ def map_to_normalized_outage(parsed_outage: Dict) -> Optional[NormalizedOutage]:
             status=determine_status(parsed_outage),
             affected_services=map_services(parsed_outage.get('affected_services', [])),
             location=parsed_outage.get('location'),
-            start_time=start_time or datetime.now(),
+            start_time=start_time or datetime.now(timezone.utc),
             estimated_fix_time=estimated_fix_time,
             source_url=parsed_outage.get('source_url')
         )

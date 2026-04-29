@@ -3,12 +3,12 @@ Outage endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from ..dependencies import get_db
 from ..schemas import OutageResponse, OutageStatus
 from scrapers.db.models import Outage, Operator, Region
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/v1/outages", tags=["outages"])
 
@@ -27,23 +27,49 @@ def _effective_status(o):
     if end:
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
-            end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.utcnow():
+            # Make end_dt timezone aware (UTC) if it's naive
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            if end_dt < datetime.now(timezone.utc):
                 return 'resolved'
         except Exception:
             pass
     return raw
 
+def _map_to_outage_response(o: Outage) -> OutageResponse:
+    """Helper to map SQLAlchemy Outage model to Pydantic OutageResponse."""
+    return OutageResponse(
+        id=o.id,
+        incident_id=o.incident_id,
+        operator_id=o.operator_id,
+        operator_name=o.operator.name,
+        region_id=o.region_id,
+        region_name=o.region.name if o.region else None,
+        raw_data_id=o.raw_data_id,
+        title=o.title if o.title else {},
+        description=o.description,
+        status=_effective_status(o),
+        severity=_safe_val(o.severity),
+        start_time=o.start_time,
+        end_time=o.end_time,
+        estimated_fix_time=o.estimated_fix_time,
+        location=o.location,
+        latitude=o.latitude,
+        longitude=o.longitude,
+        affected_services=o.affected_services if o.affected_services else [],
+        updated_at=o.updated_at
+    )
+
 @router.get("/history", response_model=List[OutageResponse])
 def get_outage_history(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     days: int = 7
 ):
     """
     Get resolved outages history.
     """
-    since_date = datetime.utcnow() - timedelta(days=days)
+    since_date = datetime.now(timezone.utc) - timedelta(days=days)
     query = db.query(Outage).join(Operator).filter(
         Outage.status == "resolved",
         Outage.end_time >= since_date
@@ -54,34 +80,11 @@ def get_outage_history(
         
     outages = query.options(joinedload(Outage.operator), joinedload(Outage.region)).all()
     
-    return [
-        OutageResponse(
-            id=o.id,
-            incident_id=o.incident_id,
-            operator_id=o.operator_id,
-            operator_name=o.operator.name,
-            region_id=o.region_id,
-            region_name=o.region.name if o.region else None,
-            raw_data_id=o.raw_data_id,
-            title=o.title if o.title else {},
-            description=o.description,
-            status=_effective_status(o),
-            severity=_safe_val(o.severity),
-            start_time=o.start_time,
-            end_time=o.end_time,
-            estimated_fix_time=o.estimated_fix_time,
-            location=o.location,
-            latitude=o.latitude,
-            longitude=o.longitude,
-            affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at
-        )
-        for o in outages
-    ]
+    return [_map_to_outage_response(o) for o in outages]
 
 @router.get("/", response_model=List[OutageResponse])
 def get_outages(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,
     status: Optional[str] = None,
     lat: Optional[float] = None,
@@ -93,84 +96,34 @@ def get_outages(
     """
     query = db.query(Outage).join(Operator)
     
-    # 1. Basic Filtering
     if operator:
         query = query.filter(Operator.name == operator.lower())
     
     if status:
         query = query.filter(Outage.status == status)
         
-    # Execute query first, then filter geospatial in Python (SQLite limitation)
     outages = query.options(joinedload(Outage.operator), joinedload(Outage.region)).all()
     
     results = []
-    
-    # 2. Geospatial Filtering (Haversine)
     if lat is not None and lon is not None:
         for outage in outages:
-            # Skip if outage has no location
             if outage.latitude is None or outage.longitude is None:
                 continue
-                
             dist = haversine(lat, lon, outage.latitude, outage.longitude)
             if dist <= radius_km:
                 results.append(outage)
     else:
         results = outages
         
-    response_list = []
-    for o in results:
-        response_list.append(OutageResponse(
-            id=o.id,
-            incident_id=o.incident_id,
-            operator_id=o.operator_id,
-            operator_name=o.operator.name,
-            region_id=o.region_id,
-            region_name=o.region.name if o.region else None,
-            raw_data_id=o.raw_data_id,
-            title=o.title if o.title else {},
-            description=o.description,
-            status=_effective_status(o),
-            severity=_safe_val(o.severity),
-            start_time=o.start_time,
-            end_time=o.end_time,
-            estimated_fix_time=o.estimated_fix_time,
-            location=o.location,
-            latitude=o.latitude,
-            longitude=o.longitude,
-            affected_services=o.affected_services if o.affected_services else [],
-            updated_at=o.updated_at
-        ))
-        
-    return response_list
+    return [_map_to_outage_response(o) for o in results]
 
-@router.get("/{outage_id}", response_model=OutageResponse)
-def get_outage_detail(outage_id: int, db: Session = Depends(get_db)):
+@router.get("/{outage_id}", response_model=OutageResponse, responses={404: {"description": "Outage not found"}})
+def get_outage_detail(outage_id: int, db: Annotated[Session, Depends(get_db)]):
     outage = db.query(Outage).options(joinedload(Outage.operator), joinedload(Outage.region)).filter(Outage.id == outage_id).first()
     if not outage:
         raise HTTPException(status_code=404, detail="Outage not found")
         
-    return OutageResponse(
-        id=outage.id,
-        incident_id=outage.incident_id,
-        operator_id=outage.operator_id,
-        operator_name=outage.operator.name,
-        region_id=outage.region_id,
-        region_name=outage.region.name if outage.region else None,
-        raw_data_id=outage.raw_data_id,
-        title=outage.title if outage.title else {},
-        description=outage.description,
-        status=_safe_val(outage.status),
-        severity=_safe_val(outage.severity),
-        start_time=outage.start_time,
-        end_time=outage.end_time,
-        estimated_fix_time=outage.estimated_fix_time,
-        location=outage.location,
-        latitude=outage.latitude,
-        longitude=outage.longitude,
-        affected_services=outage.affected_services if outage.affected_services else [],
-        updated_at=outage.updated_at
-    )
+    return _map_to_outage_response(outage)
 
 def haversine(lat1, lon1, lat2, lon2):
     """

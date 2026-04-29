@@ -8,6 +8,8 @@ import { ToastProvider } from "../../context/ToastContext";
 import ToastContainer from "../Toast/ToastContainer";
 import ScrollToTop from "../Common/ScrollToTop";
 
+import PropTypes from "prop-types";
+
 export default function ClientLayout({ children }) {
     return (
         <ThemeProvider>
@@ -42,3 +44,7 @@ export default function ClientLayout({ children }) {
         </ThemeProvider>
     );
 }
+
+ClientLayout.propTypes = {
+    children: PropTypes.node.isRequired,
+};

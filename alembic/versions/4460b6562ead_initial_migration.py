@@ -17,6 +17,8 @@ down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+CURRENT_TIMESTAMP_SQL = sa.text('(CURRENT_TIMESTAMP)')
+
 
 def upgrade() -> None:
     """Upgrade schema."""
@@ -24,7 +26,7 @@ def upgrade() -> None:
     op.create_table('operators',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_SQL, nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_operators_id'), 'operators', ['id'], unique=False)
@@ -34,7 +36,7 @@ def upgrade() -> None:
     sa.Column('operator', sa.String(), nullable=True),
     sa.Column('source_url', sa.String(), nullable=True),
     sa.Column('data', sa.JSON(), nullable=True),
-    sa.Column('scraped_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('scraped_at', sa.DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_SQL, nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_raw_data_id'), 'raw_data', ['id'], unique=False)
@@ -45,7 +47,7 @@ def upgrade() -> None:
     sa.Column('hashed_password', sa.String(), nullable=True),
     sa.Column('role', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_SQL, nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
@@ -66,7 +68,7 @@ def upgrade() -> None:
     sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
     sa.Column('affected_services', sa.JSON(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_SQL, nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['operator_id'], ['operators.id'], ),
     sa.ForeignKeyConstraint(['raw_data_id'], ['raw_data.id'], ),
@@ -82,7 +84,7 @@ def upgrade() -> None:
     sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_SQL, nullable=True),
     sa.ForeignKeyConstraint(['operator_id'], ['operators.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

@@ -1,24 +1,101 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const AUTH_TOKEN_STORAGE_KEY = "telecom-outage-auth-token";
+let authToken = null;
+
+const loadStoredAuthToken = () => {
+    if (typeof globalThis.window === "undefined") {
+        return null;
+    }
+    return globalThis.window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+};
+
+const persistAuthToken = (token) => {
+    if (typeof globalThis.window === "undefined") {
+        return;
+    }
+
+    if (token) {
+        globalThis.window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    } else {
+        globalThis.window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    }
+};
+
+const getAuthToken = () => {
+    if (!authToken) {
+        authToken = loadStoredAuthToken();
+    }
+    return authToken;
+};
 
 const fetcher = async (endpoint, options = {}) => {
-    const url = `${BASE_URL}${endpoint}`;
+    let url = `${BASE_URL}${endpoint}`;
+
+    if (options.params) {
+        const query = new URLSearchParams(options.params).toString();
+        if (query) {
+            url += (url.includes("?") ? "&" : "?") + query;
+        }
+    }
+
+    const token = getAuthToken();
+    const hasBody = options.body !== undefined;
+
     const response = await fetch(url, {
         ...options,
         headers: {
-            "Content-Type": "application/json",
+            ...(hasBody ? { "Content-Type": "application/json" } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...options.headers,
         },
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            authToken = null;
+            persistAuthToken(null);
+        }
         const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Something went wrong");
+        throw new Error(error.detail || error.message || "Something went wrong");
     }
 
-    return response.json();
+    if (response.status === 204) {
+        return null;
+    }
+
+    return response.json().catch(() => null);
 };
 
 export const api = {
+    auth: {
+        login: async (username, password) => {
+            const body = new URLSearchParams({ username, password });
+            const response = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: body.toString(),
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(result.detail || "Unable to sign in");
+            }
+
+            if (result.access_token) {
+                authToken = result.access_token;
+                persistAuthToken(result.access_token);
+            }
+
+            return result;
+        },
+        logout: () => {
+            authToken = null;
+            persistAuthToken(null);
+        },
+        getToken: () => getAuthToken(),
+    },
     operators: {
         list: () => fetcher("/api/v1/operators"),
     },
@@ -29,8 +106,10 @@ export const api = {
         },
         get: (id) => fetcher(`/api/v1/outages/${id}`),
         history: () => fetcher("/api/v1/analytics/history"),
-        reliability: () => fetcher("/api/v1/analytics/reliability"),
-        mttr: () => fetcher("/api/v1/analytics/mttr"),
+        reliability: (params) => fetcher("/api/v1/analytics/reliability", { params }),
+        mttr: (params) => fetcher("/api/v1/analytics/mttr", { params }),
+        mttrDynamic: (params) => fetcher("/api/v1/analytics/mttr-dynamic", { params }),
+        locations: (params) => fetcher("/api/v1/analytics/locations", { params }),
     },
     reports: {
         list: () => fetcher("/api/v1/reports"),
@@ -48,7 +127,8 @@ export const api = {
         outages: {
             list: (params = {}) => {
                 const query = new URLSearchParams(params).toString();
-                return fetcher(`/api/v1/admin/outages${query ? `?${query}` : ""}`);
+                const queryString = query ? `?${query}` : "";
+                return fetcher(`/api/v1/admin/outages${queryString}`);
             },
             update: (id, data) => fetcher(`/api/v1/admin/outages/${id}`, {
                 method: "PUT",

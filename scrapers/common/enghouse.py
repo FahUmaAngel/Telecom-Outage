@@ -2,7 +2,7 @@ import requests
 import logging
 import re
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import unquote
 from .models import RawOutage, OperatorEnum
 
@@ -22,60 +22,83 @@ class EnghouseFetcher:
         })
         self._token: Optional[str] = None
 
+    def _extract_from_input(self, html: str) -> Optional[str]:
+        """Check for <input id="csrft" value="...">"""
+        match = re.search(r'id=["\']csrft["\']\s+value=["\']([^"\']+)["\']', html)
+        if not match:
+            match = re.search(r'value=["\']([^"\']+)["\']\s+id=["\']csrft["\']', html)
+        
+        if match:
+            token = unquote(match.group(1))
+            logger.info(f"[{self.operator}] Found token in hidden input 'csrft'")
+            return token
+        return None
+
+    def _extract_from_url(self, url: str) -> Optional[str]:
+        """Check current URL query params."""
+        for param in ['ert', 'rt']:
+            match = re.search(f'[?&]{param}=([^&#]+)', url)
+            if match:
+                self.token_param = param
+                token = unquote(match.group(1))
+                logger.info(f"[{self.operator}] Found token '{token}' in URL param '{param}'")
+                return token
+        return None
+
+    def _extract_from_source(self, html: str) -> Optional[str]:
+        """Regex to find assignment in source code or script URLs."""
+        # Check assignment: var ert = '...';
+        for param in ['ert', 'rt']:
+            match = re.search(rf'{param}["\']?\s*[:=]\s*["\']([^"\']+)["\']', html)
+            if match:
+                self.token_param = param
+                token = unquote(match.group(1))
+                logger.info(f"[{self.operator}] Found token in source code for param '{param}'")
+                return token
+
+        # Check for URLs in source
+        for param in ['ert', 'rt']:
+            match = re.search(rf'[?&]{param}=([^"\'&>]+)', html)
+            if match:
+                self.token_param = param
+                token = unquote(match.group(1))
+                logger.info(f"[{self.operator}] Found token in source URL for param '{param}'")
+                return token
+        return None
+
+    def _extract_from_cookies(self, cookies: Any) -> Optional[str]:
+        """Check cookies for token."""
+        for param in ['ert', 'rt']:
+            if param in cookies:
+                self.token_param = param
+                token = cookies[param]
+                logger.info(f"[{self.operator}] Found token in cookie '{param}'")
+                return token
+        return None
+
     def get_token(self) -> Optional[str]:
         """Extract session token (ert or rt) from the portal."""
         try:
-            # Usually the token is in the main page or in cookies/local storage logic
-            # For Enghouse, it's often passed as a query param 'ert' or found in source
             url = f"{self.base_url}?appmode=outage"
             logger.info(f"[{self.operator}] Fetching token from {url}")
             response = self.session.get(url, timeout=10, allow_redirects=True)
             
-            if response.status_code == 200:
-                # 0. Check for <input id="csrft" value="...">
-                match = re.search(r'id=["\']csrft["\']\s+value=["\']([^"\']+)["\']', response.text)
-                if not match:
-                    match = re.search(r'value=["\']([^"\']+)["\']\s+id=["\']csrft["\']', response.text)
-                
-                if match:
-                    self._token = unquote(match.group(1))
-                    logger.info(f"[{self.operator}] Found token in hidden input 'csrft'")
-                    return self._token
+            if response.status_code != 200:
+                logger.warning(f"[{self.operator}] Failed to load portal: {response.status_code}")
+                return None
 
-                # 1. Check current URL query params (some sites redirect to a URL with the token)
-                for param in ['ert', 'rt']:
-                    match = re.search(f'[?&]{param}=([^&#]+)', response.url)
-                    if match:
-                        self._token = unquote(match.group(1))
-                        self.token_param = param
-                        logger.info(f"[{self.operator}] Found token '{self._token}' in URL param '{param}'")
-                        return self._token
+            # Sequential extraction attempts to reduce cognitive complexity
+            token = self._extract_from_input(response.text)
+            if not token:
+                token = self._extract_from_url(response.url)
+            if not token:
+                token = self._extract_from_source(response.text)
+            if not token:
+                token = self._extract_from_cookies(response.cookies)
 
-                # 2. Regex to find assignment in source code: var ert = '...'; or obj.rt = '...';
-                for param in ['ert', 'rt']:
-                    match = re.search(rf'{param}["\']?\s*[:=]\s*["\']([^"\']+)["\']', response.text)
-                    if match:
-                        self._token = unquote(match.group(1))
-                        self.token_param = param
-                        logger.info(f"[{self.operator}] Found token in source code for param '{param}'")
-                        return self._token
-                
-                # 3. Check for URLs containing the token in the source (found in scripts)
-                for param in ['ert', 'rt']:
-                    match = re.search(rf'[?&]{param}=([^"\'&>]+)', response.text)
-                    if match:
-                        self._token = unquote(match.group(1))
-                        self.token_param = param
-                        logger.info(f"[{self.operator}] Found token in source URL for param '{param}'")
-                        return self._token
-
-                # 4. Check cookies
-                for param in ['ert', 'rt']:
-                    if param in response.cookies:
-                        self._token = response.cookies[param]
-                        self.token_param = param
-                        logger.info(f"[{self.operator}] Found token in cookie '{param}'")
-                        return self._token
+            if token:
+                self._token = token
+                return token
                     
             logger.warning(f"[{self.operator}] Could not extract session token from {response.url}")
             return None
@@ -88,8 +111,6 @@ class EnghouseFetcher:
         """Get important messages (usually doesn't require token)."""
         outages = []
         try:
-            # Note: /ImportantMessages/GetMessages usually doesn't need a token
-            # But we check if it's needed based on operator if we fail
             url = f"{self.base_url}/ImportantMessages/GetMessages"
             response = self.session.get(url, timeout=10)
             
@@ -101,7 +122,7 @@ class EnghouseFetcher:
                             operator=self.operator,
                             source_url=url,
                             raw_data=msg,
-                            scraped_at=datetime.now()
+                            scraped_at=datetime.now(timezone.utc)
                         ))
             else:
                 logger.warning(f"[{self.operator}] Failed to get messages from {url}: {response.status_code}")
@@ -114,7 +135,6 @@ class EnghouseFetcher:
     def get_area_tickets(self, bbox: Dict[str, float], services: str) -> List[RawOutage]:
         """Get area tickets (outages) for a bounding box."""
         outages = []
-        # Try to get token, but proceed if we already have one
         token = self._token or self.get_token()
         
         if not token:
@@ -122,41 +142,37 @@ class EnghouseFetcher:
 
         try:
             url = f"{self.base_url}/Fault/AreaTicketList"
-            params = {
-                **bbox,
-                'services': services
-            }
+            params = { **bbox, 'services': services }
             if token:
                 params[self.token_param] = token
             
-            logger.debug(f"[{self.operator}] Fetching tickets from {url} with params {params.keys()}")
             response = self.session.get(url, params=params, timeout=15)
-            
             if response.status_code == 200:
-                if not response.text.strip():
-                     logger.warning(f"[{self.operator}] Empty response from AreaTicketList")
-                     return outages
-
-                try:
-                    tickets = response.json()
-                    if isinstance(tickets, list):
-                        logger.info(f"[{self.operator}] Found {len(tickets)} tickets")
-                        for ticket in tickets:
-                            outages.append(RawOutage(
-                                operator=self.operator,
-                                source_url=url,
-                                raw_data=ticket,
-                                scraped_at=datetime.now()
-                            ))
-                except ValueError: # JSONDecodeError
-                    logger.warning(f"[{self.operator}] Invalid JSON from AreaTicketList: {response.text[:100]}...")
+                self._process_ticket_response(response, url, outages)
             else:
-                logger.warning(f"[{self.operator}] Failed to get area tickets from {url}: {response.status_code}")
+                logger.warning(f"[{self.operator}] Failed to get area tickets: {response.status_code}")
                 
         except Exception as e:
             logger.error(f"[{self.operator}] Error fetching area tickets: {e}")
             
         return outages
+
+    def _process_ticket_response(self, response, url, outages):
+        """Helper to process JSON ticket list."""
+        if not response.text.strip():
+            return
+        try:
+            tickets = response.json()
+            if isinstance(tickets, list):
+                for ticket in tickets:
+                    outages.append(RawOutage(
+                        operator=self.operator,
+                        source_url=url,
+                        raw_data=ticket,
+                        scraped_at=datetime.now(timezone.utc)
+                    ))
+        except ValueError:
+            logger.warning(f"[{self.operator}] Invalid JSON from AreaTicketList")
 
     def get_admin_areas(self) -> List[Dict]:
         """Get list of administrative areas (regions/counties)."""
@@ -190,9 +206,8 @@ class EnghouseFetcher:
                             operator=self.operator,
                             source_url=url,
                             raw_data=fault,
-                            scraped_at=datetime.now()
+                            scraped_at=datetime.now(timezone.utc)
                         ))
         except Exception as e:
             logger.error(f"[{self.operator}] Error fetching region faults: {e}")
         return outages
-

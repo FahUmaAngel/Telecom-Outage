@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useMemo } from "react";
@@ -6,7 +6,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import Link from "next/link";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { Layers, Map as MapIcon, Flame } from "lucide-react";
+import { Map as MapIcon, Flame } from "lucide-react";
 
 // Marker Cluster CSS
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -41,14 +41,14 @@ const cityCoords = {
     "Göteborg": [57.7089, 11.9746],
     "Malmö": [55.6050, 13.0038],
     "Uppsala": [59.8586, 17.6389],
-    "Västerås": [59.6100, 16.5448],
+    "Västerås": [59.61, 16.5448],
     "Örebro": [59.2753, 15.2134],
     "Linköping": [58.4108, 15.6214],
     "Helsingborg": [56.0465, 12.6945],
     "Jönköping": [57.7826, 14.1618],
     "Norrköping": [58.5877, 16.1819],
     "Stockholms län": [59.3293, 18.0686],
-    "Västra Götalands län": [58.0, 13.0],
+    "Västra Götalands län": [58, 13],
     "Skåne län": [55.9, 13.5],
     "Uppsala län": [59.8586, 17.6389],
     "Östergötlands län": [58.4108, 15.6214],
@@ -60,9 +60,9 @@ const cityCoords = {
     "Hallands län": [56.8945, 12.8421],
     "Värmlands län": [59.4021, 13.5115],
     "Örebro län": [59.2753, 15.2134],
-    "Västmanlands län": [59.6100, 16.5448],
+    "Västmanlands län": [59.61, 16.5448],
     "Dalarnas län": [60.6749, 15.0784],
-    "Gävleborgs län": [61.0, 16.0],
+    "Gävleborgs län": [61, 16],
     "Västernorrlands län": [62.6315, 17.9386],
     "Jämtlands län": [63.1792, 14.6357],
     "Västerbottens län": [64.7507, 18.0542],
@@ -80,7 +80,7 @@ function HeatmapLayer({ points = [] }) {
     const map = useMap();
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
+        if (typeof globalThis.window === "undefined") return;
         require("leaflet.heat");
 
         const container = map.getContainer();
@@ -125,11 +125,9 @@ function ResizeFix() {
 export default function Map({ outages = [], hotspots = [], simple = false }) {
     const { theme } = useTheme();
     const { lang, t } = useLanguage();
-    const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
 
     useEffect(() => {
-        // eslint-disable-next-line
         setMounted(true);
     }, []);
 
@@ -147,8 +145,6 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
         });
         return points;
     }, [outages, hotspots]);
-
-    if (!mounted) return null;
 
     const tileUrl = theme === "dark"
         ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -231,7 +227,7 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
                                 <Popup className="premium-popup">
                                     <div className="popup-content">
                                         <h3 className="font-heading" style={{ color: "#faad14" }}>
-                                            {lang === "sv" ? "Hotspot (Crowd)" : "Hotspot (Crowd)"}
+                                            Hotspot (Crowd)
                                         </h3>
                                         <p><strong>Operator:</strong> {hotspot.operator_name}</p>
                                         <p><strong>Reports:</strong> {hotspot.report_count}</p>

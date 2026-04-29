@@ -2,72 +2,91 @@
 Tre (3) parser.
 Parses Next.js JSON to find outage information.
 """
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import logging
-import json
-import re
+import hashlib
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+MOBILE_DATA = 'Mobile Data'
+VOICE = 'Voice'
+
+def _navigate_blocks(data: Dict) -> List[Dict]:
+    """Helper to find content blocks in Tre's JSON structure."""
+    try:
+        props = data.get('props', {}).get('pageProps', {})
+        return props.get('page', {}).get('blocks', [])
+    except (AttributeError, TypeError):
+        return []
+
+def _is_outage_block(text: str) -> bool:
+    """Check if a text block likely contains outage information."""
+    if not text:
+        return False
+    keywords = ['Arbete startar', 'påverka täckning', 'Driftstörning', 'Senast uppdaterat', 'Aktuella störningar']
+    return any(k in text for k in keywords)
+
 def parse_tre_outages(raw_outages: List) -> List[Dict]:
+    """Main parser for Tre's raw data."""
     parsed = []
-    
     for raw in raw_outages:
         try:
             data = raw.raw_data if hasattr(raw, 'raw_data') else raw
+            blocks = _navigate_blocks(data)
             
-            # Navigate to content blocks
-            # Based on inspection: props.pageProps.page.blocks
-            try:
-                props = data.get('props', {}).get('pageProps', {})
-                page = props.get('page', {})
-                blocks = page.get('blocks', [])
-                
-                for block in blocks:
-                    # Look for content that resembles outages (text blocks)
-                    items = block.get('items', [])
-                    for item in items:
-                        text = item.get('text', '')
-                        if not text:
-                            text = item.get('notificationMessage', '')
-                        
-                        if text and ('Arbete startar' in text or 
-                                     'påverka täckning' in text or 
-                                     'Driftstörning' in text or 
-                                     'Senast uppdaterat' in text or
-                                     'Aktuella störningar' in text):
-                            # This is likely the outages block
-                            logger.info(f"Found matching Tre text block ({text[:50]}...), parsing details...")
-                            parsed.extend(parse_markdown_text(text))
-                            
-            except Exception as e:
-                logger.warning(f"Error navigating Tre JSON: {e}")
-                
+            for block in blocks:
+                for item in block.get('items', []):
+                    text = item.get('text', '') or item.get('notificationMessage', '')
+                    if _is_outage_block(text):
+                        logger.info("Found Tre outage block, parsing...")
+                        parsed.extend(parse_markdown_text(text))
         except Exception as e:
             logger.error(f"Error parsing Tre outage: {e}")
-            
     return parsed
 
+def _extract_services(desc_text: str) -> List[str]:
+    """Extract affected services from description text."""
+    services = []
+    lower_desc = desc_text.lower()
+    mapping = {
+        '5g': '5G', '4g': '4G', '3g': '3G', '2g': '2G',
+        'surf': MOBILE_DATA, 'data': MOBILE_DATA, 'internet': MOBILE_DATA,
+        'samtal': VOICE, 'röst': VOICE, 'telefoni': VOICE,
+        'sms': 'SMS'
+    }
+    for kw, label in mapping.items():
+        if kw in lower_desc:
+            services.append(label)
+    
+    return list(set(services)) if services else ['Mobile Network']
+
+def _parse_chunk_lines(lines: List[str], outage: Dict):
+    """Process lines within a location chunk."""
+    for line in lines[1:]:
+        clean = line.replace('__', '').strip('- ').strip()
+        
+        if 'Arbete startar:' in clean:
+            outage['start_time'] = parse_tre_date(clean.split('Arbete startar:')[1].strip())
+        elif 'Arbete klart:' in clean:
+            outage['end_time'] = parse_tre_date(clean.split('Arbete klart:')[1].strip())
+        elif 'Senast uppdaterat:' in clean:
+            outage['start_time'] = parse_tre_date(clean.split('Senast uppdaterat:')[1].strip())
+        elif 'Beskrivning:' in clean:
+            desc = clean.split('Beskrivning:')[1].strip()
+            outage['description'] = desc
+            outage['affected_services'] = _extract_services(desc)
+
+def _generate_id(outage: Dict) -> str:
+    """Generate a unique ID for the outage."""
+    t_val = outage.get('start_time') or outage.get('end_time', 'unknown')
+    raw_str = f"tre_{outage.get('location', 'unknown')}_{t_val.replace(' ', '_')}"
+    hash_val = hashlib.sha256(raw_str.encode()).hexdigest()[:6].upper()
+    return f"TRE-{hash_val}"
+
 def parse_markdown_text(text: str) -> List[Dict]:
-    """
-    Parse Tre's markdown-like outage list.
-    Format:
-    ### __City__
-    - __Arbete startar:__ YYYY-MM-DD Kl HH:MM
-    - __Arbete klart:__ YYYY-MM-DD Kl HH:MM
-    - __Beskrivning:__ ...
-    """
+    """Parse Tre's markdown-like outage list."""
     outages = []
-    
-    # Split by location header (### __City__)
-    # Regex to find these blocks
-    # We'll use split to separate them, but keep the delimiter
-    
-    # Pattern to match: ### __City__
-    # But since it's a long string, let's just find all matches and their indices
-    
-    # Simple strategy: Split by "### "
     chunks = text.split('### ')
     
     for chunk in chunks:
@@ -77,66 +96,26 @@ def parse_markdown_text(text: str) -> List[Dict]:
         try:
             outage = {}
             lines = chunk.strip().split('\n')
-            
-            # First line is usually location: "__City__"
-            location_line = lines[0].replace('__', '').strip()
-            if location_line:
-                outage['location'] = location_line
-            
-            # Parse other lines
-            for line in lines[1:]:
-                clean_line = line.replace('__', '').strip('- ').strip()
+            location = lines[0].replace('__', '').strip()
+            if not location:
+                continue
                 
-                if 'Arbete startar:' in clean_line:
-                    time_str = clean_line.split('Arbete startar:')[1].strip()
-                    outage['start_time'] = parse_tre_date(time_str)
-                elif 'Arbete klart:' in clean_line:
-                    time_str = clean_line.split('Arbete klart:')[1].strip()
-                    outage['end_time'] = parse_tre_date(time_str)
-                elif 'Senast uppdaterat:' in clean_line:
-                    time_str = clean_line.split('Senast uppdaterat:')[1].strip()
-                    # Use update time as start time for these warnings
-                    outage['start_time'] = parse_tre_date(time_str)
-                elif 'Beskrivning:' in clean_line:
-                    desc_text = clean_line.split('Beskrivning:')[1].strip()
-                    outage['description'] = desc_text
-                    
-                    # Extract affected services from text
-                    services = []
-                    lower_desc = desc_text.lower()
-                    if '5g' in lower_desc: services.append('5G')
-                    if '4g' in lower_desc: services.append('4G')
-                    if '3g' in lower_desc: services.append('3G')
-                    if '2g' in lower_desc: services.append('2G')
-                    if 'data' in lower_desc or 'surf' in lower_desc or 'internet' in lower_desc: services.append('Mobile Data')
-                    if 'samtal' in lower_desc or 'röst' in lower_desc or 'telefoni' in lower_desc: services.append('Voice')
-                    if 'sms' in lower_desc: services.append('SMS')
-                    
-                    if not services: services.append('Mobile Network')
-                    outage['affected_services'] = list(set(services))
+            outage['location'] = location
+            _parse_chunk_lines(lines, outage)
             
             if outage.get('location') and (outage.get('start_time') or outage.get('end_time')):
-                # Generate a clean ID based on location and time
-                t_val = outage.get('start_time') or outage.get('end_time')
-                raw_str = f"tre_{outage['location']}_{t_val.replace(' ','_')}"
-                import hashlib
-                hash_str = hashlib.sha256(raw_str.encode()).hexdigest()[:6].upper()
-                outage['id'] = f"TRE-{hash_str}"
+                outage['id'] = _generate_id(outage)
                 outages.append(outage)
-                
         except Exception as e:
             logger.warning(f"Error parsing text chunk: {e}")
             
     return outages
 
 def parse_tre_date(date_str: str) -> Optional[str]:
-    # Format: 2025-12-15 Kl 00:00
+    """Parse Tre date format (YYYY-MM-DD Kl HH:MM)."""
     try:
-        # Remove 'Kl' and extra spaces, case insensitive
         clean = date_str.lower().replace('kl', '').strip()
-        # Parse
         dt = datetime.strptime(clean, "%Y-%m-%d %H:%M")
         return dt.isoformat()
-    except Exception as e:
-        logger.warning(f"Failed to parse date '{date_str}': {e}")
+    except (ValueError, AttributeError):
         return None

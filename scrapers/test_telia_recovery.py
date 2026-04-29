@@ -59,7 +59,7 @@ def test_recovery():
         
         # Try one county: Stockholm
         county = "Stockholms län"
-        area_xpath = f"//td[contains(text(), 'Stockholm')]/..//span[contains(text(), 'Visa område')]"
+        area_xpath = "//td[contains(text(), 'Stockholm')]/..//span[contains(text(), 'Visa område')]"
         logger.info(f"Looking for area link for {county} with XPath: {area_xpath}")
         try:
             area_btn = wait.until(EC.element_to_be_clickable((By.XPATH, area_xpath)))

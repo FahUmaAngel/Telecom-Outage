@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for API responses.
 """
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -27,36 +27,35 @@ class RegionResponse(BaseModel):
     name: Dict[str, str]
     outage_count: Optional[int] = 0
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class OutageResponse(BaseModel):
     id: int
-    incident_id: Optional[str]
-    operator_id: Optional[int]
+    incident_id: Optional[str] = None
+    operator_id: Optional[int] = None
     operator_name: str
     region_id: Optional[int] = None
     region_name: Optional[Dict[str, str]] = None
     raw_data_id: Optional[int] = None
     
     title: Dict[str, str] # Bilingual
-    description: Optional[Dict[str, str]]
+    description: Optional[Dict[str, str]] = None
     
     status: Optional[OutageStatus] = None
     severity: Optional[SeverityLevel] = None
     
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
-    estimated_fix_time: Optional[datetime]
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
     
-    location: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     
-    affected_services: List[str]
+    affected_services: List[str] = []
     place: Optional[str] = None
     quality_issues: Optional[List[str]] = None
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
     
     @field_validator('status', mode='before')
     @classmethod
@@ -73,28 +72,26 @@ class OutageResponse(BaseModel):
         if v is None: return v
         return str(v).lower()
 
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class ReportCreate(BaseModel):
+    operator_name: Optional[str] = Field(default=None, max_length=50)
+    title: str = Field(min_length=3, max_length=160)
+    description: Optional[str] = Field(default=None, max_length=2000)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+class ReportResponse(BaseModel):
+    id: int
     operator_name: Optional[str] = None
     title: str
     description: Optional[str] = None
     latitude: float
     longitude: float
-
-class ReportResponse(BaseModel):
-    id: int
-    operator_name: Optional[str]
-    title: str
-    description: Optional[str]
-    latitude: float
-    longitude: float
     status: str
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class MTTRResponse(BaseModel):
     operator_name: str
@@ -139,7 +136,7 @@ class UserResponse(UserBase):
 
 class HotspotResponse(BaseModel):
     operator_name: str
-    region_name: Optional[Dict[str, str]]
+    region_name: Optional[Dict[str, str]] = None
     latitude: float
     longitude: float
     report_count: int
@@ -182,7 +179,10 @@ class OutageUpdate(BaseModel):
     @classmethod
     def normalize_severity(cls, v):
         if v is None: return v
-        return str(v).lower()
+        val_str = str(v)
+        if "SeverityLevel" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
 
 class ResolvePlaceRequest(BaseModel):
     query: str

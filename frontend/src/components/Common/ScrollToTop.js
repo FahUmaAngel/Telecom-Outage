@@ -28,8 +28,21 @@ export default function ScrollToTop() {
         return () => window.removeEventListener("scroll", toggleVisibility);
     }, []);
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scrollToTop();
+        }
+    };
+
     return (
-        <div className={`scroll-to-top ${isVisible ? "visible" : ""}`} onClick={scrollToTop}>
+        <button 
+            className={`scroll-to-top ${isVisible ? "visible" : ""}`} 
+            onClick={scrollToTop}
+            onKeyDown={handleKeyDown}
+            aria-label="Scroll to top"
+            type="button"
+        >
             <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -98,6 +111,6 @@ export default function ScrollToTop() {
                     }
                 }
             `}</style>
-        </div>
+        </button>
     );
 }

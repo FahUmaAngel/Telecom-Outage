@@ -17,7 +17,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from scrapers.run import run_scrapers
 from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
-
+from scrapers.db.models import User
+from .auth import get_password_hash
 from .websockets import manager
 from fastapi import WebSocket, WebSocketDisconnect
 from datetime import datetime
@@ -26,6 +27,37 @@ logger = logging.getLogger(__name__)
 
 # Global scheduler instance
 scheduler = None
+
+
+def ensure_default_admin():
+    """Bootstrap a local admin user when the database has no users yet."""
+    app_env = (getattr(settings, "APP_ENV", "development") or "development").lower()
+    if app_env == "production":
+        return
+
+    db = SessionLocal()
+    try:
+        existing_user = db.query(User).first()
+        if existing_user:
+            return
+
+        username = getattr(settings, "ADMIN_USERNAME", None) or "admin"
+        password = getattr(settings, "ADMIN_PASSWORD", None) or os.environ.get("DEFAULT_ADMIN_PASSWORD")
+        if not password:
+            logger.warning("Default admin password not set. Skipping admin creation.")
+            return
+
+        db.add(User(
+            username=username,
+            hashed_password=get_password_hash(password),
+            role="admin",
+            is_active=True,
+        ))
+        db.commit()
+        logger.info("Created default development admin user '%s'", username)
+    finally:
+        db.close()
+
 
 async def scraper_job():
     """Background job to run scrapers"""
@@ -52,6 +84,8 @@ async def scraper_job():
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     global scheduler
+
+    ensure_default_admin()
     
     # Startup: Start the scheduler
     scheduler = AsyncIOScheduler()
@@ -97,7 +131,9 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 # CORS Configuration
-allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or "https://localhost:3000,http://localhost:8080"
+allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or (
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080"
+)
 origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 
 app.add_middleware(SecurityHeadersMiddleware)
@@ -107,8 +143,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Include Routers
@@ -127,7 +163,7 @@ def read_root():
 @app.get("/api/v1/scheduler/status")
 def scheduler_status():
     """Check scheduler status and next run times"""
-    if not scheduler:
+    if not scheduler or not scheduler.running:
         return {"status": "disabled", "message": "Scheduler is not running"}
     
     jobs = []

@@ -5,21 +5,24 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState(() => {
-        if (typeof window !== "undefined") {
-            return localStorage.getItem("theme") || "dark";
-        }
-        return "dark";
-    });
+    const [theme, setTheme] = useState("dark"); // Default to match server
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme && storedTheme !== "dark") {
+            setTheme(storedTheme);
+        }
+    }, []);
+
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
     }, [theme]);
 
     const toggleTheme = () => {
         const newTheme = theme === "light" ? "dark" : "light";
         setTheme(newTheme);
-        document.documentElement.setAttribute("data-theme", newTheme);
+        document.documentElement.dataset.theme = newTheme;
         localStorage.setItem("theme", newTheme);
     };
 
