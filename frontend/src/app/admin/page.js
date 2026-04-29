@@ -342,6 +342,40 @@ ReportModeration.propTypes = {
 /**
  * Component for Outage Management Table
  */
+const OutageRow = ({ o, lang, startEditing }) => {
+    const rowClass = o.quality_issues?.length > 0 ? "row-low-quality" : "";
+    const coordClass = o.latitude ? "" : "text-error";
+    const fallbackText = lang === "sv" ? "Saknas" : "Missing";
+    const coordText = o.latitude 
+        ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` 
+        : fallbackText;
+
+    return (
+        <tr className={`jsx-3261c0b2e58416a9 ${rowClass}`}>
+            <td className="jsx-3261c0b2e58416a9 id-cell">
+                #{o.id}
+                {o.quality_issues?.includes("missing_coords") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing Coordinates">📍</span>}
+                {o.quality_issues?.includes("missing_end_date") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing End Date">⏱️</span>}
+            </td>
+            <td className="jsx-3261c0b2e58416a9 op-cell">{o.operator_name}</td>
+            <td className="jsx-3261c0b2e58416a9 title-cell">{o.title[lang] || o.title['sv']}</td>
+            <td>
+                <span className={`jsx-3261c0b2e58416a9 status-badge-mini ${o.status}`}>
+                    {o.status}
+                </span>
+            </td>
+            <td className={`jsx-3261c0b2e58416a9 coord-cell ${coordClass}`}>
+                {coordText}
+            </td>
+            <td className="jsx-3261c0b2e58416a9 actions-cell">
+                <button onClick={() => startEditing(o)} className="jsx-3261c0b2e58416a9 btn-edit">
+                    {lang === "sv" ? "Redigera" : "Edit"}
+                </button>
+            </td>
+        </tr>
+    );
+};
+
 function OutageManagement({ outageMgr, lang }) {
     const { 
         outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
@@ -350,6 +384,47 @@ function OutageManagement({ outageMgr, lang }) {
         filterMissingCoords, setFilterMissingCoords, filterMissingEndDate, setFilterMissingEndDate
     } = outageMgr;
     
+    const onSearchChange = (e) => {
+        const val = e.target.value;
+        setSearchQuery(val);
+        clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = setTimeout(() => {
+            handleFilterChange(val, filterOperator, filterStatus);
+        }, 400);
+    };
+
+    const onOperatorChange = (e) => { 
+        setFilterOperator(e.target.value); 
+        handleFilterChange(searchQuery, e.target.value, filterStatus); 
+    };
+
+    const onStatusChange = (e) => { 
+        setFilterStatus(e.target.value); 
+        handleFilterChange(searchQuery, filterOperator, e.target.value); 
+    };
+
+    const onMissingCoordsChange = (e) => {
+        setFilterMissingCoords(e.target.checked);
+        handleFilterChange(searchQuery, filterOperator, filterStatus, e.target.checked, filterMissingEndDate);
+    };
+
+    const onMissingEndDateChange = (e) => {
+        setFilterMissingEndDate(e.target.checked);
+        handleFilterChange(searchQuery, filterOperator, filterStatus, filterMissingCoords, e.target.checked);
+    };
+
+    const handlePrevPage = () => {
+        const newPage = page - 1;
+        setPage(newPage);
+        fetchOutages(newPage);
+    };
+
+    const handleNextPage = () => {
+        const newPage = page + 1;
+        setPage(newPage);
+        fetchOutages(newPage);
+    };
+
     const outageList = useMemo(() => {
         if (outagesLoading) {
             return (
@@ -371,39 +446,9 @@ function OutageManagement({ outageMgr, lang }) {
             );
         }
 
-        return outages.map((o) => {
-            const rowClass = o.quality_issues?.length > 0 ? "row-low-quality" : "";
-            const coordClass = o.latitude ? "" : "text-error";
-            const fallbackText = lang === "sv" ? "Saknas" : "Missing";
-            const coordText = o.latitude 
-                ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` 
-                : fallbackText;
-
-            return (
-                <tr key={o.id} className={`jsx-3261c0b2e58416a9 ${rowClass}`}>
-                    <td className="jsx-3261c0b2e58416a9 id-cell">
-                        #{o.id}
-                        {o.quality_issues?.includes("missing_coords") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing Coordinates">📍</span>}
-                        {o.quality_issues?.includes("missing_end_date") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing End Date">⏱️</span>}
-                    </td>
-                    <td className="jsx-3261c0b2e58416a9 op-cell">{o.operator_name}</td>
-                    <td className="jsx-3261c0b2e58416a9 title-cell">{o.title[lang] || o.title['sv']}</td>
-                    <td>
-                        <span className={`jsx-3261c0b2e58416a9 status-badge-mini ${o.status}`}>
-                            {o.status}
-                        </span>
-                    </td>
-                    <td className={`jsx-3261c0b2e58416a9 coord-cell ${coordClass}`}>
-                        {coordText}
-                    </td>
-                    <td className="jsx-3261c0b2e58416a9 actions-cell">
-                        <button onClick={() => startEditing(o)} className="jsx-3261c0b2e58416a9 btn-edit">
-                            {lang === "sv" ? "Redigera" : "Edit"}
-                        </button>
-                    </td>
-                </tr>
-            );
-        });
+        return outages.map((o) => (
+            <OutageRow key={o.id} o={o} lang={lang} startEditing={startEditing} />
+        ));
     }, [outages, outagesLoading, lang, startEditing]);
 
     return (
@@ -417,21 +462,14 @@ function OutageManagement({ outageMgr, lang }) {
                             type="text"
                             placeholder={lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)..."}
                             value={searchQuery}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setSearchQuery(val);
-                                clearTimeout(searchTimerRef.current);
-                                searchTimerRef.current = setTimeout(() => {
-                                    handleFilterChange(val, filterOperator, filterStatus);
-                                }, 400);
-                            }}
+                            onChange={onSearchChange}
                             className="search-input"
                         />
                     </div>
                     <div className="filter-group">
                         <select
                             value={filterOperator}
-                            onChange={(e) => { setFilterOperator(e.target.value); handleFilterChange(searchQuery, e.target.value, filterStatus); }}
+                            onChange={onOperatorChange}
                             className="filter-select"
                         >
                             <option value="">{lang === "sv" ? "Alla operatörer" : "All Operators"}</option>
@@ -441,7 +479,7 @@ function OutageManagement({ outageMgr, lang }) {
                         </select>
                         <select
                             value={filterStatus}
-                            onChange={(e) => { setFilterStatus(e.target.value); handleFilterChange(searchQuery, filterOperator, e.target.value); }}
+                            onChange={onStatusChange}
                             className="filter-select"
                         >
                             <option value="">{lang === "sv" ? "Alla statusar" : "All Statuses"}</option>
@@ -457,10 +495,7 @@ function OutageManagement({ outageMgr, lang }) {
                             <input 
                                 type="checkbox" 
                                 checked={filterMissingCoords} 
-                                onChange={(e) => {
-                                    setFilterMissingCoords(e.target.checked);
-                                    handleFilterChange(searchQuery, filterOperator, filterStatus, e.target.checked, filterMissingEndDate);
-                                }} 
+                                onChange={onMissingCoordsChange} 
                             />
                             <span>{lang === "sv" ? "Saknar koordinater" : "Missing Coords"}</span>
                         </label>
@@ -468,10 +503,7 @@ function OutageManagement({ outageMgr, lang }) {
                             <input 
                                 type="checkbox" 
                                 checked={filterMissingEndDate} 
-                                onChange={(e) => {
-                                    setFilterMissingEndDate(e.target.checked);
-                                    handleFilterChange(searchQuery, filterOperator, filterStatus, filterMissingCoords, e.target.checked);
-                                }} 
+                                onChange={onMissingEndDateChange} 
                             />
                             <span>{lang === "sv" ? "Saknar slutdatum" : "Missing End Date"}</span>
                         </label>
@@ -520,11 +552,7 @@ function OutageManagement({ outageMgr, lang }) {
                     <button
                         className="btn-secondary"
                         disabled={page === 0 || outagesLoading}
-                        onClick={() => {
-                            const newPage = page - 1;
-                            setPage(newPage);
-                            fetchOutages(newPage);
-                        }}
+                        onClick={handlePrevPage}
                     >
                         {lang === "sv" ? "← Föregående" : "← Previous"}
                     </button>
@@ -534,11 +562,7 @@ function OutageManagement({ outageMgr, lang }) {
                     <button
                         className="btn-secondary"
                         disabled={!hasMore || outagesLoading}
-                        onClick={() => {
-                            const newPage = page + 1;
-                            setPage(newPage);
-                            fetchOutages(newPage);
-                        }}
+                        onClick={handleNextPage}
                     >
                         {lang === "sv" ? "Nästa →" : "Next →"}
                     </button>
