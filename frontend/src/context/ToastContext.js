@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 const ToastContext = createContext();
 
@@ -26,12 +27,18 @@ export function ToastProvider({ children }) {
         return id;
     }, [removeToast]);
 
+    const value = useMemo(() => ({ toasts, addToast, removeToast }), [toasts, addToast, removeToast]);
+
     return (
-        <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+        <ToastContext.Provider value={value}>
             {children}
         </ToastContext.Provider>
     );
 }
+
+ToastProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
 
 export function useToast() {
     const context = useContext(ToastContext);
