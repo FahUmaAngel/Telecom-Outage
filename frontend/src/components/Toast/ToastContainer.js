@@ -8,17 +8,10 @@ export default function ToastContainer() {
     return (
         <div className="toast-container">
             {toasts.map(toast => (
-                <div
+                <button
                     key={toast.id}
                     className={`toast toast-${toast.type} animate-slide-in`}
                     onClick={() => removeToast(toast.id)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            removeToast(toast.id);
-                        }
-                    }}
-                    role="button"
-                    tabIndex={0}
                     aria-label={`Close ${toast.type} notification: ${toast.message}`}
                 >
                     <div className="toast-icon">
@@ -28,16 +21,8 @@ export default function ToastContainer() {
                         {toast.type === 'info' && 'ℹ'}
                     </div>
                     <div className="toast-message">{toast.message}</div>
-                    <button
-                        className="toast-close"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            removeToast(toast.id);
-                        }}
-                    >
-                        ✕
-                    </button>
-                </div>
+                    <div className="toast-close-icon">✕</div>
+                </button>
             ))}
 
             <style jsx>{`
@@ -65,11 +50,19 @@ export default function ToastContainer() {
                     backdrop-filter: blur(10px);
                     border: 1px solid var(--glass-border);
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-                    transition: transform 0.2s ease, opacity 0.2s ease;
+                    transition: all 0.2s ease;
+                    font-family: inherit;
+                    text-align: left;
+                    outline: none;
                 }
 
                 .toast:hover {
                     transform: translateX(-5px);
+                    border-color: rgba(255, 255, 255, 0.3);
+                }
+
+                .toast:focus-visible {
+                    box-shadow: 0 0 0 3px var(--accent-glow);
                 }
 
                 .toast-success {
@@ -110,24 +103,16 @@ export default function ToastContainer() {
                     line-height: 1.4;
                 }
 
-                .toast-close {
-                    background: none;
-                    border: none;
+                .toast-close-icon {
                     color: var(--text-muted);
-                    cursor: pointer;
                     font-size: 1.2rem;
-                    padding: 0;
-                    width: 24px;
-                    height: 24px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 4px;
-                    transition: background 0.2s ease;
+                    opacity: 0.5;
+                    transition: opacity 0.2s ease;
                 }
 
-                .toast-close:hover {
-                    background: rgba(255, 255, 255, 0.1);
+                .toast:hover .toast-close-icon {
+                    opacity: 1;
+                    color: var(--text-primary);
                 }
 
                 @keyframes slideIn {
