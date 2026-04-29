@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { api } from "../../lib/api";
@@ -382,6 +382,39 @@ OutageRow.propTypes = {
     startEditing: PropTypes.func.isRequired,
 };
 
+const OutageTableBody = ({ outagesLoading, outages, lang, startEditing }) => {
+    if (outagesLoading) {
+        return (
+            <tr>
+                <td colSpan="6" style={{ textAlign: "center", padding: "3rem" }}>
+                    <div className="loading-spinner"></div>
+                </td>
+            </tr>
+        );
+    }
+    
+    if (outages.length === 0) {
+        return (
+            <tr>
+                <td colSpan="6" style={{ textAlign: "center", padding: "3rem", opacity: 0.5 }}>
+                    {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
+                </td>
+            </tr>
+        );
+    }
+
+    return outages.map((o) => (
+        <OutageRow key={o.id} o={o} lang={lang} startEditing={startEditing} />
+    ));
+};
+
+OutageTableBody.propTypes = {
+    outagesLoading: PropTypes.bool.isRequired,
+    outages: PropTypes.array.isRequired,
+    lang: PropTypes.string.isRequired,
+    startEditing: PropTypes.func.isRequired,
+};
+
 function OutageManagement({ outageMgr, lang }) {
     const { 
         outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
@@ -430,38 +463,6 @@ function OutageManagement({ outageMgr, lang }) {
         setPage(newPage);
         fetchOutages(newPage);
     };
-
-const OutageTableBody = ({ outagesLoading, outages, lang, startEditing }) => {
-    if (outagesLoading) {
-        return (
-            <tr>
-                <td colSpan="6" style={{ textAlign: "center", padding: "3rem" }}>
-                    <div className="loading-spinner"></div>
-                </td>
-            </tr>
-        );
-    }
-    
-    if (outages.length === 0) {
-        return (
-            <tr>
-                <td colSpan="6" style={{ textAlign: "center", padding: "3rem", opacity: 0.5 }}>
-                    {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
-                </td>
-            </tr>
-        );
-    }
-
-    return outages.map((o) => (
-        <OutageRow key={o.id} o={o} lang={lang} startEditing={startEditing} />
-    ));
-};
-OutageTableBody.propTypes = {
-    outagesLoading: PropTypes.bool.isRequired,
-    outages: PropTypes.array.isRequired,
-    lang: PropTypes.string.isRequired,
-    startEditing: PropTypes.func.isRequired,
-};
 
     return (
         <section className="admin-section">
