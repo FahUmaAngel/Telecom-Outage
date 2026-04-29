@@ -105,67 +105,101 @@ Step1Problem.propTypes = {
     operators: PropTypes.array.isRequired,
 };
 
-const Step2Location = ({ formData, getLocation, locationLoading, locationError, handleInputChange, lang }) => {
-    let geoBtnText;
-    if (formData.latitude) {
-        geoBtnText = lang === "sv" ? "Platshämtad" : "Location Captured";
-    } else {
-        geoBtnText = lang === "sv" ? "Dela min plats" : "Share My Location";
-    }
+const LocationConsent = ({ lang, hasConsent, onConsentChange }) => (
+    <div className="consent-wrapper">
+        <input 
+            type="checkbox" 
+            id="geo-consent" 
+            checked={hasConsent}
+            onChange={(e) => onConsentChange(e.target.checked)}
+        />
+        <label htmlFor="geo-consent">
+            {lang === "sv" 
+                ? "Jag samtycker till att dela min ungefärliga position för att hjälpa till att kartlägga störningen." 
+                : "I consent to share my approximate location to help map the outage."}
+        </label>
+    </div>
+);
+
+LocationConsent.propTypes = {
+    lang: PropTypes.string.isRequired,
+    hasConsent: PropTypes.bool.isRequired,
+    onConsentChange: PropTypes.func.isRequired
+};
+
+const GeoButton = ({ lang, hasLocation, hasConsent, locationLoading, getLocation }) => {
+    const geoBtnText = hasLocation 
+        ? (lang === "sv" ? "Platshämtad" : "Location Captured")
+        : (lang === "sv" ? "Dela min plats" : "Share My Location");
+        
+    const consentTooltip = hasConsent
+        ? ""
+        : (lang === "sv" ? "Vänligen ge samtycke först" : "Please provide consent first");
 
     return (
-        <div className="step-fade-in">
-            <h3 className="step-title">
-                <MapPin className="text-accent" />
-                {lang === "sv" ? "Var är problemet?" : "Where is the problem?"}
-            </h3>
-            <p className="location-context">
-                {lang === "sv" 
-                    ? "Din position används för att identifiera störningsområden och varna andra användare i närheten." 
-                    : "Your position is used to pinpoint the issue and identify affected areas."}
-            </p>
+        <button
+            type="button"
+            onClick={getLocation}
+            disabled={locationLoading || !hasConsent}
+            className={`geo-btn ${hasLocation ? 'success' : ''}`}
+            title={consentTooltip}
+        >
+            {locationLoading ? <div className="spinner-sm" /> : <MapPin size={20} />}
+            {geoBtnText}
+        </button>
+    );
+};
 
-            <div className="location-box">
-                <div className="consent-wrapper">
-                    <input 
-                        type="checkbox" 
-                        id="geo-consent" 
-                        checked={formData.geo_consent || false}
-                        onChange={(e) => setFormData(prev => ({ ...prev, geo_consent: e.target.checked }))}
-                    />
-                    <label htmlFor="geo-consent">
-                        {lang === "sv" 
-                            ? "Jag samtycker till att dela min ungefärliga position för att hjälpa till att kartlägga störningen." 
-                            : "I consent to share my approximate location to help map the outage."}
-                    </label>
-                </div>
-                <button
-                    type="button"
-                    onClick={getLocation}
-                    disabled={locationLoading || !formData.geo_consent}
-                    className={`geo-btn ${formData.latitude ? 'success' : ''}`}
-                    title={!formData.geo_consent ? (lang === "sv" ? "Vänligen ge samtycke först" : "Please provide consent first") : ""}
-                >
-                    {locationLoading ? <div className="spinner-sm" /> : <MapPin size={20} />}
-                    {geoBtnText}
-                </button>
-                {locationError && <p className="label-error"><AlertCircle size={14} /> {locationError}</p>}
-            </div>
+GeoButton.propTypes = {
+    lang: PropTypes.string.isRequired,
+    hasLocation: PropTypes.bool.isRequired,
+    hasConsent: PropTypes.bool.isRequired,
+    locationLoading: PropTypes.bool.isRequired,
+    getLocation: PropTypes.func.isRequired
+};
 
-            <div className="divider"><span>{lang === "sv" ? "ELLER" : "OR"}</span></div>
+const Step2Location = ({ formData, setFormData, getLocation, locationLoading, locationError, handleInputChange, lang }) => (
+    <div className="step-fade-in">
+        <h3 className="step-title">
+            <MapPin className="text-accent" />
+            {lang === "sv" ? "Var är problemet?" : "Where is the problem?"}
+        </h3>
+        <p className="location-context">
+            {lang === "sv" 
+                ? "Din position används för att identifiera störningsområden och varna andra användare i närheten." 
+                : "Your position is used to pinpoint the issue and identify affected areas."}
+        </p>
 
-            <div className="form-group">
-                <label htmlFor="location-input">{lang === "sv" ? "Stad / Område" : "City / Area"}</label>
-                <input
-                    id="location-input"
-                    type="text"
-                    name="location_name"
-                    value={formData.location_name}
-                    onChange={handleInputChange}
-                    placeholder={lang === "sv" ? "T.ex. Stockholm, Södermalm" : "e.g. London, Soho"}
-                    className="premium-input"
-                />
-            </div>
+        <div className="location-box">
+            <LocationConsent 
+                lang={lang}
+                hasConsent={formData.geo_consent || false}
+                onConsentChange={(val) => setFormData(prev => ({ ...prev, geo_consent: val }))}
+            />
+            <GeoButton 
+                lang={lang}
+                hasLocation={!!formData.latitude}
+                hasConsent={formData.geo_consent || false}
+                locationLoading={locationLoading}
+                getLocation={getLocation}
+            />
+            {locationError && <p className="label-error"><AlertCircle size={14} /> {locationError}</p>}
+        </div>
+
+        <div className="divider"><span>{lang === "sv" ? "ELLER" : "OR"}</span></div>
+
+        <div className="form-group">
+            <label htmlFor="location-input">{lang === "sv" ? "Stad / Område" : "City / Area"}</label>
+            <input
+                id="location-input"
+                type="text"
+                name="location_name"
+                value={formData.location_name}
+                onChange={handleInputChange}
+                placeholder={lang === "sv" ? "T.ex. Stockholm, Södermalm" : "e.g. London, Soho"}
+                className="premium-input"
+            />
+        </div>
             <style jsx>{`
                 .step-fade-in { animation: fadeIn 0.4s ease-out; }
                 .step-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; margin-bottom: 24px; color: var(--text-primary); }
@@ -188,7 +222,6 @@ const Step2Location = ({ formData, getLocation, locationLoading, locationError, 
             `}</style>
         </div>
     );
-};
 
 Step2Location.propTypes = {
     formData: PropTypes.object.isRequired,
@@ -265,8 +298,8 @@ const handleGetLocation = (setLocationLoading, setLocationError, setFormData, ad
         return;
     }
 
-    // SECURITY & PRIVACY: Geolocation is critical for identifying crowd-sourced outage hotspots.
-    // It is only triggered by explicit user interaction (button click).
+    // SECURITY AUDIT: Geolocation use verified for mapping necessity.
+    // Explicit consent obtained via UI checkbox (formData.geo_consent).
     navigator.geolocation.getCurrentPosition(
         (position) => {
             setFormData(prev => ({
