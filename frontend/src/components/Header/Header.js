@@ -7,6 +7,10 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage } = useLanguage();
 
+  const themeToggleLabel = theme === "light"
+    ? (lang === "sv" ? "MÖRKT" : "DARK")
+    : (lang === "sv" ? "LJUST" : "LIGHT");
+
   return (
     <header className="header glass animate-fade-in">
       <div className="logo font-heading">
@@ -26,7 +30,7 @@ export default function Header() {
           {lang === "sv" ? "SV" : "EN"}
         </button>
         <button onClick={toggleTheme} className="action-btn theme-btn">
-          {theme === "light" ? (lang === "sv" ? "MÖRKT" : "DARK") : (lang === "sv" ? "LJUST" : "LIGHT")}
+          {themeToggleLabel}
         </button>
       </div>
 
