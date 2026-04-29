@@ -5,12 +5,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from ..config import settings
 
-engine = create_engine(
-    settings.DATABASE_URL, 
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
-)
+engine = create_engine(settings.DATABASE_URL)
 
-# Enable WAL mode for SQLite
+# Enable WAL mode ONLY for SQLite
 if "sqlite" in settings.DATABASE_URL:
     from sqlalchemy import event
     @event.listens_for(engine, "connect")

@@ -17,14 +17,17 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from scrapers.run import run_scrapers
 from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import auto_resolve_expired_outages
+
+from .websockets import manager
+from fastapi import WebSocket, WebSocketDisconnect
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 # Global scheduler instance
 scheduler = None
 
-def scraper_job():
+async def scraper_job():
     """Background job to run scrapers"""
     try:
         logger.info("Running scheduled scraper job...")
@@ -32,16 +35,16 @@ def scraper_job():
         # 1. Run Scrapers
         run_scrapers()
         
-        # 2. Auto-resolve expired outages
-        db = SessionLocal()
-        try:
-            resolved_count = auto_resolve_expired_outages(db)
-            if resolved_count > 0:
-                logger.info(f"Auto-resolved {resolved_count} expired outages")
-        finally:
-            db.close()
+        # Note: Auto-resolve based on ETA was removed to prevent status flapping.
+        # Resolution is now handled entirely by Delta-Resolve (vanished incidents)
+        # or explicitly by the scrapers.
             
-        logger.info("Scraper job completed successfully")
+        logger.info("Scraper job completed successfully. Broadcasting update...")
+        await manager.broadcast({
+            "type": "OUTAGE_UPDATE", 
+            "timestamp": datetime.now().isoformat(),
+            "message": "New outage data available"
+        })
     except Exception as e:
         logger.error(f"Error in scraper job: {e}")
 
@@ -78,6 +81,20 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# WebSocket Endpoint
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Keep connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        manager.disconnect(websocket)
 
 # CORS Configuration
 allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or "https://localhost:3000,http://localhost:8080"

@@ -22,7 +22,7 @@ from scrapers.tre.mapper import map_tre_outages
 from scrapers.telia import scrape_telia_outages, parse_telia_outages, scrape_portal_granular
 
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import save_outage
+from scrapers.db.crud import save_outage, resolve_missing_outages
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES
@@ -50,8 +50,10 @@ def run_scrapers():
             if parsed_outages:
                 logger.info(f"✓ Telia API scraper found {len(parsed_outages)} outages")
                 save_count = 0
+                seen_ids = []
                 for outage in parsed_outages:
                     inc_id = outage.get('id', 'N/A')
+                    seen_ids.append(inc_id)
                     desc = outage.get('description', {})
                     location_text = outage.get('location', 'Sweden')
                     
@@ -83,6 +85,9 @@ def run_scrapers():
                 
                 db.commit()
                 logger.info(f"Telia API: saved {save_count} outages")
+                
+                # Resolve Telia outages not seen in this run
+                resolve_missing_outages(db, OperatorEnum.TELIA, seen_ids)
             else:
                 logger.warning("! Telia API scraper found no outages - falling back to Playwright Portal Scraper")
                 scrape_portal_granular()
@@ -103,7 +108,9 @@ def run_scrapers():
                 logger.info(f"  Found {len(telenor_result['outages'])} outages")
                 
                 # Save each outage to database
+                seen_ids = []
                 for outage in telenor_result['outages']:
+                    seen_ids.append(outage['incident_id'])
                     location_text = outage.get('location', '')
                     desc_text = outage.get('description', '')
                     title_text = outage.get('title', f"Incident {outage['incident_id']}")
@@ -142,6 +149,9 @@ def run_scrapers():
                 
                 db.commit()
                 logger.info(f"Telenor: saved {len(telenor_result['outages'])} outages to database")
+                
+                # Resolve Telenor outages not seen in this run
+                resolve_missing_outages(db, OperatorEnum.TELENOR, seen_ids)
             else:
                 logger.error(f"✗ Telenor scraper failed")
                 
@@ -156,11 +166,15 @@ def run_scrapers():
             parsed = parse_tre_outages(raw)
             mapped = map_tre_outages(parsed)
             
+            seen_ids = [item.incident_id for item in mapped]
             for item in mapped:
                 save_outage(db, item, {"source": "tre_scraper"})
                 
             db.commit()
             logger.info(f"Tre: processed {len(mapped)} outages")
+            
+            # Resolve Tre outages not seen in this run
+            resolve_missing_outages(db, OperatorEnum.TRE, seen_ids)
         except Exception as e:
             logger.error(f"Tre failed: {e}")
             db.rollback()

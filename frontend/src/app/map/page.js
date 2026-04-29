@@ -34,6 +34,50 @@ export default function MapPage() {
         };
 
         fetchData();
+
+        // WebSocket Setup for Real-time Updates
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+        console.log("Connecting to WebSocket:", wsUrl);
+        
+        let socket;
+        let reconnectTimeout;
+
+        const connect = () => {
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                console.log("✓ Connected to Outage WebSocket");
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "OUTAGE_UPDATE") {
+                        console.log("⚡ Real-time update received! Refreshing data...");
+                        fetchData();
+                    }
+                } catch (err) {
+                    console.error("Error parsing WebSocket message:", err);
+                }
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket disconnected. Reconnecting in 5s...");
+                reconnectTimeout = setTimeout(connect, 5000);
+            };
+
+            socket.onerror = (err) => {
+                console.error("WebSocket error:", err);
+                socket.close();
+            };
+        };
+
+        connect();
+
+        return () => {
+            if (socket) socket.close();
+            if (reconnectTimeout) clearTimeout(reconnectTimeout);
+        };
     }, []);
 
     return (

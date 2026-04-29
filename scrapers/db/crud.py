@@ -96,40 +96,38 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         db.add(new_outage)
         return new_outage
 
-def auto_resolve_expired_outages(db: Session):
+
+
+def resolve_missing_outages(db: Session, operator_enum: OperatorEnum, seen_incident_ids: list):
     """
-    Find outages that are still active/scheduled but their end dates/ETAs have passed.
-    Mark them as 'resolved' in the database.
+    Mark active outages that were NOT seen in the current scrape as resolved.
+    This handles the case where an operator removes an incident from their site once fixed.
     """
+    operator_id = get_operator_id(db, operator_enum.value)
+    if not operator_id:
+        return 0
+        
     now = datetime.utcnow()
     
-    # 1. Check end_time (definite resolution time)
-    expired_end = db.query(Outage).filter(
+    # Find active outages for this operator that are NOT in the seen list
+    missing_outages = db.query(Outage).filter(
+        Outage.operator_id == operator_id,
         Outage.status != 'resolved',
-        Outage.end_time != None,
-        Outage.end_time <= now
+        ~Outage.incident_id.in_(seen_incident_ids)
     ).all()
     
-    # 2. Check estimated_fix_time (ETA passed)
-    # We only auto-resolve based on ETA if there's no definite end_time
-    expired_eta = db.query(Outage).filter(
-        Outage.status != 'resolved',
-        Outage.end_time == None,
-        Outage.estimated_fix_time != None,
-        Outage.estimated_fix_time <= now
-    ).all()
-    
-    total_resolved = 0
-    for outage in expired_end + expired_eta:
+    resolved_count = 0
+    for outage in missing_outages:
         outage.status = 'resolved'
+        outage.end_time = now
         outage.updated_at = now
-        total_resolved += 1
+        resolved_count += 1
         
-    if total_resolved > 0:
+    if resolved_count > 0:
         db.commit()
-        print(f"AUTO-RESOLVE: Marked {total_resolved} expired outages as 'resolved'.")
-    
-    return total_resolved
+        print(f"DELTA-RESOLVE: Marked {resolved_count} vanished outages for {operator_enum.value} as 'resolved'.")
+        
+    return resolved_count
 
 def cleanup_old_data(db: Session, days: int = 30):
     """
