@@ -351,29 +351,35 @@ const OutageRow = ({ o, lang, startEditing }) => {
         : fallbackText;
 
     return (
-        <tr className={`jsx-3261c0b2e58416a9 ${rowClass}`}>
-            <td className="jsx-3261c0b2e58416a9 id-cell">
+        <tr className={rowClass}>
+            <td className="id-cell">
                 #{o.id}
-                {o.quality_issues?.includes("missing_coords") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing Coordinates">📍</span>}
-                {o.quality_issues?.includes("missing_end_date") && <span className="jsx-3261c0b2e58416a9 quality-tag" title="Missing End Date">⏱️</span>}
+                {o.quality_issues?.includes("missing_coords") && <span className="quality-tag" title="Missing Coordinates">📍</span>}
+                {o.quality_issues?.includes("missing_end_date") && <span className="quality-tag" title="Missing End Date">⏱️</span>}
             </td>
-            <td className="jsx-3261c0b2e58416a9 op-cell">{o.operator_name}</td>
-            <td className="jsx-3261c0b2e58416a9 title-cell">{o.title[lang] || o.title['sv']}</td>
+            <td className="op-cell">{o.operator_name}</td>
+            <td className="title-cell">{o.title[lang] || o.title['sv']}</td>
             <td>
-                <span className={`jsx-3261c0b2e58416a9 status-badge-mini ${o.status}`}>
+                <span className={`status-badge-mini ${o.status}`}>
                     {o.status}
                 </span>
             </td>
-            <td className={`jsx-3261c0b2e58416a9 coord-cell ${coordClass}`}>
+            <td className={`coord-cell ${coordClass}`}>
                 {coordText}
             </td>
-            <td className="jsx-3261c0b2e58416a9 actions-cell">
-                <button onClick={() => startEditing(o)} className="jsx-3261c0b2e58416a9 btn-edit">
+            <td className="actions-cell">
+                <button onClick={() => startEditing(o)} className="btn-edit">
                     {lang === "sv" ? "Redigera" : "Edit"}
                 </button>
             </td>
         </tr>
     );
+};
+
+OutageRow.propTypes = {
+    o: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired,
+    startEditing: PropTypes.func.isRequired,
 };
 
 function OutageManagement({ outageMgr, lang }) {
@@ -568,7 +574,7 @@ function OutageManagement({ outageMgr, lang }) {
                     </button>
                 </div>
             </div>
-            <style jsx>{`
+            <style jsx global>{`
                 .admin-section { margin-bottom: 64px; }
                 .section-header-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; }
                 .section-title { margin-bottom: 24px; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
@@ -597,6 +603,7 @@ function OutageManagement({ outageMgr, lang }) {
                 .row-low-quality:hover td { background: rgba(225, 29, 72, 0.08) !important; }
                 .quality-tag { margin-left: 8px; font-size: 1.1rem; vertical-align: middle; cursor: help; }
                 .text-error { color: var(--status-critical); font-weight: 800; }
+
                 .op-cell { font-weight: 800; color: var(--accent-primary); text-transform: capitalize; }
                 .id-cell { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
                 .title-cell { font-weight: 600; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }

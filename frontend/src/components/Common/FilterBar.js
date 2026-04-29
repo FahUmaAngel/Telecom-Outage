@@ -59,7 +59,7 @@ export default function FilterBar({
         filters.operators.length +
         filters.severities.length +
         (filters.search ? 1 : 0) +
-        (filters.status !== "all" ? 1 : 0);
+        (filters.status === "all" ? 0 : 1);
 
     return (
         <div className="filter-bar-wrapper">
@@ -100,7 +100,7 @@ export default function FilterBar({
                 <div className="filter-dropdown glass animate-slide-down">
                     <div className="filter-grid">
                         <div className="filter-group">
-                            <label>Status</label>
+                            <span className="filter-label">Status</span>
                             <div className="chip-group">
                                 {statuses.map(s => (
                                     <button
@@ -115,7 +115,7 @@ export default function FilterBar({
                         </div>
 
                         <div className="filter-group">
-                            <label>Operators</label>
+                            <span className="filter-label">Operators</span>
                             <div className="chip-group">
                                 {operators.map(op => (
                                     <button
@@ -130,7 +130,7 @@ export default function FilterBar({
                         </div>
 
                         <div className="filter-group">
-                            <label>Severity</label>
+                            <span className="filter-label">Severity</span>
                             <div className="chip-group">
                                 {severities.map(s => (
                                     <button
@@ -247,7 +247,7 @@ export default function FilterBar({
                     grid-template-columns: repeat(3, 1fr);
                     gap: 32px;
                 }
-                .filter-group label {
+                .filter-group .filter-label {
                     display: block;
                     font-size: 0.7rem;
                     text-transform: uppercase;
@@ -282,3 +282,9 @@ export default function FilterBar({
         </div>
     );
 }
+
+FilterBar.propTypes = {
+    operators: PropTypes.array,
+    onFilterChange: PropTypes.func,
+    initialFilters: PropTypes.object
+};

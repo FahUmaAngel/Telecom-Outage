@@ -2,11 +2,12 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../../context/LanguageContext';
+import PropTypes from 'prop-types';
 
 export default function HistoricalTrend({ data }) {
     const { lang } = useLanguage();
 
-    if (!data || !data.trend || data.trend.length === 0) {
+    if (!data?.trend?.length) {
         return (
             <div className="empty-chart glass">
                 <p>{lang === "sv" ? "Ingen data tillgänglig" : "No data available"}</p>
@@ -102,3 +103,10 @@ export default function HistoricalTrend({ data }) {
         </div>
     );
 }
+
+HistoricalTrend.propTypes = {
+    data: PropTypes.shape({
+        trend: PropTypes.array,
+        total_count: PropTypes.number
+    })
+};

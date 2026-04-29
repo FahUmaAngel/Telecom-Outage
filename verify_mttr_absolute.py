@@ -12,7 +12,7 @@ tre_id = cursor.fetchone()[0]
 # Calculate MTTR for last year (365 days) manually with final logic
 since_date = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
 
-cursor.execute(f"""
+cursor.execute("""
     SELECT start_time, end_time, updated_at, status
     FROM outages 
     WHERE operator_id = %s 

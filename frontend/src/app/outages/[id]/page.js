@@ -7,16 +7,15 @@ import { useLanguage } from "../../../context/LanguageContext";
 import { api } from "../../../lib/api";
 import {
     AlertCircle,
-    Calendar,
     Clock,
     CheckCircle2,
     Activity,
     MapPin,
     ShieldAlert,
     ChevronLeft,
-    Wrench,
-    ArrowRight
+    Wrench
 } from "lucide-react";
+import PropTypes from "prop-types";
 
 const LoadingState = () => (
     <div className="detail-page-loading">
@@ -73,6 +72,12 @@ const ErrorState = ({ error, lang, onBack }) => (
         `}</style>
     </div>
 );
+
+ErrorState.propTypes = {
+    error: PropTypes.string,
+    lang: PropTypes.string.isRequired,
+    onBack: PropTypes.func.isRequired
+};
 
 
 
@@ -141,6 +146,15 @@ const OutageTimeline = ({ outage, lang, hasUpdates, isResolved, hasEstimation, r
     </section>
 );
 
+OutageTimeline.propTypes = {
+    outage: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired,
+    hasUpdates: PropTypes.bool,
+    isResolved: PropTypes.bool,
+    hasEstimation: PropTypes.bool,
+    resolutionDesc: PropTypes.string
+};
+
 const OutageSidebar = ({ outage, lang }) => (
     <aside className="details-sidebar">
         <div className="premium-card status-panel">
@@ -158,7 +172,7 @@ const OutageSidebar = ({ outage, lang }) => (
                     <span className="datum-sub">{new Date(outage.estimated_fix_time).toLocaleDateString()}</span>
                 </div>
             )}
-            <button className="btn-refresh" onClick={() => window.location.reload()}>
+            <button className="btn-refresh" onClick={() => globalThis.window.location.reload()}>
                 {lang === "sv" ? "Uppdatera" : "Refresh"}
             </button>
             {outage.source_url && (
@@ -169,6 +183,11 @@ const OutageSidebar = ({ outage, lang }) => (
         </div>
     </aside>
 );
+
+OutageSidebar.propTypes = {
+    outage: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired
+};
 
 const OutageHero = ({ outage, t, lang, regionName }) => (
     <section className="premium-card hero-section">
@@ -208,7 +227,7 @@ const OutageHero = ({ outage, t, lang, regionName }) => (
             <div className="info-item">
                 <div className="info-header">
                     <Activity size={14} />
-                    <span className="info-label">{lang === "sv" ? "Status" : "Status"}</span>
+                    <span className="info-label">Status</span>
                 </div>
                 <span className="info-value">{outage.status}</span>
             </div>
@@ -231,6 +250,13 @@ const OutageHero = ({ outage, t, lang, regionName }) => (
         )}
     </section>
 );
+
+OutageHero.propTypes = {
+    outage: PropTypes.object.isRequired,
+    t: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+    regionName: PropTypes.string.isRequired
+};
 
 export default function OutageDetailPage() {
     const { id } = useParams();
@@ -274,7 +300,7 @@ export default function OutageDetailPage() {
         <div className="outage-detail-container animate-fade-in">
             <header className="detail-header">
                 <Link href="/" className="back-link">
-                    <ChevronLeft size={18} /> {lang === "sv" ? "Dashboard" : "Dashboard"}
+                    <ChevronLeft size={18} /> Dashboard
                 </Link>
                 <div className={`status-badge-detail status-${outage.status.toLowerCase()}`}>
                     <span className="dot"></span>

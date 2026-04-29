@@ -3,21 +3,21 @@ const AUTH_TOKEN_STORAGE_KEY = "telecom-outage-auth-token";
 let authToken = null;
 
 const loadStoredAuthToken = () => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
         return null;
     }
-    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    return globalThis.window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 };
 
 const persistAuthToken = (token) => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
         return;
     }
 
     if (token) {
-        window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+        globalThis.window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
     } else {
-        window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+        globalThis.window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
     }
 };
 

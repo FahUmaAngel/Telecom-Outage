@@ -41,14 +41,14 @@ const cityCoords = {
     "Göteborg": [57.7089, 11.9746],
     "Malmö": [55.6050, 13.0038],
     "Uppsala": [59.8586, 17.6389],
-    "Västerås": [59.6100, 16.5448],
+    "Västerås": [59.61, 16.5448],
     "Örebro": [59.2753, 15.2134],
     "Linköping": [58.4108, 15.6214],
     "Helsingborg": [56.0465, 12.6945],
     "Jönköping": [57.7826, 14.1618],
     "Norrköping": [58.5877, 16.1819],
     "Stockholms län": [59.3293, 18.0686],
-    "Västra Götalands län": [58.0, 13.0],
+    "Västra Götalands län": [58, 13],
     "Skåne län": [55.9, 13.5],
     "Uppsala län": [59.8586, 17.6389],
     "Östergötlands län": [58.4108, 15.6214],
@@ -60,9 +60,9 @@ const cityCoords = {
     "Hallands län": [56.8945, 12.8421],
     "Värmlands län": [59.4021, 13.5115],
     "Örebro län": [59.2753, 15.2134],
-    "Västmanlands län": [59.6100, 16.5448],
+    "Västmanlands län": [59.61, 16.5448],
     "Dalarnas län": [60.6749, 15.0784],
-    "Gävleborgs län": [61.0, 16.0],
+    "Gävleborgs län": [61, 16],
     "Västernorrlands län": [62.6315, 17.9386],
     "Jämtlands län": [63.1792, 14.6357],
     "Västerbottens län": [64.7507, 18.0542],
@@ -80,7 +80,7 @@ function HeatmapLayer({ points = [] }) {
     const map = useMap();
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
+        if (typeof globalThis.window === "undefined") return;
         require("leaflet.heat");
 
         const container = map.getContainer();
