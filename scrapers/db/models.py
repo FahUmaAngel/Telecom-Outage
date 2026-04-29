@@ -59,7 +59,6 @@ class Outage(Base):
     # SQLite fallback: using specific columns instead of PostGIS Geometry
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    # geom = Column(Geometry("POINT", srid=4326), nullable=True)
     
     affected_services = Column(JSON) # List of strings/enums
     place = Column(String, nullable=True)
