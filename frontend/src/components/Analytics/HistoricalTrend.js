@@ -52,7 +52,7 @@ export default function HistoricalTrend({ data }) {
                             color: 'var(--text-primary)'
                         }}
                         labelFormatter={(label, payload) => {
-                            if (payload && payload[0]) {
+                            if (payload?.[0]) {
                                 return payload[0].payload.date;
                             }
                             return label;
