@@ -415,29 +415,31 @@ OutageTableBody.propTypes = {
     startEditing: PropTypes.func.isRequired,
 };
 
+const getTranslations = (lang) => ({
+    heading: lang === "sv" ? "Hantera driftstörningar" : "Outage Management",
+    searchPlaceholder: lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)...",
+    allOps: lang === "sv" ? "Alla operatörer" : "All Operators",
+    allStats: lang === "sv" ? "Alla statusar" : "All Statuses",
+    active: lang === "sv" ? "Aktiv" : "Active",
+    investigating: lang === "sv" ? "Undersöker" : "Investigating",
+    scheduled: lang === "sv" ? "Planerad" : "Scheduled",
+    resolved: lang === "sv" ? "Löst" : "Resolved",
+    closed: lang === "sv" ? "Stängd" : "Closed",
+    missingCoords: lang === "sv" ? "Saknar koordinater" : "Missing Coords",
+    missingEndDate: lang === "sv" ? "Saknar slutdatum" : "Missing End Date",
+    networkSharingTitle: lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)",
+    networkSharingDesc: lang === "sv" ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:",
+    operator: lang === "sv" ? "Operatör" : "Operator",
+    title: lang === "sv" ? "Titel" : "Title",
+    coordinates: lang === "sv" ? "Position" : "Coordinates",
+    actions: lang === "sv" ? "Åtgärd" : "Actions",
+    prevPage: lang === "sv" ? "← Föregående" : "← Previous",
+    nextPage: lang === "sv" ? "Nästa →" : "Next →",
+    pageIndicator: (p) => lang === "sv" ? `Sida ${p + 1}` : `Page ${p + 1}`
+});
+
 function OutageManagement({ outageMgr, lang }) {
-    const t = {
-        heading: lang === "sv" ? "Hantera driftstörningar" : "Outage Management",
-        searchPlaceholder: lang === "sv" ? "Sök (ID, Titel, Plats)..." : "Search (ID, Title, Location)...",
-        allOps: lang === "sv" ? "Alla operatörer" : "All Operators",
-        allStats: lang === "sv" ? "Alla statusar" : "All Statuses",
-        active: lang === "sv" ? "Aktiv" : "Active",
-        investigating: lang === "sv" ? "Undersöker" : "Investigating",
-        scheduled: lang === "sv" ? "Planerad" : "Scheduled",
-        resolved: lang === "sv" ? "Löst" : "Resolved",
-        closed: lang === "sv" ? "Stängd" : "Closed",
-        missingCoords: lang === "sv" ? "Saknar koordinater" : "Missing Coords",
-        missingEndDate: lang === "sv" ? "Saknar slutdatum" : "Missing End Date",
-        networkSharingTitle: lang === "sv" ? "Nätverksdelning (Operatörer under samma nät)" : "Network Sharing (MVNOs under the same network)",
-        networkSharingDesc: lang === "sv" ? "Flera varumärken hyr in sig på och delar samma mobilmaster (Infrastruktur). En driftstörning hos huvudoperatören påverkar även dessa:" : "Several brands lease and share the same cell towers (Infrastructure). An outage at the main operator also affects these:",
-        operator: lang === "sv" ? "Operatör" : "Operator",
-        title: lang === "sv" ? "Titel" : "Title",
-        coordinates: lang === "sv" ? "Position" : "Coordinates",
-        actions: lang === "sv" ? "Åtgärd" : "Actions",
-        prevPage: lang === "sv" ? "← Föregående" : "← Previous",
-        nextPage: lang === "sv" ? "Nästa →" : "Next →",
-        pageIndicator: (p) => lang === "sv" ? `Sida ${p + 1}` : `Page ${p + 1}`
-    };
+    const t = getTranslations(lang);
 
     const { 
         outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
