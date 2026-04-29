@@ -117,8 +117,13 @@ const Step2Location = ({ formData, getLocation, locationLoading, locationError, 
         <div className="step-fade-in">
             <h3 className="step-title">
                 <MapPin className="text-accent" />
-                {lang === "sv" ? "Var är du?" : "Where are you?"}
+                {lang === "sv" ? "Var är problemet?" : "Where is the problem?"}
             </h3>
+            <p className="location-context">
+                {lang === "sv" 
+                    ? "Din position används för att identifiera störningsområden och varna andra användare i närheten." 
+                    : "Your position is used to pinpoint the issue and identify affected areas."}
+            </p>
 
             <div className="location-box">
                 <button
@@ -232,6 +237,10 @@ Step3Details.propTypes = {
     lang: PropTypes.string.isRequired,
 };
 
+/**
+ * Handles retrieving user geolocation. 
+ * Necessary for pinpointing outages on the map and providing localized data.
+ */
 const handleGetLocation = (setLocationLoading, setLocationError, setFormData, addToast, lang) => {
     setLocationLoading(true);
     setLocationError(null);
@@ -488,6 +497,7 @@ export default function ReportForm({ operators }) {
                 .geo-btn { width: 100%; padding: 20px; border-radius: 16px; border: 2px dashed var(--border-color); background: var(--surface-light); color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; font-weight: 700; transition: 0.3s; }
                 .geo-btn:hover { border-color: var(--accent-primary); background: var(--surface-hover); }
                 .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.08); }
+                .location-context { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
             `}</style>
         </div>
     );
