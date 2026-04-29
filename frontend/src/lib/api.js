@@ -3,14 +3,14 @@ const AUTH_TOKEN_STORAGE_KEY = "telecom-outage-auth-token";
 let authToken = null;
 
 const loadStoredAuthToken = () => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
         return null;
     }
     return globalThis.window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 };
 
 const persistAuthToken = (token) => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
         return;
     }
 
@@ -102,7 +102,8 @@ export const api = {
     outages: {
         list: (params = {}) => {
             const query = new URLSearchParams(params).toString();
-            return fetcher(`/api/v1/outages${query ? `?${query}` : ""}`);
+            const queryString = query ? `?${query}` : "";
+            return fetcher(`/api/v1/outages${queryString}`);
         },
         get: (id) => fetcher(`/api/v1/outages/${id}`),
         history: () => fetcher("/api/v1/analytics/history"),
