@@ -126,11 +126,25 @@ const Step2Location = ({ formData, getLocation, locationLoading, locationError, 
             </p>
 
             <div className="location-box">
+                <div className="consent-wrapper">
+                    <input 
+                        type="checkbox" 
+                        id="geo-consent" 
+                        checked={formData.geo_consent || false}
+                        onChange={(e) => setFormData(prev => ({ ...prev, geo_consent: e.target.checked }))}
+                    />
+                    <label htmlFor="geo-consent">
+                        {lang === "sv" 
+                            ? "Jag samtycker till att dela min ungefärliga position för att hjälpa till att kartlägga störningen." 
+                            : "I consent to share my approximate location to help map the outage."}
+                    </label>
+                </div>
                 <button
                     type="button"
                     onClick={getLocation}
-                    disabled={locationLoading}
+                    disabled={locationLoading || !formData.geo_consent}
                     className={`geo-btn ${formData.latitude ? 'success' : ''}`}
+                    title={!formData.geo_consent ? (lang === "sv" ? "Vänligen ge samtycke först" : "Please provide consent first") : ""}
                 >
                     {locationLoading ? <div className="spinner-sm" /> : <MapPin size={20} />}
                     {geoBtnText}
@@ -505,6 +519,10 @@ export default function ReportForm({ operators }) {
                 .geo-btn:hover { border-color: var(--accent-primary); background: var(--surface-hover); }
                 .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.08); }
                 .location-context { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+                .consent-wrapper { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; padding: 12px; border-radius: 12px; background: rgba(var(--accent-primary-rgb), 0.03); border: 1px solid var(--border-color); }
+                .consent-wrapper input { margin-top: 3px; cursor: pointer; }
+                .consent-wrapper label { font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; line-height: 1.4; user-select: none; }
+                .geo-btn:disabled { opacity: 0.6; cursor: not-allowed; border-style: solid; filter: grayscale(1); }
             `}</style>
         </div>
     );
