@@ -13,8 +13,9 @@ export function ToastProvider({ children }) {
     }, []);
 
     const addToast = useCallback((message, type = 'info', duration = 5000) => {
-        const id = (globalThis.crypto?.randomUUID?.()) || 
-                   (globalThis.crypto?.getRandomValues ? globalThis.crypto.getRandomValues(new Uint32Array(1))[0].toString(36) : `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        const id = globalThis.crypto?.randomUUID?.() || 
+                   globalThis.crypto?.getRandomValues?.(new Uint32Array(1))[0].toString(36) || 
+                   `toast-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const toast = { id, message, type, duration };
 
         setToasts(prev => [...prev, toast]);
