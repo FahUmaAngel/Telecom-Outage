@@ -9,6 +9,9 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+MOBILE_DATA = 'Mobile Data'
+VOICE = 'Voice'
+
 def _navigate_blocks(data: Dict) -> List[Dict]:
     """Helper to find content blocks in Tre's JSON structure."""
     try:
@@ -36,7 +39,7 @@ def parse_tre_outages(raw_outages: List) -> List[Dict]:
                 for item in block.get('items', []):
                     text = item.get('text', '') or item.get('notificationMessage', '')
                     if _is_outage_block(text):
-                        logger.info(f"Found Tre outage block, parsing...")
+                        logger.info("Found Tre outage block, parsing...")
                         parsed.extend(parse_markdown_text(text))
         except Exception as e:
             logger.error(f"Error parsing Tre outage: {e}")
@@ -48,8 +51,8 @@ def _extract_services(desc_text: str) -> List[str]:
     lower_desc = desc_text.lower()
     mapping = {
         '5g': '5G', '4g': '4G', '3g': '3G', '2g': '2G',
-        'surf': 'Mobile Data', 'data': 'Mobile Data', 'internet': 'Mobile Data',
-        'samtal': 'Voice', 'röst': 'Voice', 'telefoni': 'Voice',
+        'surf': MOBILE_DATA, 'data': MOBILE_DATA, 'internet': MOBILE_DATA,
+        'samtal': VOICE, 'röst': VOICE, 'telefoni': VOICE,
         'sms': 'SMS'
     }
     for kw, label in mapping.items():
