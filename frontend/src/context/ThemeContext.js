@@ -5,14 +5,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState("dark"); // Default to match server
-
-    useEffect(() => {
-        const storedTheme = localStorage.getItem("theme");
-        if (storedTheme && storedTheme !== "dark") {
-            setTheme(storedTheme);
+    const [theme, setTheme] = useState(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("theme") || "dark";
         }
-    }, []);
+        return "dark";
+    });
 
 
     useEffect(() => {

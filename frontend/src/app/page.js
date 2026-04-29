@@ -373,9 +373,14 @@ export default function Home() {
   }, [updateStatsFromData]);
 
   useEffect(() => {
-    fetchDashboardData();
+    const timer = setTimeout(() => {
+      fetchDashboardData();
+    }, 0);
     const interval = setInterval(fetchDashboardData, 5 * 60 * 1000); // 5m
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [fetchDashboardData]);
 
   const filteredOutages = useMemo(() => {

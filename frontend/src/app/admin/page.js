@@ -202,12 +202,19 @@ function useOutageManagement() {
  * Component for Scraper Health Section
  */
 function ScraperHealth({ scrapers, lang }) {
+    const [now, setNow] = useState(() => Date.now());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(Date.now()), 10000);
+        return () => clearInterval(timer);
+    }, []);
+
     return (
         <section className="admin-section">
             <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
             <div className="scraper-grid">
                 {scrapers.filter(s => s.operator !== 'tele2').map((s) => {
-                    const isOnline = Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
+                    const isOnline = now - new Date(s.last_scraped_at).getTime() < 3600000;
                     return (
                     <div key={s.operator} className="premium-card scraper-card">
                         <div className="scraper-main">
@@ -710,6 +717,7 @@ export default function AdminPage() {
     const { fetchOutages } = outageMgr;
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         fetchData();
         fetchOutages(0);

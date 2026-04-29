@@ -171,6 +171,7 @@ def set_date_and_get_incidents(driver, target_date: str) -> List[Dict]:
     target_date: 'YYYY-MM-DD' string
     """
     all_incidents = []
+    wait = WebDriverWait(driver, 10)
     
     if not _click_element_safe(wait, By.XPATH, "//span[contains(., 'Nätverkshistorik')]", "Nätverkshistorik"):
         return []

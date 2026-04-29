@@ -36,13 +36,12 @@ def scrape_tele2():
             try:
                 page.locator("button:has-text('Acceptera alla')").click(timeout=5000)
                 print("Cookies accepted.")
-except Exception as e:
+            except Exception:
                 pass
         except Exception as e:
-                    print(f"  Error probing {addr['address']}: {e}")
-                    
-        except Exception as e:
             print(f"Failed to load map page: {e}")
+            browser.close()
+            return []
             
         browser.close()
         
