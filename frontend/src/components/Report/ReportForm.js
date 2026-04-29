@@ -287,6 +287,58 @@ const handleFormSubmit = async (e, formData, addToast, lang, setLoading, setSucc
     }
 };
 
+const SuccessScreen = ({ lang }) => (
+    <div className="success-screen animate-scale-up">
+        <div className="success-icon">
+            <CheckCircle2 size={64} color="var(--status-success)" />
+        </div>
+        <h2>{lang === "sv" ? "Rapporten Skickad" : "Report Submitted"}</h2>
+        <p>{lang === "sv" ? "Ditt bidrag hjälper andra att hålla sig informerade. Vi undersöker saken." : "Your contribution helps others stay informed. We are looking into it."}</p>
+        <button onClick={() => globalThis.location.reload()} className="premium-btn">
+            {lang === "sv" ? "Skicka en till rapport" : "Submit another report"}
+        </button>
+        <style jsx>{`
+            .success-screen { text-align: center; padding: 40px; border-radius: 24px; background: var(--surface-color); border: 1px solid var(--border-color); }
+            .success-icon { margin-bottom: 24px; }
+            .success-screen h2 { font-size: 2rem; margin-bottom: 16px; }
+            .success-screen p { color: var(--text-secondary); margin-bottom: 32px; }
+            .premium-btn { padding: 14px 28px; background: var(--accent-primary); color: white; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; }
+            .premium-btn:hover { background: var(--accent-secondary); transform: translateY(-2px); }
+        `}</style>
+    </div>
+);
+
+SuccessScreen.propTypes = {
+    lang: PropTypes.string.isRequired
+};
+
+const WizardHeader = ({ step }) => (
+    <div className="wizard-header">
+        <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
+        </div>
+        <div className="steps-indicator">
+            {[1, 2, 3].map(s => (
+                <div key={s} className={`step-dot ${step >= s ? 'active' : ''}`}>
+                    {step > s ? <CheckCircle2 size={16} /> : s}
+                </div>
+            ))}
+        </div>
+        <style jsx>{`
+            .wizard-header { margin-bottom: 32px; }
+            .progress-bar { height: 4px; background: var(--surface-light); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+            .progress-fill { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+            .steps-indicator { display: flex; justify-content: space-between; }
+            .step-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s; }
+            .step-dot.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--accent-glow); }
+        `}</style>
+    </div>
+);
+
+WizardHeader.propTypes = {
+    step: PropTypes.number.isRequired
+};
+
 export default function ReportForm({ operators }) {
     const { lang } = useLanguage();
     const { addToast } = useToast();
@@ -330,28 +382,7 @@ export default function ReportForm({ operators }) {
 
     const handleSubmit = (e) => handleFormSubmit(e, formData, addToast, lang, setLoading, setSuccess);
 
-    if (success) {
-        return (
-            <div className="success-screen animate-scale-up">
-                <div className="success-icon">
-                    <CheckCircle2 size={64} color="var(--status-success)" />
-                </div>
-                <h2>{lang === "sv" ? "Rapporten Skickad" : "Report Submitted"}</h2>
-                <p>{lang === "sv" ? "Ditt bidrag hjälper andra att hålla sig informerade. Vi undersöker saken." : "Your contribution helps others stay informed. We are looking into it."}</p>
-                <button onClick={() => globalThis.location.reload()} className="premium-btn">
-                    {lang === "sv" ? "Skicka en till rapport" : "Submit another report"}
-                </button>
-                <style jsx>{`
-                    .success-screen { text-align: center; padding: 40px; border-radius: 24px; background: var(--surface-color); border: 1px solid var(--border-color); }
-                    .success-icon { margin-bottom: 24px; }
-                    .success-screen h2 { font-size: 2rem; margin-bottom: 16px; }
-                    .success-screen p { color: var(--text-secondary); margin-bottom: 32px; }
-                    .premium-btn { padding: 14px 28px; background: var(--accent-primary); color: white; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; }
-                    .premium-btn:hover { background: var(--accent-secondary); transform: translateY(-2px); }
-                `}</style>
-            </div>
-        );
-    }
+    if (success) return <SuccessScreen lang={lang} />;
 
     let submitBtnText;
     if (loading) {
@@ -361,19 +392,8 @@ export default function ReportForm({ operators }) {
     }
 
     return (
-        <div className="report-wizard">
-            <div className="wizard-header">
-                <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
-                </div>
-                <div className="steps-indicator">
-                    {[1, 2, 3].map(s => (
-                        <div key={s} className={`step-dot ${step >= s ? 'active' : ''}`}>
-                            {step > s ? <CheckCircle2 size={16} /> : s}
-                        </div>
-                    ))}
-                </div>
-            </div>
+        <div className="report-wizard premium-card animate-fade-in">
+            <WizardHeader step={step} />
 
             <form onSubmit={handleSubmit} className="wizard-content">
                 {step === 1 && (
@@ -404,19 +424,19 @@ export default function ReportForm({ operators }) {
 
                 <div className="wizard-footer">
                     {step > 1 && (
-                        <button type="button" onClick={prevStep} className="back-btn">
+                        <button type="button" onClick={prevStep} className="back-btn" aria-label="Previous step">
                             <ChevronLeft size={20} />
                             {lang === "sv" ? "Bakåt" : "Back"}
                         </button>
                     )}
 
                     {step < 3 ? (
-                        <button type="button" onClick={nextStep} className="next-btn">
+                        <button type="button" onClick={nextStep} className="next-btn" aria-label="Next step">
                             {lang === "sv" ? "Nästa" : "Next"}
                             <ChevronRight size={20} />
                         </button>
                     ) : (
-                        <button type="submit" disabled={loading} className="submit-btn-premium">
+                        <button type="submit" disabled={loading} className="submit-btn-premium" aria-label="Submit report">
                             {submitBtnText}
                             <CheckCircle2 size={20} />
                         </button>
@@ -424,20 +444,50 @@ export default function ReportForm({ operators }) {
                 </div>
             </form>
 
-            <style jsx>{`
-                .report-wizard { border-radius: 24px; max-width: 500px; margin: 0 auto; }
+            <style jsx global>{`
+                .report-wizard { 
+                    border-radius: 24px; 
+                    max-width: 500px; 
+                    margin: 40px auto; 
+                    padding: 32px;
+                    background: var(--surface-base);
+                    border: 1px solid var(--glass-border);
+                    box-shadow: var(--shadow-xl);
+                }
                 .wizard-header { margin-bottom: 32px; }
-                .progress-bar { height: 4px; background: var(--surface-light); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+                .progress-bar { height: 6px; background: var(--surface-light); border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
                 .progress-fill { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-                .steps-indicator { display: flex; justify-content: space-between; }
-                .step-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s; }
-                .step-dot.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--accent-glow); }
-                .wizard-footer { display: flex; justify-content: space-between; margin-top: 40px; gap: 12px; }
-                .back-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: 0.3s; }
-                .back-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
-                .next-btn, .submit-btn-premium { flex: 1; padding: 12px 24px; border-radius: 12px; background: var(--accent-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; transition: 0.3s; }
+                .steps-indicator { display: flex; justify-content: space-between; position: relative; padding: 0 4px; }
+                .step-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-color); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2; }
+                .step-dot.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.1); }
+                
+                .wizard-footer { display: flex; justify-content: space-between; margin-top: 40px; gap: 16px; }
+                .back-btn { padding: 12px 24px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: 0.3s; }
+                .back-btn:hover { background: var(--surface-hover); border-color: var(--text-muted); }
+                
+                .next-btn, .submit-btn-premium { flex: 1; padding: 14px 28px; border-radius: 14px; background: var(--accent-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; transition: 0.3s; font-size: 1rem; }
                 .submit-btn-premium { background: var(--status-success); }
-                .next-btn:hover, .submit-btn-premium:hover { filter: brightness(1.1); transform: translateY(-2px); }
+                .next-btn:hover, .submit-btn-premium:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 8px 24px var(--accent-glow); }
+                .next-btn:active, .submit-btn-premium:active { transform: translateY(-1px); }
+
+                /* Fix for sub-components unstyled issue */
+                .pill-selector { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+                .pill-selector button { padding: 10px 20px; border-radius: 24px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-secondary); cursor: pointer; transition: 0.3s; font-size: 0.95rem; font-weight: 600; }
+                .pill-selector button:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: var(--surface-hover); }
+                .pill-selector button.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 6px 16px var(--accent-glow); }
+                
+                .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
+                .service-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 12px; border-radius: 20px; background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+                .service-card:hover { border-color: var(--accent-primary); color: var(--text-primary); transform: translateY(-4px); }
+                .service-card.active { background: var(--accent-glow); border-color: var(--accent-primary); color: var(--accent-primary); }
+                .service-card span { font-size: 0.85rem; font-weight: 700; }
+
+                .premium-input, .premium-textarea, .premium-select { width: 100%; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary); font-size: 1rem; transition: 0.3s; }
+                .premium-input:focus, .premium-textarea:focus, .premium-select:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 4px var(--accent-glow); background: var(--surface-hover); }
+                
+                .geo-btn { width: 100%; padding: 20px; border-radius: 16px; border: 2px dashed var(--border-color); background: var(--surface-light); color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; font-weight: 700; transition: 0.3s; }
+                .geo-btn:hover { border-color: var(--accent-primary); background: var(--surface-hover); }
+                .geo-btn.success { border-color: var(--status-success); color: var(--status-success); background: rgba(82, 196, 26, 0.08); }
             `}</style>
         </div>
     );
