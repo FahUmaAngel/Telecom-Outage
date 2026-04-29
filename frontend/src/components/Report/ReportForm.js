@@ -266,6 +266,11 @@ const handleGetLocation = (setLocationLoading, setLocationError, setFormData, ad
         () => {
             setLocationError(lang === "sv" ? "Kunde inte hämta plats" : "Unable to retrieve location");
             setLocationLoading(false);
+        },
+        {
+            enableHighAccuracy: false, // Low accuracy is sufficient for mapping general outage zones
+            timeout: 10000,
+            maximumAge: 60000 // Cache for 1 minute
         }
     );
 };
