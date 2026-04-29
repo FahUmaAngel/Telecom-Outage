@@ -12,6 +12,14 @@ export default function ToastContainer() {
                     key={toast.id}
                     className={`toast toast-${toast.type} animate-slide-in`}
                     onClick={() => removeToast(toast.id)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            removeToast(toast.id);
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Close ${toast.type} notification: ${toast.message}`}
                 >
                     <div className="toast-icon">
                         {toast.type === 'success' && '✓'}
