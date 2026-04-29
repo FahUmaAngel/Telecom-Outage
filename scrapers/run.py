@@ -73,6 +73,37 @@ def _run_telia_scraper(db):
         logger.error(f"Telia enhanced scraper failed: {e}", exc_info=True)
         db.rollback()
 
+def _process_telenor_outage(db, outage):
+    """Helper to process and save a single Telenor outage."""
+    location_text = outage.get('location', '')
+    desc_text = outage.get('description', '')
+    title_text = outage.get('title', f"Incident {outage['incident_id']}")
+    context_text = f"{location_text} {desc_text} {title_text}"
+    
+    normalized = NormalizedOutage(
+        operator=OperatorEnum.TELENOR,
+        incident_id=outage['incident_id'],
+        title={"sv": outage['incident_id'], "en": outage['incident_id']},
+        description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
+        location=location_text or 'Unknown',
+        status=classify_status(context_text, OutageStatus.ACTIVE),
+        severity=SeverityLevel.MEDIUM,
+        affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
+        source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
+        started_at=parse_swedish_date(outage.get('start_time')),
+        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
+    )
+    
+    search_text = location_text if location_text else context_text
+    county_name = extract_region_from_text(search_text, SWEDISH_COUNTIES)
+    if county_name:
+        normalized.location = county_name
+        coords = get_county_coordinates(county_name, jitter=True)
+        if coords:
+            normalized.latitude, normalized.longitude = coords
+    
+    save_outage(db, normalized, {"source": "telenor_selenium", "raw": outage})
+
 def _run_telenor_scraper(db):
     """Execution logic for Telenor scraper."""
     try:
@@ -83,34 +114,7 @@ def _run_telenor_scraper(db):
         if telenor_result['success']:
             logger.info(f"✓ Telenor scraper succeeded. Found {len(telenor_result['outages'])} outages")
             for outage in telenor_result['outages']:
-                location_text = outage.get('location', '')
-                desc_text = outage.get('description', '')
-                title_text = outage.get('title', f"Incident {outage['incident_id']}")
-                context_text = f"{location_text} {desc_text} {title_text}"
-                
-                normalized = NormalizedOutage(
-                    operator=OperatorEnum.TELENOR,
-                    incident_id=outage['incident_id'],
-                    title={"sv": outage['incident_id'], "en": outage['incident_id']},
-                    description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
-                    location=location_text or 'Unknown',
-                    status=classify_status(context_text, OutageStatus.ACTIVE),
-                    severity=SeverityLevel.MEDIUM,
-                    affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
-                    source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
-                    started_at=parse_swedish_date(outage.get('start_time')),
-                    estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
-                )
-                
-                search_text = location_text if location_text else context_text
-                county_name = extract_region_from_text(search_text, SWEDISH_COUNTIES)
-                if county_name:
-                    normalized.location = county_name
-                    coords = get_county_coordinates(county_name, jitter=True)
-                    if coords:
-                        normalized.latitude, normalized.longitude = coords
-                
-                save_outage(db, normalized, {"source": "telenor_selenium", "raw": outage})
+                _process_telenor_outage(db, outage)
             
             db.commit()
         else:

@@ -64,6 +64,7 @@ def start_scheduler():
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         logger.info("Scheduler stopped by user or system.")
+        raise
 
 if __name__ == "__main__":
     start_scheduler()
