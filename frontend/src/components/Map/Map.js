@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import PropTypes from "prop-types";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useMemo } from "react";
@@ -39,7 +40,7 @@ const cityCoords = {
     // ... same as before
     "Stockholm": [59.3293, 18.0686],
     "Göteborg": [57.7089, 11.9746],
-    "Malmö": [55.6050, 13.0038],
+    "Malmö": [55.605, 13.0038],
     "Uppsala": [59.8586, 17.6389],
     "Västerås": [59.61, 16.5448],
     "Örebro": [59.2753, 15.2134],
@@ -80,7 +81,7 @@ function HeatmapLayer({ points = [] }) {
     const map = useMap();
 
     useEffect(() => {
-        if (typeof globalThis.window === "undefined") return;
+        if (globalThis.window === undefined) return;
         require("leaflet.heat");
 
         const container = map.getContainer();
@@ -103,6 +104,10 @@ function HeatmapLayer({ points = [] }) {
     return null;
 }
 
+HeatmapLayer.propTypes = {
+    points: PropTypes.arrayOf(PropTypes.array)
+};
+
 function ResizeFix() {
     const map = useMap();
     useEffect(() => {
@@ -122,7 +127,7 @@ function ResizeFix() {
     return null;
 }
 
-export default function Map({ outages = [], hotspots = [], simple = false }) {
+export default function OutageMap({ outages = [], hotspots = [], simple = false }) {
     const { theme } = useTheme();
     const { lang, t } = useLanguage();
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
@@ -214,9 +219,9 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
                         })}
 
                         {/* Crowd Hotspots */}
-                        {hotspots.map((hotspot, idx) => (
+                        {hotspots.map((hotspot) => (
                             <Marker
-                                key={`hotspot-${idx}`}
+                                key={`hotspot-${hotspot.latitude}-${hotspot.longitude}-${hotspot.operator_name}`}
                                 position={[hotspot.latitude, hotspot.longitude]}
                                 icon={hotspotIcon}
                             >
@@ -334,3 +339,9 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
         </div>
     );
 }
+
+OutageMap.propTypes = {
+    outages: PropTypes.arrayOf(PropTypes.object),
+    hotspots: PropTypes.arrayOf(PropTypes.object),
+    simple: PropTypes.bool
+};
