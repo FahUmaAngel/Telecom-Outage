@@ -431,31 +431,37 @@ function OutageManagement({ outageMgr, lang }) {
         fetchOutages(newPage);
     };
 
-    const outageList = useMemo(() => {
-        if (outagesLoading) {
-            return (
-                <tr>
-                    <td colSpan="6" style={{ textAlign: "center", padding: "3rem" }}>
-                        <div className="loading-spinner"></div>
-                    </td>
-                </tr>
-            );
-        }
-        
-        if (outages.length === 0) {
-            return (
-                <tr>
-                    <td colSpan="6" style={{ textAlign: "center", padding: "3rem", opacity: 0.5 }}>
-                        {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
-                    </td>
-                </tr>
-            );
-        }
+const OutageTableBody = ({ outagesLoading, outages, lang, startEditing }) => {
+    if (outagesLoading) {
+        return (
+            <tr>
+                <td colSpan="6" style={{ textAlign: "center", padding: "3rem" }}>
+                    <div className="loading-spinner"></div>
+                </td>
+            </tr>
+        );
+    }
+    
+    if (outages.length === 0) {
+        return (
+            <tr>
+                <td colSpan="6" style={{ textAlign: "center", padding: "3rem", opacity: 0.5 }}>
+                    {lang === "sv" ? "Inga driftstörningar hittades" : "No outages found"}
+                </td>
+            </tr>
+        );
+    }
 
-        return outages.map((o) => (
-            <OutageRow key={o.id} o={o} lang={lang} startEditing={startEditing} />
-        ));
-    }, [outages, outagesLoading, lang, startEditing]);
+    return outages.map((o) => (
+        <OutageRow key={o.id} o={o} lang={lang} startEditing={startEditing} />
+    ));
+};
+OutageTableBody.propTypes = {
+    outagesLoading: PropTypes.bool.isRequired,
+    outages: PropTypes.array.isRequired,
+    lang: PropTypes.string.isRequired,
+    startEditing: PropTypes.func.isRequired,
+};
 
     return (
         <section className="admin-section">
@@ -549,7 +555,7 @@ function OutageManagement({ outageMgr, lang }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {outageList}
+                            <OutageTableBody outagesLoading={outagesLoading} outages={outages} lang={lang} startEditing={startEditing} />
                         </tbody>
                     </table>
                 </div>

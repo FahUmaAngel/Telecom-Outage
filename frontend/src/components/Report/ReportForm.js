@@ -232,6 +232,61 @@ Step3Details.propTypes = {
     lang: PropTypes.string.isRequired,
 };
 
+const handleGetLocation = (setLocationLoading, setLocationError, setFormData, addToast, lang) => {
+    setLocationLoading(true);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+        setLocationError(lang === "sv" ? "Geolocation stöds inte" : "Geolocation not supported");
+        setLocationLoading(false);
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            setFormData(prev => ({
+                ...prev,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            }));
+            setLocationLoading(false);
+            addToast(lang === "sv" ? "Plats hämtad!" : "Location captured!", "success", 2000);
+        },
+        () => {
+            setLocationError(lang === "sv" ? "Kunde inte hämta plats" : "Unable to retrieve location");
+            setLocationLoading(false);
+        }
+    );
+};
+
+const handleFormSubmit = async (e, formData, addToast, lang, setLoading, setSuccess) => {
+    e.preventDefault();
+    if (!formData.title) {
+        addToast(lang === "sv" ? "Vänligen ange en titel" : "Please provide a title", "error", 3000);
+        return;
+    }
+
+    setLoading(true);
+    try {
+        const submissionData = {
+            operator_name: formData.operator_name,
+            title: `${formData.service_type}: ${formData.title}`,
+            description: `Impact: ${formData.impact}. Location: ${formData.location_name}. ${formData.description}`,
+            latitude: formData.latitude || 59.3293,
+            longitude: formData.longitude || 18.0686
+        };
+
+        await api.reports.create(submissionData);
+        setSuccess(true);
+        addToast(lang === "sv" ? "Tack för din rapport!" : "Thank you for your report!", "success", 5000);
+    } catch (error) {
+        console.error("Submission error:", error);
+        addToast(lang === "sv" ? "Kunde inte skicka rapporten" : "Failed to submit report", "error", 5000);
+    } finally {
+        setLoading(false);
+    }
+};
+
 export default function ReportForm({ operators }) {
     const { lang } = useLanguage();
     const { addToast } = useToast();
@@ -271,60 +326,9 @@ export default function ReportForm({ operators }) {
 
     const prevStep = () => setStep(prev => prev - 1);
 
-    const getLocation = () => {
-        setLocationLoading(true);
-        setLocationError(null);
+    const getLocation = () => handleGetLocation(setLocationLoading, setLocationError, setFormData, addToast, lang);
 
-        if (!navigator.geolocation) {
-            setLocationError(lang === "sv" ? "Geolocation stöds inte" : "Geolocation not supported");
-            setLocationLoading(false);
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setFormData(prev => ({
-                    ...prev,
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
-                }));
-                setLocationLoading(false);
-                addToast(lang === "sv" ? "Plats hämtad!" : "Location captured!", "success", 2000);
-            },
-            () => {
-                setLocationError(lang === "sv" ? "Kunde inte hämta plats" : "Unable to retrieve location");
-                setLocationLoading(false);
-            }
-        );
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!formData.title) {
-            addToast(lang === "sv" ? "Vänligen ange en titel" : "Please provide a title", "error", 3000);
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const submissionData = {
-                operator_name: formData.operator_name,
-                title: `${formData.service_type}: ${formData.title}`,
-                description: `Impact: ${formData.impact}. Location: ${formData.location_name}. ${formData.description}`,
-                latitude: formData.latitude || 59.3293,
-                longitude: formData.longitude || 18.0686
-            };
-
-            await api.reports.create(submissionData);
-            setSuccess(true);
-            addToast(lang === "sv" ? "Tack för din rapport!" : "Thank you for your report!", "success", 5000);
-        } catch (error) {
-            console.error("Submission error:", error);
-            addToast(lang === "sv" ? "Kunde inte skicka rapporten" : "Failed to submit report", "error", 5000);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const handleSubmit = (e) => handleFormSubmit(e, formData, addToast, lang, setLoading, setSuccess);
 
     if (success) {
         return (
