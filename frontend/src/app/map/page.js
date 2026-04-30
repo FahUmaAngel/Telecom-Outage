@@ -33,10 +33,9 @@ export default function MapPage() {
         fetchData();
 
         // WebSocket Setup for Real-time Updates
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || apiUrl.replace(/^http/, "ws") + "/ws";
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws";
         console.log("Connecting to WebSocket:", wsUrl);
-        
+
         let socket;
         let reconnectTimeout;
 
@@ -101,7 +100,7 @@ export default function MapPage() {
                         <span className="dot" style={{ backgroundColor: "#ff4d4f" }}></span> Tre (3)
                     </div>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#00a1e1" }}></span> Telenor
+                        <span className="dot" style={{ backgroundColor: "#007bff" }}></span> Telenor
                     </div>
                 </div>
             </div>
