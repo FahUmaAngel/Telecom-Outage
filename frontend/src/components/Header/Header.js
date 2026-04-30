@@ -1,15 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";
   const lightLabel = lang === "sv" ? "LJUST" : "LIGHT";
   const themeToggleLabel = theme === "light" ? darkLabel : lightLabel;
+
+  // Use a stable initial state for hydration, then update after mount
+  const currentLang = mounted ? lang : "sv";
+  const currentThemeLabel = mounted ? themeToggleLabel : "...";
+  const currentPlaceholder = mounted ? (lang === "sv" ? "Sök..." : "Search...") : "Search...";
 
   return (
     <header className="header glass animate-fade-in">
@@ -21,16 +32,16 @@ export default function Header() {
         <div className="search-icon-css"></div>
         <input
           type="text"
-          placeholder={lang === "sv" ? "Sök..." : "Search..."}
+          placeholder={currentPlaceholder}
         />
       </div>
 
       <div className="actions">
         <button onClick={toggleLanguage} className="action-btn">
-          {lang === "sv" ? "SV" : "EN"}
+          {mounted ? (lang === "sv" ? "SV" : "EN") : "SV"}
         </button>
         <button onClick={toggleTheme} className="action-btn theme-btn">
-          {themeToggleLabel}
+          {currentThemeLabel}
         </button>
       </div>
 

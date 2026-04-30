@@ -7,6 +7,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import Link from "next/link";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { Map as MapIcon, Flame } from "lucide-react";
+import PropTypes from "prop-types";
 
 // Marker Cluster CSS
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -103,6 +104,10 @@ function HeatmapLayer({ points = [] }) {
     return null;
 }
 
+HeatmapLayer.propTypes = {
+    points: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
+};
+
 function ResizeFix() {
     const map = useMap();
     useEffect(() => {
@@ -122,9 +127,10 @@ function ResizeFix() {
     return null;
 }
 
-export default function Map({ outages = [], hotspots = [], simple = false }) {
+export default function OutageMap({ outages = [], hotspots = [], simple = false }) {
     const { theme } = useTheme();
     const { lang, t } = useLanguage();
+    const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
 
     useEffect(() => {
@@ -145,6 +151,8 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
         });
         return points;
     }, [outages, hotspots]);
+
+    if (!mounted) return <div className="map-placeholder glass animate-pulse" style={{ height: "100%", width: "100%", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>Loading Map...</div>;
 
     const tileUrl = theme === "dark"
         ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -338,3 +346,27 @@ export default function Map({ outages = [], hotspots = [], simple = false }) {
         </div>
     );
 }
+
+OutageMap.propTypes = {
+    outages: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        operator_name: PropTypes.string.isRequired,
+        title: PropTypes.shape({
+            sv: PropTypes.string,
+            en: PropTypes.string,
+        }),
+        status: PropTypes.string,
+        severity: PropTypes.string,
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+        location: PropTypes.string,
+    })),
+    hotspots: PropTypes.arrayOf(PropTypes.shape({
+        operator_name: PropTypes.string,
+        report_count: PropTypes.number,
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+        detected_at: PropTypes.string,
+    })),
+    simple: PropTypes.bool,
+};

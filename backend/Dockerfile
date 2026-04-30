@@ -15,11 +15,18 @@ COPY scrapers/requirements.txt ./scrapers/
 # since the FastAPI backend orchestrates the scrapers in its lifespan
 RUN pip install --no-cache-dir -r backend/requirements.txt -r scrapers/requirements.txt
 
-# Copy all source code (since backend imports from scrapers)
-COPY . .
+# Copy only necessary directories to avoid sensitive data leakage
+COPY backend/ ./backend/
+COPY scrapers/ ./scrapers/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./alembic.ini
 
 # Set PYTHONPATH so absolute imports work if necessary
 ENV PYTHONPATH=/app
+
+# Create a non-root user and switch to it
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
 
 # Expose FastAPI port
 EXPOSE 8000

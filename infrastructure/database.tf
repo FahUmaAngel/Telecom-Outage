@@ -6,9 +6,11 @@ resource "aws_db_instance" "postgres" {
   instance_class         = "db.t3.micro"
   db_name                = "telecom_outage"
   username               = "admin"
-  password               = "ChangeMe123!" # Use secrets manager in production
+  password               = var.db_password
   parameter_group_name   = "default.postgres15"
   skip_final_snapshot    = true
+  storage_encrypted      = true
+  backup_retention_period = 7
   vpc_security_group_ids = [aws_security_group.db.id]
   db_subnet_group_name   = aws_db_subnet_group.main.id
 

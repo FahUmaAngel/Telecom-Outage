@@ -2,11 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { lang } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const displayLang = mounted ? lang : "sv";
 
   const menuItems = [
     { label_sv: "Översikt", label_en: "Dashboard", path: "/" },
@@ -29,7 +37,7 @@ export default function Sidebar() {
             className={`nav-item ${pathname === item.path ? "active" : ""}`}
           >
             <span className="dot-marker"></span>
-            <span className="label">{lang === "sv" ? item.label_sv : item.label_en}</span>
+            <span className="label">{displayLang === "sv" ? item.label_sv : item.label_en}</span>
           </Link>
         ))}
       </nav>
@@ -37,7 +45,7 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <div className="status-indicator">
           <div className="system-dot"></div>
-          <span className="status-text">{lang === "sv" ? "System Aktivt" : "System Live"}</span>
+          <span className="status-text">{displayLang === "sv" ? "System Aktivt" : "System Live"}</span>
         </div>
       </div>
 

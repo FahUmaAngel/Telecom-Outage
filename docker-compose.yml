@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: telecom_db
     environment:
-      - POSTGRES_USER=telecom_user
-      - POSTGRES_PASSWORD=telecom_pass
-      - POSTGRES_DB=telecom_outage
+      - POSTGRES_USER=${POSTGRES_USER:-telecom_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-telecom_outage}
     ports:
       - "5432:5432"
     volumes:
@@ -22,8 +22,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://telecom_user:telecom_pass@db:5432/telecom_outage
-      - SCRAPER_INTERVAL_MINUTES=60
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-telecom_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-telecom_outage}
+      - SCRAPER_INTERVAL_MINUTES=${SCRAPER_INTERVAL_MINUTES:-60}
     depends_on:
       - db
     volumes:

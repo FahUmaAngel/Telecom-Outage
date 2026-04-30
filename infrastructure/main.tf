@@ -10,11 +10,3 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
-
-variable "aws_region" {
-  default = "eu-north-1" # Stockholm
-}
-
-variable "project_name" {
-  default = "telecom-outage"
-}
