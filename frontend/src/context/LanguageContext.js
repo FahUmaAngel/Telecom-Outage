@@ -5,12 +5,14 @@ import { createContext, useContext, useState, useEffect } from "react";
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-    const [lang, setLang] = useState(() => {
-        if (typeof window !== "undefined") {
-            return localStorage.getItem("lang") || "sv";
+    const [lang, setLang] = useState("sv");
+
+    useEffect(() => {
+        const stored = localStorage.getItem("lang");
+        if (stored && stored !== lang) {
+            setLang(stored);
         }
-        return "sv";
-    });
+    }, []);
 
 
     const toggleLanguage = () => {

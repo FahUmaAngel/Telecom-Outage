@@ -275,6 +275,13 @@ export default function Home() {
   const [mttrData, setMttrData] = useState([]);
   const [reliabilityData, setReliabilityData] = useState([]);
   const previousOutageIds = useRef(new Set());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const displayLang = mounted ? lang : "sv";
 
   const [filters, setFilters] = useState({
     search: "",
@@ -409,28 +416,28 @@ export default function Home() {
     });
   }, [outages, filters, lang]);
 
-  if (loading) return <LoadingState lang={lang} />;
+  if (loading) return <LoadingState lang={displayLang} />;
 
   return (
     <div className="dashboard-container animate-fade-in">
       <header className="dashboard-header">
         <div className="header-text">
           <h1 className="text-gradient">
-            {lang === "sv" ? "Nätverksöversikt" : "Network Overview"}
+            {displayLang === "sv" ? "Nätverksöversikt" : "Network Overview"}
           </h1>
           <p className="subtitle">
-            {lang === "sv"
+            {displayLang === "sv"
               ? "Driftstatus för Sveriges telekomnätverk"
               : "Operational status for Sweden's telecom infrastructure"}
           </p>
         </div>
         <div className="system-status">
           <span className="status-dot"></span>
-          {lang === "sv" ? "System Aktivt" : "System Live"}
+          {displayLang === "sv" ? "System Aktivt" : "System Live"}
         </div>
       </header>
 
-      <StatsDashboard stats={stats} lang={lang} />
+      <StatsDashboard stats={stats} lang={displayLang} />
 
       <FilterBar
         operators={operators}
@@ -441,10 +448,10 @@ export default function Home() {
       <div className="dashboard-main-grid">
         <div className="premium-card chart-view">
           <div className="card-header">
-            <h3 className="section-title">{lang === "sv" ? "Regional Distribution" : "Incident Map"}</h3>
+            <h3 className="section-title">{displayLang === "sv" ? "Regional Distribution" : "Incident Map"}</h3>
             <div className="map-legend">
-              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-critical)' }}></span> {lang === "sv" ? "Avbrott" : "Outages"}</span>
-              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-warning)' }}></span> {lang === "sv" ? "Fokusområden" : "Hotspots"}</span>
+              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-critical)' }}></span> {displayLang === "sv" ? "Avbrott" : "Outages"}</span>
+              <span className="legend-item"><span className="dot" style={{ backgroundColor: 'var(--status-warning)' }}></span> {displayLang === "sv" ? "Fokusområden" : "Hotspots"}</span>
             </div>
           </div>
           <div className="map-area">
@@ -454,20 +461,20 @@ export default function Home() {
 
         <div className="premium-card list-view">
           <div className="card-header">
-            <h3 className="section-title">{lang === "sv" ? "Händelseflöde" : "Event Stream"}</h3>
+            <h3 className="section-title">{displayLang === "sv" ? "Händelseflöde" : "Event Stream"}</h3>
             <div className="count-badge">{filteredOutages.length}</div>
           </div>
-          <OutageList outages={filteredOutages} lang={lang} />
+          <OutageList outages={filteredOutages} lang={displayLang} />
         </div>
       </div>
 
       <div className="premium-card analysis-card">
-        <h3 className="section-title">{lang === "sv" ? "Trendanalys (30 dagar)" : "Trend Analysis (30 days)"}</h3>
+        <h3 className="section-title">{displayLang === "sv" ? "Trendanalys (30 dagar)" : "Trend Analysis (30 days)"}</h3>
         <HistoricalTrend data={trendData} />
       </div>
 
       <div className="premium-card analysis-card">
-        <h3 className="section-title">{lang === "sv" ? "Operatörsjämförelse" : "Operator Comparison"}</h3>
+        <h3 className="section-title">{displayLang === "sv" ? "Operatörsjämförelse" : "Operator Comparison"}</h3>
         <OperatorComparison mttrData={mttrData} reliabilityData={reliabilityData} />
       </div>
 

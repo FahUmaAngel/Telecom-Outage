@@ -2,6 +2,7 @@
 Database CRUD operations.
 """
 from sqlalchemy.orm import Session
+from typing import Optional
 from .models import Outage, RawData, Operator, Region
 from ..common.models import NormalizedOutage, OperatorEnum
 from ..common.translation import SWEDISH_COUNTIES
@@ -11,7 +12,7 @@ import json
 
 from sqlalchemy import func
 
-def get_operator_id(db: Session, operator_name: str) -> int:
+def get_operator_id(db: Session, operator_name: str) -> Optional[int]:
     op = db.query(Operator).filter(func.lower(Operator.name) == operator_name.lower()).first()
     if op:
         return op.id

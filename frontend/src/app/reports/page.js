@@ -197,7 +197,7 @@ const ReportRow = ({ outage, lang, t }) => {
                 {formatDate(outage.start_time)}
             </td>
             <td className="date-cell">
-                {formatDate(outage.end_time || outage.estimated_fix_time)}
+                {formatDate(outage.end_time || (displayStatus === 'resolved' ? (outage.updated_at || outage.estimated_fix_time) : null))}
             </td>
             <td className="actions-cell">
                 <Link href={`/outages/${outage.id}`} className="view-link">

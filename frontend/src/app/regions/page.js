@@ -56,7 +56,15 @@ export default function RegionsPage() {
                             </div>
                         </div>
                         <div className="region-meta">
-                            <span className="uptime">100% Up</span>
+                            {(() => {
+                                const health = Math.max(70, 100 - (region.outage_count * 3));
+                                const isStable = region.outage_count === 0;
+                                return (
+                                    <span className={`uptime ${isStable ? 'stable' : 'degraded'}`}>
+                                        {isStable ? '100% UP' : `${health}% UP`}
+                                    </span>
+                                );
+                            })()}
                         </div>
                     </div>
                 ))}
@@ -91,6 +99,8 @@ export default function RegionsPage() {
                 
                 .status-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
                 .uptime { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+                .uptime.stable { color: var(--status-success); }
+                .uptime.degraded { color: var(--status-warning); }
 
                 .loading-container { height: 60vh; display: flex; align-items: center; justify-content: center; }
                 .spinner {

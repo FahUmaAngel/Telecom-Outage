@@ -19,7 +19,7 @@ from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
 from scrapers.db.models import User
 from .auth import get_password_hash
-from .websockets import manager
+from .websocket_manager import manager
 from fastapi import WebSocket, WebSocketDisconnect
 from datetime import datetime
 
