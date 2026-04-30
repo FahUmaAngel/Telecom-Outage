@@ -10,7 +10,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
   }, []);
 
   const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";

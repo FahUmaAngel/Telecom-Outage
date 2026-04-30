@@ -33,7 +33,8 @@ export default function MapPage() {
         fetchData();
 
         // WebSocket Setup for Real-time Updates
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws";
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080").replace("localhost", "127.0.0.1");
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || apiUrl.replace(/^http/, "ws") + "/ws";
         console.log("Connecting to WebSocket:", wsUrl);
 
         let socket;

@@ -119,6 +119,7 @@ app = FastAPI(
 # WebSocket Endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    logger.info("WebSocket connection attempt received")
     await manager.connect(websocket)
     try:
         while True:
@@ -131,10 +132,7 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 # CORS Configuration
-allowed_origins_str = getattr(settings, "ALLOWED_ORIGINS", None) or (
-    "https://localhost:3000,https://localhost:8080"
-)
-origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
+origins = ["*"]
 
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(LoggingMiddleware)
@@ -142,9 +140,9 @@ app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include Routers

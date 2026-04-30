@@ -134,7 +134,7 @@ export default function OutageMap({ outages = [], hotspots = [], simple = false 
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
 
     useEffect(() => {
-        setMounted(true);
+        setTimeout(() => setMounted(true), 0);
     }, []);
 
     const heatPoints = useMemo(() => {

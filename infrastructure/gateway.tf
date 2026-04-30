@@ -25,7 +25,7 @@ resource "aws_apigatewayv2_stage" "prod" {
 
 resource "aws_cloudwatch_log_group" "api_gw" {
   name = "/aws/api-gw/${aws_apigatewayv2_api.main.name}"
-  retention_in_days = 7
+  retention_in_days = 30
 }
 
 resource "aws_apigatewayv2_integration" "backend" {

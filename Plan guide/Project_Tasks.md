@@ -38,29 +38,29 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [x] Implement Database cleanup tasks
 
 ## 🌐 Frontend Development (React / Next.js)
-- [ ] **Setup & UI Kit**
-  - [ ] Initialize Next.js with App Router and TypeScript
-  - [ ] Configure Tailwind CSS / Vanilla CSS strategy
-  - [ ] Create Reusable UI Components (Button, Modal, Filter, Badge)
-- [ ] **Interactive Map**
-  - [ ] Integrate Mapbox / Leaflet
-  - [ ] Implement Outage Marker Layer with clusters
-  - [ ] Create Map Legend and Info Overlays
-- [ ] **Pages & Features**
-  - [ ] **Home**: Live Outage Map with real-time updates
-  - [ ] **Outage List**: Searchable and filterable list of incidents
-  - [ ] **Incident Details**: Deep dive into specific outages with timeline
-  - [ ] **Analytics Dashboards**:
-    - [ ] MTTR Charts
-    - [ ] Reliability Comparison (Bar charts)
-    - [ ] Trends & Heatmaps
-  - [ ] **Reporting Flow**: Multistep form for user reports
-  - [ ] **Transparency**: Static pages for Methodology, Sources, etc.
-  - [ ] **Admin Dashboard**: Incident validation and system health
-- [ ] **State & API Integration**
-  - [ ] Implement custom hooks for data fetching (`useOutages`, etc.)
-  - [ ] Set up Real-time updates (Polling or WebSockets)
-  - [ ] Implement Auth flow (Login, protected routes)
+- [x] **Setup & UI Kit**
+  - [x] Initialize Next.js with App Router and TypeScript
+  - [x] Configure Tailwind CSS / Vanilla CSS strategy
+  - [x] Create Reusable UI Components (Button, Modal, Filter, Badge)
+- [x] **Interactive Map**
+  - [x] Integrate Mapbox / Leaflet
+  - [x] Implement Outage Marker Layer with clusters
+  - [x] Create Map Legend and Info Overlays
+- [x] **Pages & Features**
+  - [x] **Home**: Live Outage Map with real-time updates
+  - [x] **Outage List**: Searchable and filterable list of incidents
+  - [x] **Incident Details**: Deep dive into specific outages with timeline
+  - [x] **Analytics Dashboards**:
+    - [x] MTTR Charts
+    - [x] Reliability Comparison (Bar charts)
+    - [x] Trends & Heatmaps
+  - [x] **Reporting Flow**: Multistep form for user reports
+  - [x] **Transparency**: Static pages for Methodology, Sources, etc.
+  - [x] **Admin Dashboard**: Incident validation and system health
+- [x] **State & API Integration**
+  - [x] Implement custom hooks for data fetching (`useOutages`, etc.)
+  - [x] Set up Real-time updates (Polling or WebSockets)
+  - [x] Implement Auth flow (Login, protected routes)
 
 ## 🕵️ Data Ingestion (Scrapers & Workers)
 - [x] **Scraper Implementation**
