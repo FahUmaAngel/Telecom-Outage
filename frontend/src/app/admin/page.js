@@ -83,7 +83,7 @@ function useOutageManagement() {
             if (status) params.status = status;
             if (missingCoords) params.missing_coords = true;
             if (missingEndDate) params.missing_end_date = true;
-            
+
             const data = await api.admin.outages.list(params);
             setOutages(data);
             setHasMore(data.length === PAGE_SIZE);
@@ -117,7 +117,7 @@ function useOutageManagement() {
         const startStr = outage.start_time ? new Date(outage.start_time).toISOString().slice(0, 16) : "";
         const endStr = outage.end_time ? new Date(outage.end_time).toISOString().slice(0, 16) : "";
         const fixStr = outage.estimated_fix_time ? new Date(outage.estimated_fix_time).toISOString().slice(0, 16) : "";
-        
+
         setEditForm({
             incident_id: outage.incident_id || "",
             operator_id: outage.operator_id || "",
@@ -216,21 +216,21 @@ function ScraperHealth({ scrapers, lang }) {
                 {scrapers.filter(s => s.operator !== 'tele2').map((s) => {
                     const isOnline = now - new Date(s.last_scraped_at).getTime() < 3600000;
                     return (
-                    <div key={s.operator} className="premium-card scraper-card">
-                        <div className="scraper-main">
-                            <div className={`status-dot ${isOnline ? 'online' : 'stale'}`}></div>
-                            <div className="scraper-info">
-                                <span className="operator-name">{s.operator.toUpperCase()}</span>
-                                <span className="last-scrape">
-                                    {lang === "sv" ? "Senaste: " : "Last Sync: "}
-                                    {new Date(s.last_scraped_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                        <div key={s.operator} className="premium-card scraper-card">
+                            <div className="scraper-main">
+                                <div className={`status-dot ${isOnline ? 'online' : 'stale'}`}></div>
+                                <div className="scraper-info">
+                                    <span className="operator-name">{s.operator.toUpperCase()}</span>
+                                    <span className="last-scrape">
+                                        {lang === "sv" ? "Senaste: " : "Last Sync: "}
+                                        {new Date(s.last_scraped_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="scraper-date">
+                                {new Date(s.last_scraped_at).toLocaleDateString()}
                             </div>
                         </div>
-                        <div className="scraper-date">
-                            {new Date(s.last_scraped_at).toLocaleDateString()}
-                        </div>
-                    </div>
                     );
                 })}
             </div>
@@ -355,8 +355,8 @@ const OutageRow = ({ o, lang, startEditing }) => {
     const rowClass = o.quality_issues?.length > 0 ? "row-low-quality" : "";
     const coordClass = o.latitude ? "" : "text-error";
     const fallbackText = lang === "sv" ? "Saknas" : "Missing";
-    const coordText = o.latitude 
-        ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}` 
+    const coordText = o.latitude
+        ? `${o.latitude.toFixed(4)}, ${o.longitude.toFixed(4)}`
         : fallbackText;
 
     return (
@@ -401,7 +401,7 @@ const OutageTableBody = ({ outagesLoading, outages, lang, startEditing }) => {
             </tr>
         );
     }
-    
+
     if (outages.length === 0) {
         return (
             <tr>
@@ -476,13 +476,13 @@ const getTranslations = (lang) => TRANSLATIONS[lang] || TRANSLATIONS.en;
 function OutageManagement({ outageMgr, lang }) {
     const t = getTranslations(lang);
 
-    const { 
-        outages, outagesLoading, startEditing, page, hasMore, fetchOutages, 
+    const {
+        outages, outagesLoading, startEditing, page, hasMore, fetchOutages,
         searchQuery, filterOperator, filterStatus, setPage, setSearchQuery,
         setFilterOperator, setFilterStatus, handleFilterChange, searchTimerRef,
         filterMissingCoords, setFilterMissingCoords, filterMissingEndDate, setFilterMissingEndDate
     } = outageMgr;
-    
+
     const onSearchChange = (e) => {
         const val = e.target.value;
         setSearchQuery(val);
@@ -492,14 +492,14 @@ function OutageManagement({ outageMgr, lang }) {
         }, 400);
     };
 
-    const onOperatorChange = (e) => { 
-        setFilterOperator(e.target.value); 
-        handleFilterChange(searchQuery, e.target.value, filterStatus); 
+    const onOperatorChange = (e) => {
+        setFilterOperator(e.target.value);
+        handleFilterChange(searchQuery, e.target.value, filterStatus);
     };
 
-    const onStatusChange = (e) => { 
-        setFilterStatus(e.target.value); 
-        handleFilterChange(searchQuery, filterOperator, e.target.value); 
+    const onStatusChange = (e) => {
+        setFilterStatus(e.target.value);
+        handleFilterChange(searchQuery, filterOperator, e.target.value);
     };
 
     const onMissingCoordsChange = (e) => {
@@ -565,18 +565,18 @@ function OutageManagement({ outageMgr, lang }) {
                     </div>
                     <div className="quality-filters">
                         <label className="filter-checkbox">
-                            <input 
-                                type="checkbox" 
-                                checked={filterMissingCoords} 
-                                onChange={onMissingCoordsChange} 
+                            <input
+                                type="checkbox"
+                                checked={filterMissingCoords}
+                                onChange={onMissingCoordsChange}
                             />
                             <span>{t.missingCoords}</span>
                         </label>
                         <label className="filter-checkbox">
-                            <input 
-                                type="checkbox" 
-                                checked={filterMissingEndDate} 
-                                onChange={onMissingEndDateChange} 
+                            <input
+                                type="checkbox"
+                                checked={filterMissingEndDate}
+                                onChange={onMissingEndDateChange}
                             />
                             <span>{t.missingEndDate}</span>
                         </label>
@@ -586,7 +586,7 @@ function OutageManagement({ outageMgr, lang }) {
 
             <div className="network-sharing-note">
                 <h4 className="sharing-title">
-                    <span className="icon">ℹ️</span> 
+                    <span className="icon">ℹ️</span>
                     {t.networkSharingTitle}
                 </h4>
                 <p className="sharing-text">
@@ -709,10 +709,10 @@ OutageManagement.propTypes = {
 export default function AdminPage() {
     const { lang } = useLanguage();
     const [mounted, setMounted] = useState(false);
-    
+
     const adminData = useAdminData();
     const outageMgr = useOutageManagement();
-    
+
     const { fetchData } = adminData;
     const { fetchOutages } = outageMgr;
 
@@ -746,11 +746,11 @@ export default function AdminPage() {
             </header>
 
             <ScraperHealth scrapers={adminData.scrapers} lang={lang} />
-            
-            <ReportModeration 
-                reports={adminData.reports} 
-                handleReportAction={adminData.handleReportAction} 
-                lang={lang} 
+
+            <ReportModeration
+                reports={adminData.reports}
+                handleReportAction={adminData.handleReportAction}
+                lang={lang}
             />
 
             <OutageManagement outageMgr={outageMgr} lang={lang} />

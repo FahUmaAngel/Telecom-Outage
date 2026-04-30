@@ -7,6 +7,25 @@ resource "aws_apigatewayv2_stage" "prod" {
   api_id      = aws_apigatewayv2_api.main.id
   name        = "prod"
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw.arn
+    format          = jsonencode({
+      requestId               = "$context.requestId"
+      sourceIp                = "$context.identity.sourceIp"
+      requestTime             = "$context.requestTime"
+      httpMethod              = "$context.httpMethod"
+      resourcePath            = "$context.resourcePath"
+      status                  = "$context.status"
+      protocol                = "$context.protocol"
+      responseLength          = "$context.responseLength"
+    })
+  }
+}
+
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name = "/aws/api-gw/${aws_apigatewayv2_api.main.name}"
+  retention_in_days = 7
 }
 
 resource "aws_apigatewayv2_integration" "backend" {

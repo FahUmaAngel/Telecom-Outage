@@ -11,7 +11,7 @@ export default function Sidebar() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setMounted(true), 0);
+    setMounted(true);
   }, []);
 
   const displayLang = mounted ? lang : "sv";

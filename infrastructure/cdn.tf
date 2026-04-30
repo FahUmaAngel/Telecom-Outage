@@ -5,6 +5,53 @@ resource "aws_s3_bucket" "frontend" {
   }
 }
 
+resource "aws_s3_bucket" "logs" {
+  bucket = "${var.project_name}-logs"
+}
+
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
+  bucket = aws_s3_bucket.logs.id
+  acl    = "log-delivery-write"
+}
+
+resource "aws_s3_bucket_logging" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "s3/"
+}
+
+resource "aws_s3_bucket_policy" "frontend_https_only" {
+  bucket = aws_s3_bucket.frontend.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "s3:*"
+        Effect    = "Deny"
+        Principal = "*"
+        Resource = [
+          aws_s3_bucket.frontend.arn,
+          "${aws_s3_bucket.frontend.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_s3_bucket_public_access_block" "frontend" {
   bucket = aws_s3_bucket.frontend.id
 
@@ -23,6 +70,12 @@ resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
+
+  logging_config {
+    include_cookies = false
+    bucket          = aws_s3_bucket.logs.bucket_domain_name
+    prefix          = "cloudfront/"
+  }
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]

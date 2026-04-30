@@ -10,7 +10,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setMounted(true), 0);
+    setMounted(true);
   }, []);
 
   const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";
@@ -23,8 +23,9 @@ export default function Header() {
     currentPlaceholder = lang === "sv" ? "Sök..." : "Search...";
   }
 
+
   const currentThemeLabel = mounted ? themeToggleLabel : "...";
-  
+
   let languageDisplay = "SV";
   if (mounted) {
     languageDisplay = lang === "sv" ? "SV" : "EN";
