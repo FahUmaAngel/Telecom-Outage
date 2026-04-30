@@ -11,13 +11,6 @@ except ImportError:
 SEED_FILE = os.path.join(os.path.dirname(__file__), "tele2_seed_addresses.json")
 
 def scrape_tele2():
-    if not os.path.exists(SEED_FILE):
-        print(f"Seed file {SEED_FILE} not found.")
-        return []
-
-    with open(SEED_FILE, "r", encoding="utf-8") as f:
-        addresses = json.load(f)
-
     outages = []
     
     with sync_playwright() as p:

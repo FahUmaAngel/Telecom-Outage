@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import PropTypes from "prop-types";
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(() => {
-        if (typeof window !== "undefined") {
+        if (typeof globalThis.window !== "undefined") {
             return localStorage.getItem("theme") || "dark";
         }
         return "dark";
@@ -24,11 +25,17 @@ export const ThemeProvider = ({ children }) => {
         localStorage.setItem("theme", newTheme);
     };
 
+    const value = useMemo(() => ({ theme, toggleTheme }), [theme]);
+
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={value}>
             {children}
         </ThemeContext.Provider>
     );
+};
+
+ThemeProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useTheme = () => useContext(ThemeContext);
