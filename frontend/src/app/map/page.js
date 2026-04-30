@@ -33,7 +33,7 @@ export default function MapPage() {
         fetchData();
 
         // WebSocket Setup for Real-time Updates
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8080/ws";
         console.log("Connecting to WebSocket:", wsUrl);
         
         let socket;
@@ -94,13 +94,13 @@ export default function MapPage() {
                 <div className="map-legend premium-card glass">
                     <h4 className="font-heading">Legend</h4>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#0070f3" }}></span> Telia
+                        <span className="dot" style={{ backgroundColor: "#912f91" }}></span> Telia
                     </div>
                     <div className="legend-item">
                         <span className="dot" style={{ backgroundColor: "#ff4d4f" }}></span> Tre (3)
                     </div>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#007bff" }}></span> Telenor
+                        <span className="dot" style={{ backgroundColor: "#00a1e1" }}></span> Telenor
                     </div>
                 </div>
             </div>

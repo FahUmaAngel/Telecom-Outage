@@ -10,7 +10,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
   }, []);
 
   const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";
@@ -18,9 +18,17 @@ export default function Header() {
   const themeToggleLabel = theme === "light" ? darkLabel : lightLabel;
 
   // Use a stable initial state for hydration, then update after mount
-  const currentLang = mounted ? lang : "sv";
+  let currentPlaceholder = "Search...";
+  if (mounted) {
+    currentPlaceholder = lang === "sv" ? "Sök..." : "Search...";
+  }
+
   const currentThemeLabel = mounted ? themeToggleLabel : "...";
-  const currentPlaceholder = mounted ? (lang === "sv" ? "Sök..." : "Search...") : "Search...";
+  
+  let languageDisplay = "SV";
+  if (mounted) {
+    languageDisplay = lang === "sv" ? "SV" : "EN";
+  }
 
   return (
     <header className="header glass animate-fade-in">
@@ -38,7 +46,7 @@ export default function Header() {
 
       <div className="actions">
         <button onClick={toggleLanguage} className="action-btn">
-          {mounted ? (lang === "sv" ? "SV" : "EN") : "SV"}
+          {languageDisplay}
         </button>
         <button onClick={toggleTheme} className="action-btn theme-btn">
           {currentThemeLabel}

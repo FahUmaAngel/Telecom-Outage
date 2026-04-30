@@ -30,9 +30,9 @@ const createCustomIcon = (color) => new L.DivIcon({
 });
 
 const operatorColors = {
-    telia: "#0070f3",
+    telia: "#912f91", // Telia Purple
     tre: "#ff4d4f",
-    telenor: "#007bff",
+    telenor: "#00a1e1", // Telenor Light Blue
     unknown: "#94a3b8"
 };
 
@@ -40,7 +40,7 @@ const cityCoords = {
     // ... same as before
     "Stockholm": [59.3293, 18.0686],
     "Göteborg": [57.7089, 11.9746],
-    "Malmö": [55.6050, 13.0038],
+    "Malmö": [55.605, 13.0038],
     "Uppsala": [59.8586, 17.6389],
     "Västerås": [59.61, 16.5448],
     "Örebro": [59.2753, 15.2134],
@@ -81,7 +81,7 @@ function HeatmapLayer({ points = [] }) {
     const map = useMap();
 
     useEffect(() => {
-        if (typeof globalThis.window === "undefined") return;
+        if (globalThis.window === undefined) return;
         require("leaflet.heat");
 
         const container = map.getContainer();
@@ -134,7 +134,7 @@ export default function OutageMap({ outages = [], hotspots = [], simple = false 
     const [viewMode, setViewMode] = useState("markers"); // "markers" or "heatmap"
 
     useEffect(() => {
-        setMounted(true);
+        setTimeout(() => setMounted(true), 0);
     }, []);
 
     const heatPoints = useMemo(() => {
@@ -228,7 +228,7 @@ export default function OutageMap({ outages = [], hotspots = [], simple = false 
                         {/* Crowd Hotspots */}
                         {hotspots.map((hotspot, idx) => (
                             <Marker
-                                key={`hotspot-${idx}`}
+                                key={`hotspot-${hotspot.operator_name}-${hotspot.latitude}-${hotspot.longitude}`}
                                 position={[hotspot.latitude, hotspot.longitude]}
                                 icon={hotspotIcon}
                             >
