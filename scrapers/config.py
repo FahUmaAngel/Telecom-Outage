@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/telecom_outage"
+    DATABASE_URL: str = "postgresql://postgres@localhost:5432/telecom_outage"
     SCRAPER_INTERVAL_MINUTES: int = 5
     LOG_LEVEL: str = "INFO"
     SECRET_KEY: Optional[str] = None
