@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "../../context/LanguageContext";
@@ -7,9 +8,16 @@ import { useLanguage } from "../../context/LanguageContext";
 export default function Sidebar() {
   const pathname = usePathname();
   const { lang } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const resolvedLang = mounted ? lang : "sv";
 
   const menuItems = [
-    { label_sv: "Översikt", label_en: "Dashboard", path: "/" },
+    { label_sv: "Oversikt", label_en: "Dashboard", path: "/" },
     { label_sv: "Live-karta", label_en: "Live Map", path: "/map" },
     { label_sv: "Rapportera", label_en: "Report Outage", path: "/report" },
     { label_sv: "Rapporter", label_en: "Reports", path: "/reports" },
@@ -29,7 +37,7 @@ export default function Sidebar() {
             className={`nav-item ${pathname === item.path ? "active" : ""}`}
           >
             <span className="dot-marker"></span>
-            <span className="label">{lang === "sv" ? item.label_sv : item.label_en}</span>
+            <span className="label">{resolvedLang === "sv" ? item.label_sv : item.label_en}</span>
           </Link>
         ))}
       </nav>
@@ -37,7 +45,7 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <div className="status-indicator">
           <div className="system-dot"></div>
-          <span className="status-text">{lang === "sv" ? "System Aktivt" : "System Live"}</span>
+          <span className="status-text">{resolvedLang === "sv" ? "System Aktivt" : "System Live"}</span>
         </div>
       </div>
 

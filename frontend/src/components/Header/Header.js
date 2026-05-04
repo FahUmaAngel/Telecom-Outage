@@ -1,15 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage } = useLanguage();
+  const [mounted, setMounted] = useState(false);
 
-  const darkLabel = lang === "sv" ? "MÖRKT" : "DARK";
-  const lightLabel = lang === "sv" ? "LJUST" : "LIGHT";
-  const themeToggleLabel = theme === "light" ? darkLabel : lightLabel;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const resolvedLang = mounted ? lang : "sv";
+  const resolvedTheme = mounted ? theme : "dark";
+  const darkLabel = resolvedLang === "sv" ? "MORKT" : "DARK";
+  const lightLabel = resolvedLang === "sv" ? "LJUST" : "LIGHT";
+  const themeToggleLabel = resolvedTheme === "light" ? darkLabel : lightLabel;
 
   return (
     <header className="header glass animate-fade-in">
@@ -21,13 +29,13 @@ export default function Header() {
         <div className="search-icon-css"></div>
         <input
           type="text"
-          placeholder={lang === "sv" ? "Sök..." : "Search..."}
+          placeholder={resolvedLang === "sv" ? "Sok..." : "Search..."}
         />
       </div>
 
       <div className="actions">
         <button onClick={toggleLanguage} className="action-btn">
-          {lang === "sv" ? "SV" : "EN"}
+          {resolvedLang === "sv" ? "SV" : "EN"}
         </button>
         <button onClick={toggleTheme} className="action-btn theme-btn">
           {themeToggleLabel}
