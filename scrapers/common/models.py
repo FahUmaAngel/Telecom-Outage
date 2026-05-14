@@ -61,7 +61,7 @@ class NormalizedOutage(BaseModel):
     status: OutageStatus
     severity: SeverityLevel = SeverityLevel.MEDIUM
     started_at: Optional[datetime] = None
-    resolved_at: Optional[datetime] = None
+    end_time: Optional[datetime] = None
     estimated_fix_time: Optional[datetime] = None
     affected_services: list[ServiceType] = Field(default_factory=list)
     source_url: Optional[str] = None

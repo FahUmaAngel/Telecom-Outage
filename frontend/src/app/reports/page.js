@@ -13,7 +13,7 @@ import PropTypes from "prop-types";
 const getEffectiveStatus = (outageObj) => {
     if (outageObj?.status?.toLowerCase() === 'resolved') return 'resolved';
     
-    const endDateStr = outageObj?.end_time || outageObj?.estimated_fix_time;
+    const endDateStr = outageObj?.end_time;
     if (endDateStr) {
         const endDate = new Date(endDateStr);
         if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) {
@@ -103,7 +103,6 @@ const FilterControls = ({ lang, operators, operatorFilter, setOperatorFilter, st
                 <option value="all">{lang === "sv" ? "Alla Status" : "All Status"}</option>
                 <option value="active">{lang === "sv" ? "Aktiva" : "Active"}</option>
                 <option value="investigating">{lang === "sv" ? "Undersöker" : "Investigating"}</option>
-                <option value="scheduled">{lang === "sv" ? "Planerat" : "Scheduled"}</option>
                 <option value="resolved">{lang === "sv" ? "Lösta" : "Resolved"}</option>
             </select>
             <select
@@ -160,7 +159,12 @@ FilterControls.propTypes = {
 const ReportRow = ({ outage, lang, t }) => {
     const displayStatus = getEffectiveStatus(outage);
     const fallbackLoc = lang === "sv" ? "Sverige" : "Sweden";
-    const locationDisplay = outage.region_name ? t(outage.region_name) : fallbackLoc;
+    let locationDisplay = fallbackLoc;
+    if (outage.location && outage.location.toLowerCase() !== "unknown" && outage.location.toLowerCase() !== "sverige" && outage.location.toLowerCase() !== "sweden") {
+        locationDisplay = outage.location;
+    } else if (outage.region_name) {
+        locationDisplay = t(outage.region_name);
+    }
     
     const priority = ["5g+", "5g", "4g", "3g", "2g", "voice", "data", "sms", "mms", "fiber", "broadband"];
     const sortedServices = [...(outage.affected_services || [])].sort((a, b) => {
@@ -197,7 +201,7 @@ const ReportRow = ({ outage, lang, t }) => {
                 {formatDate(outage.start_time)}
             </td>
             <td className="date-cell">
-                {formatDate(outage.end_time || outage.estimated_fix_time)}
+                {formatDate(outage.end_time)}
             </td>
             <td className="actions-cell">
                 <Link href={`/outages/${outage.id}`} className="view-link">

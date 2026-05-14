@@ -26,7 +26,27 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
     operator_id = get_operator_id(db, normalized.operator.value)
     if not operator_id:
         return None
+
+    # Check if outage already exists
+    existing = None
+    if normalized.incident_id:
+        existing = db.query(Outage).filter(
+            Outage.operator_id == operator_id,
+            Outage.incident_id == normalized.incident_id
+        ).first()
+
+    # Skip scheduled outages as per user request
+    if normalized.status == 'scheduled':
+        if existing and existing.status != 'resolved':
+            print(f"INFO: Outage {normalized.incident_id} is now scheduled. Marking as resolved.")
+            existing.status = 'resolved'
+            existing.end_time = datetime.now(timezone.utc)
+            existing.updated_at = datetime.now(timezone.utc)
+            return existing
         
+        print(f"INFO: Skipping scheduled outage {normalized.incident_id}")
+        return None
+
     # Create RawData entry
     raw_entry = RawData(
         operator=normalized.operator.value,
@@ -47,14 +67,6 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         if region:
             region_id = region.id
             
-    # Check if outage already exists
-    existing = None
-    if normalized.incident_id:
-        existing = db.query(Outage).filter(
-            Outage.operator_id == operator_id,
-            Outage.incident_id == normalized.incident_id
-        ).first()
-        
     affected_services_json = [s.value for s in normalized.affected_services]
     
     if existing:
@@ -68,7 +80,16 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.title = normalized.title
         existing.description = normalized.description
         existing.location = normalized.location
-        existing.end_time = normalized.estimated_fix_time
+        
+        # Priority: Use end_time only if status is resolved
+        if normalized.status == 'resolved':
+            existing.end_time = normalized.end_time or existing.end_time or datetime.now(timezone.utc)
+        else:
+            existing.end_time = None
+        
+        # Stop using ETA as end_time or at all in normalized flow as per request
+        existing.estimated_fix_time = None 
+            
         existing.updated_at = datetime.now(timezone.utc)
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
@@ -88,7 +109,8 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
             status=normalized.status,
             severity=normalized.severity,
             start_time=normalized.started_at if normalized.started_at else datetime.now(timezone.utc),
-            estimated_fix_time=normalized.estimated_fix_time,
+            end_time=normalized.end_time if normalized.status == 'resolved' else None,
+            estimated_fix_time=None, # Stop using ETA
             location=normalized.location,
             latitude=normalized.latitude,
             longitude=normalized.longitude,
@@ -123,6 +145,7 @@ def auto_resolve_expired_outages(db: Session):
     total_resolved = 0
     for outage in expired_end + expired_eta:
         outage.status = 'resolved'
+        outage.end_time = now
         outage.updated_at = now
         total_resolved += 1
         
@@ -153,3 +176,34 @@ def cleanup_old_data(db: Session, days: int = 30):
     
     db.commit()
     print(f"CLEANUP: Deleted {deleted_count} old outages and {deleted_raw} raw data records.")
+
+
+def mark_missing_outages_resolved(db: Session, operator_name: str, current_incident_ids: list):
+    """
+    Mark outages as 'resolved' if they are not in the current list of incident IDs for an operator.
+    """
+    operator_id = get_operator_id(db, operator_name)
+    if not operator_id:
+        return 0
+
+    now = datetime.now(timezone.utc)
+    
+    # Find active outages for this operator that are NOT in the current_incident_ids
+    query = db.query(Outage).filter(
+        Outage.operator_id == operator_id,
+        Outage.status != 'resolved',
+        ~Outage.incident_id.in_(current_incident_ids)
+    )
+    
+    missing_outages = query.all()
+    count = len(missing_outages)
+    
+    if count > 0:
+        for outage in missing_outages:
+            outage.status = 'resolved'
+            outage.end_time = now
+            outage.updated_at = now
+        db.commit()
+        print(f"SYNC: Marked {count} missing {operator_name} outages as 'resolved'.")
+    
+    return count

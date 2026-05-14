@@ -16,7 +16,8 @@ from playwright.sync_api import sync_playwright
 
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import CITY_TO_COUNTY, SWEDISH_COUNTIES
-from scrapers.common.engine import extract_region_from_text, parse_swedish_date
+from scrapers.common.engine import extract_region_from_text, parse_swedish_date, classify_status
+from scrapers.common.models import OutageStatus
 
 logger = logging.getLogger("TeliaPortalScraper")
 
@@ -194,6 +195,12 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
 
     start_time, end_time = parse_incident_dates(item)
     desc_raw = item.get("Description") or item.get("Text") or ""
+    
+    status = classify_status(desc_raw)
+    if status == OutageStatus.SCHEDULED:
+        logger.info(f"Skipping scheduled incident: {inc_id}")
+        return
+        
     services = json.dumps(extract_services(desc_raw + " " + item.get("AffectedServices", "")))
     
     title_json = json.dumps({"sv": str(inc_id), "en": str(inc_id)})
@@ -204,15 +211,15 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
 
     if row:
         cursor.execute("""
-            UPDATE outages SET location=?, region_id=?, latitude=?, longitude=?, start_time=?, estimated_fix_time=?,
-            description=?, affected_services=?, title=?, updated_at=?, status='active' WHERE id=?
-        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services, title_json, timestamp, row[0]))
+            UPDATE outages SET location=?, region_id=?, latitude=?, longitude=?, start_time=?, end_time=NULL, estimated_fix_time=NULL,
+            description=?, affected_services=?, title=?, updated_at=?, status=? WHERE id=?
+        """, (location, region_id, lat, lon, start_time, desc_json, services, title_json, timestamp, status.value, row[0]))
     else:
         cursor.execute("""
             INSERT INTO outages (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
-            start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
-        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services, timestamp, timestamp))
+            start_time, end_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, 'medium', ?, ?, ?)
+        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, status.value, services, timestamp, timestamp))
 
 
 def scrape_portal_granular():

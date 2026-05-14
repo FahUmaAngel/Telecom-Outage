@@ -23,7 +23,7 @@ def _effective_status(o):
     raw = _safe_val(o.status) or 'active'
     if raw.lower() == 'resolved':
         return raw
-    end = o.end_time or o.estimated_fix_time
+    end = o.end_time
     if end:
         try:
             end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
@@ -94,7 +94,7 @@ def get_outages(
     """
     Get outages with optional filtering and geospatial search.
     """
-    query = db.query(Outage).join(Operator)
+    query = db.query(Outage).join(Operator).filter(Outage.status != "scheduled")
     
     if operator:
         query = query.filter(Operator.name == operator.lower())

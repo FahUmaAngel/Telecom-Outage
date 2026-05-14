@@ -1,0 +1,13 @@
+id,operator_id,region_id,title,description,latitude,longitude,status,created_at
+1,1,,No signal in Stockholm 0,Nothing works,59.3293,18.0686,verified,2025-12-27 10:11:20
+2,1,,No signal in Stockholm 1,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:20
+3,1,,No signal in Stockholm 2,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:20
+4,1,,No signal in Stockholm 3,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:20
+5,1,,No signal in Stockholm 4,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:20
+6,1,,No signal in Stockholm 5,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:20
+7,1,,No signal in Stockholm 0,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46
+8,1,,No signal in Stockholm 1,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46
+9,1,,No signal in Stockholm 2,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46
+10,1,,No signal in Stockholm 3,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46
+11,1,,No signal in Stockholm 4,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46
+12,1,,No signal in Stockholm 5,Nothing works,59.3293,18.0686,pending,2025-12-27 10:11:46

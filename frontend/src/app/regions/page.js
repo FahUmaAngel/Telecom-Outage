@@ -32,6 +32,11 @@ export default function RegionsPage() {
         return lang === "sv" ? "Inga störningar" : "No disruptions";
     };
 
+    const getUptime = (count) => {
+        if (count === 0) return "100% Up";
+        return `${(100 - (count * 0.2)).toFixed(1)}% Up`;
+    };
+
     return (
         <div className="regions-container animate-fade-in">
             <header className="page-header">
@@ -56,7 +61,9 @@ export default function RegionsPage() {
                             </div>
                         </div>
                         <div className="region-meta">
-                            <span className="uptime">100% Up</span>
+                            <span className={`uptime ${region.outage_count > 0 ? "degraded" : ""}`}>
+                                {getUptime(region.outage_count)}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -90,7 +97,8 @@ export default function RegionsPage() {
                 .status-dot.warning { background: var(--status-warning); }
                 
                 .status-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-                .uptime { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+                .uptime { font-size: 0.75rem; font-weight: 800; color: var(--status-success); text-transform: uppercase; }
+                .uptime.degraded { color: var(--status-warning); }
 
                 .loading-container { height: 60vh; display: flex; align-items: center; justify-content: center; }
                 .spinner {

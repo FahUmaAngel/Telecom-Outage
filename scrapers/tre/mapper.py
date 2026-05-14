@@ -16,25 +16,24 @@ from scrapers.common.models import (
     ServiceType
 )
 from scrapers.common.translation import translate_swedish_to_english, SWEDISH_COUNTIES
-from scrapers.common.engine import classify_services, extract_region_from_text
+from scrapers.common.engine import classify_services, extract_region_from_text, classify_status
 import requests
 import time
 
 logger = logging.getLogger(__name__)
 
 def determine_title_and_status(location: str, desc_sv: str):
-    if "Driftstörning" in location:
-         title_sv = location
-         title_en = f"Service disruption in {location.replace('Driftstörning i ', '')}"
-         status = OutageStatus.ACTIVE
-    elif "driftstörning" in desc_sv.lower():
+    context = f"{location} {desc_sv}"
+    status = classify_status(context, OutageStatus.SCHEDULED)
+    
+    if status == OutageStatus.ACTIVE:
          title_sv = f"Driftstörning i {location}"
          title_en = f"Service disruption in {location}"
-         status = OutageStatus.ACTIVE
     else:
          title_sv = f"Planerat arbete i {location}"
          title_en = f"Planned maintenance in {location}"
-         status = OutageStatus.SCHEDULED
+         status = OutageStatus.SCHEDULED # Ensure it's scheduled if not explicitly active
+         
     return title_sv, title_en, status
 
 def get_county_from_nominatim(location: str) -> Optional[str]:
@@ -77,8 +76,9 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         context_text = f"{location} {desc_sv} {title_sv}"
         affected_services = classify_services(context_text)
         
-        # Filter out 'voice' and 'data' as requested by user
-        affected_services = [s for s in affected_services if s not in [ServiceType.VOICE, ServiceType.MOBILE_DATA]]
+        # Filter out generic service types if they somehow appeared
+        # ServiceType in common/models.py only includes: 5g+, 5g, 4g, 3g, 2g, mobile
+        affected_services = [s for s in affected_services if hasattr(ServiceType, s.name)]
         
         inc_id = parsed_outage.get('id')
         
@@ -102,7 +102,8 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
             status=status,
             affected_services=affected_services,
             location=county_name,
-            estimated_fix_time=parsed_outage.get('end_time'),
+            end_time=parsed_outage.get('end_time') if status == OutageStatus.RESOLVED else None,
+            estimated_fix_time=None,
             started_at=parsed_outage.get('start_time')
         )
         return normalized

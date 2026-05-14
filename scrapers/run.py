@@ -14,7 +14,7 @@ from scrapers.tre.mapper import map_tre_outages
 from scrapers.telia import scrape_telia_outages, parse_telia_outages, scrape_portal_granular
 
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import save_outage
+from scrapers.db.crud import save_outage, mark_missing_outages_resolved
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
@@ -52,10 +52,11 @@ def _run_telia_scraper(db):
                     affected_services=outage.get('affected_services', classify_services(context_text)),
                     source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
                     started_at=parse_swedish_date(outage.get('start_time')),
-                    estimated_fix_time=parse_swedish_date(outage.get('estimated_fix_time'))
+                    end_time=None, # End date should be empty if not resolved
+                    estimated_fix_time=None
                 )
                 
-                county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
+                county_name = extract_region_from_text(context_text, SWEDISH_COUNTIES)
                 if county_name:
                     normalized.location = county_name
                     coords = get_county_coordinates(county_name, jitter=True)
@@ -63,6 +64,10 @@ def _run_telia_scraper(db):
                         normalized.latitude, normalized.longitude = coords
                 
                 save_outage(db, normalized, {"source": "telia_api_enhanced", "raw": outage})
+            
+            # Sync: Mark missing Telia outages as resolved
+            current_ids = [o.get('id') for o in parsed_outages if o.get('id')]
+            mark_missing_outages_resolved(db, "telia", current_ids)
             
             db.commit()
         else:
@@ -91,7 +96,8 @@ def _process_telenor_outage(db, outage):
         affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
         source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
         started_at=parse_swedish_date(outage.get('start_time')),
-        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
+        end_time=None, # End date should be empty if not resolved
+        estimated_fix_time=None
     )
     
     search_text = location_text if location_text else context_text
@@ -116,6 +122,10 @@ def _run_telenor_scraper(db):
             for outage in telenor_result['outages']:
                 _process_telenor_outage(db, outage)
             
+            # Sync: Mark missing Telenor outages as resolved
+            current_ids = [o['incident_id'] for o in telenor_result['outages']]
+            mark_missing_outages_resolved(db, "telenor", current_ids)
+            
             db.commit()
         else:
             logger.error("✗ Telenor scraper failed")
@@ -134,10 +144,35 @@ def _run_tre_scraper(db):
         for item in mapped:
             save_outage(db, item, {"source": "tre_scraper"})
             
+        # Sync: Mark missing Tre outages as resolved
+        current_ids = [item.incident_id for item in mapped]
+        mark_missing_outages_resolved(db, "tre", current_ids)
+            
         db.commit()
         logger.info(f"Tre: processed {len(mapped)} outages")
     except Exception as e:
         logger.error(f"Tre failed: {e}")
+        db.rollback()
+
+def _run_tele2_scraper(db):
+    """Execution logic for Tele2 scraper."""
+    try:
+        logger.info("Running Tele2 (Playwright)...")
+        from scrapers.tele2.fetch import scrape_tele2
+        tele2_outages = scrape_tele2()
+        
+        if tele2_outages:
+            logger.info(f"✓ Tele2 scraper found {len(tele2_outages)} outages")
+            for outage in tele2_outages:
+                save_outage(db, outage, {"source": "tele2_playwright"})
+            
+            # Sync: Mark missing Tele2 outages as resolved
+            current_ids = [o.incident_id for o in tele2_outages]
+            mark_missing_outages_resolved(db, "tele2", current_ids)
+            
+            db.commit()
+    except Exception as e:
+        logger.error(f"Tele2 failed: {e}")
         db.rollback()
 
 def run_scrapers():
@@ -148,6 +183,7 @@ def run_scrapers():
         _run_telia_scraper(db)
         _run_telenor_scraper(db)
         _run_tre_scraper(db)
+        _run_tele2_scraper(db)
     finally:
         db.close()
     logger.info("Scraper run completed.")

@@ -36,11 +36,29 @@ def parse_tre_outages(raw_outages: List) -> List[Dict]:
             blocks = _navigate_blocks(data)
             
             for block in blocks:
-                for item in block.get('items', []):
-                    text = item.get('text', '') or item.get('notificationMessage', '')
-                    if _is_outage_block(text):
-                        logger.info("Found Tre outage block, parsing...")
-                        parsed.extend(parse_markdown_text(text))
+                # Some blocks have items directly, some have cards
+                items = block.get('items', [])
+                
+                # Check block title/heading as well
+                block_heading = block.get('headingText', '') or block.get('title', '')
+                
+                for item in items:
+                    # Collect all possible text fields
+                    text_parts = [
+                        item.get('text', ''),
+                        item.get('notificationMessage', ''),
+                        item.get('content', ''),
+                        item.get('title', ''),
+                        block_heading
+                    ]
+                    combined_text = " ".join([t for t in text_parts if t])
+                    
+                    if _is_outage_block(combined_text):
+                        logger.info(f"Found Tre outage in block: {item.get('title') or block_heading}")
+                        # We parse each text part that might contain markdown-like lists
+                        for part in [item.get('text', ''), item.get('content', '')]:
+                            if part:
+                                parsed.extend(parse_markdown_text(part))
         except Exception as e:
             logger.error(f"Error parsing Tre outage: {e}")
     return parsed

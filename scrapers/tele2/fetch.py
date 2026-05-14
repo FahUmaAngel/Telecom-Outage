@@ -21,7 +21,6 @@ def scrape_tele2():
     outages = []
     
     with sync_playwright() as p:
-        # Using a fixed browser context to handle sessions
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
@@ -36,11 +35,34 @@ def scrape_tele2():
             try:
                 page.locator("button:has-text('Acceptera alla')").click(timeout=5000)
                 print("Cookies accepted.")
-except Exception as e:
+            except Exception:
                 pass
-        except Exception as e:
+
+            for addr in addresses:
+                try:
+                    print(f"Probing {addr['address']}, {addr['city']}...")
+                    # Tele2 map usually requires typing an address
+                    input_selector = "input[placeholder*='Gata'], input[id*='search']"
+                    if page.locator(input_selector).is_visible():
+                        page.locator(input_selector).fill(addr['address'])
+                        page.keyboard.press("Enter")
+                        time.sleep(2)
+                        
+                        # Look for status indicators
+                        # Note: This part is speculative as we don't have the real DOM structure here
+                        # We'll look for generic status indicators
+                        status_loc = page.locator(".drift-status-text, .status-header")
+                        if status_loc.count() > 0:
+                            status_text = status_loc.first.inner_text()
+                            desc_loc = page.locator(".drift-detailed-info, .status-description")
+                            detailed_text = desc_loc.first.inner_text() if desc_loc.count() > 0 else ""
+                            
+                            outage = map_tele2_to_outage(addr, status_text, detailed_text)
+                            if outage:
+                                outages.append(outage)
+                except Exception as e:
                     print(f"  Error probing {addr['address']}: {e}")
-                    
+
         except Exception as e:
             print(f"Failed to load map page: {e}")
             

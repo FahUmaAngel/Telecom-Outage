@@ -113,7 +113,8 @@ const OutageTimeline = ({ outage, lang, hasUpdates, isResolved, hasEstimation, r
                 </div>
             </div>
 
-            {/* Step 3: ETA / Fix Scheduled (Optional) */}
+            {/* Step 3: ETA / Fix Scheduled (Removed as per request) */}
+            {/*
             {hasEstimation && (
                 <div className={`timeline-node ${isResolved ? 'completed' : 'active'}`}>
                     <div className="node-marker highlight">
@@ -128,6 +129,7 @@ const OutageTimeline = ({ outage, lang, hasUpdates, isResolved, hasEstimation, r
                     </div>
                 </div>
             )}
+            */}
 
             {/* Step 4: Resolved */}
             <div className={`timeline-node ${isResolved ? 'completed resolved' : 'pending'}`}>
@@ -165,6 +167,8 @@ const OutageSidebar = ({ outage, lang }) => (
                     {outage.updated_at ? new Date(outage.updated_at).toLocaleTimeString() : new Date(outage.start_time).toLocaleTimeString()}
                 </span>
             </div>
+            {/* ETA Resolution (Removed as per request) */}
+            {/*
             {outage.estimated_fix_time && (
                 <div className="summary-datum highlight">
                     <span className="datum-label">{lang === "sv" ? "Beräknad lösning" : "ETA Resolution"}</span>
@@ -172,6 +176,7 @@ const OutageSidebar = ({ outage, lang }) => (
                     <span className="datum-sub">{new Date(outage.estimated_fix_time).toLocaleDateString()}</span>
                 </div>
             )}
+            */}
             <button className="btn-refresh" onClick={() => globalThis.window.location.reload()}>
                 {lang === "sv" ? "Uppdatera" : "Refresh"}
             </button>
@@ -224,6 +229,17 @@ const OutageHero = ({ outage, t, lang, regionName }) => (
                     {outage.start_time ? new Date(outage.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : "-"}
                 </span>
             </div>
+            {outage.status.toLowerCase() === 'resolved' && outage.end_time && (
+                <div className="info-item">
+                    <div className="info-header">
+                        <CheckCircle2 size={14} />
+                        <span className="info-label">{lang === "sv" ? "Sluttid" : "Resolved"}</span>
+                    </div>
+                    <span className="info-value">
+                        {new Date(outage.end_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                    </span>
+                </div>
+            )}
             <div className="info-item">
                 <div className="info-header">
                     <Activity size={14} />

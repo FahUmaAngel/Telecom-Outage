@@ -173,11 +173,16 @@ def classify_status(text: str, current_status: OutageStatus = OutageStatus.ACTIV
 
     text_lower = text.lower()
 
-    if any(k in text_lower for k in ['löst', 'resolved', 'åtgärdat', 'klart']):
+    # Resolved Keywords
+    if any(k in text_lower for k in ['löst', 'resolved', 'åtgärdat', 'klart', 'closed', 'fixed', 'avhjälpt', 'avslutad']):
         return OutageStatus.RESOLVED
-    if any(k in text_lower for k in ['planerat', 'scheduled', 'kommande', 'underhåll']):
+        
+    # Scheduled/Planned Keywords (To be excluded)
+    if any(k in text_lower for k in ['planerat', 'scheduled', 'kommande', 'underhåll', 'planned', 'maintenance', 'upcoming', 'framtida', 'planerad']):
         return OutageStatus.SCHEDULED
-    if any(k in text_lower for k in ['undersöker', 'investigating', 'felsökning', 'pågår']):
-        return OutageStatus.INVESTIGATING
+        
+    # Active/Ongoing Keywords
+    if any(k in text_lower for k in ['active', 'ongoing', 'current', 'pågående', 'aktiv', 'undersöker', 'investigating', 'felsökning']):
+        return OutageStatus.ACTIVE
 
     return current_status

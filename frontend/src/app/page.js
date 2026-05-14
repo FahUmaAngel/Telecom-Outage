@@ -151,7 +151,25 @@ const OutageList = ({ outages, lang, onOutageClick }) => (
               <div className="event-meta">
                 <span>{outage.operator_name}</span>
                 <span className="sep">•</span>
-                <span>{outage.location || "Sweden"}</span>
+                <span>
+                  {outage.location && outage.location.toLowerCase() !== "unknown" && outage.location.toLowerCase() !== "sverige" && outage.location.toLowerCase() !== "sweden" 
+                    ? outage.location 
+                    : (outage.region_name ? t(outage.region_name) : (lang === 'sv' ? 'Sverige' : 'Sweden'))}
+                </span>
+                {outage.status.toLowerCase() === 'resolved' && outage.end_time && (
+                  <>
+                    <span className="sep">•</span>
+                    <span className="end-date">
+                      {lang === 'sv' ? 'Klart: ' : 'Resolved: '}
+                      {new Date(outage.end_time).toLocaleDateString(lang === 'sv' ? 'sv-SE' : 'en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </>
+                )}
                 {outage.affected_services?.length > 0 && (
                   <>
                     <span className="sep">•</span>
