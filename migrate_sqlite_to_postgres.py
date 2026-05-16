@@ -12,6 +12,7 @@ import sqlite3
 import sys
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import sessionmaker
 
 TABLES_IN_ORDER = [
@@ -23,6 +24,11 @@ TABLES_IN_ORDER = [
     "users",
     "scraper_runs",
 ]
+
+
+def chunked(items: list[dict], size: int):
+    for idx in range(0, len(items), size):
+        yield items[idx : idx + size]
 
 
 def sqlite_rows(sqlite_path: str, table: str) -> list[dict]:
@@ -40,12 +46,13 @@ def sqlite_rows(sqlite_path: str, table: str) -> list[dict]:
 def migrate(sqlite_path: str, pg_url: str):
     pg_engine = create_engine(pg_url)
 
-    # Import models so create_all knows about them
+    # Import models so Base.metadata includes all tables.
     sys.path.insert(0, ".")
-    from scrapers.db.init_db import init_db
+    from scrapers.db.connection import Base
+    import scrapers.db.models  # noqa: F401
 
-    print("Initialising PostgreSQL schema + seed data...")
-    init_db()
+    print("Initialising PostgreSQL schema...")
+    Base.metadata.create_all(bind=pg_engine)
     print("Schema ready.")
 
     Session = sessionmaker(bind=pg_engine)
@@ -57,13 +64,12 @@ def migrate(sqlite_path: str, pg_url: str):
             print(f"  {table}: 0 rows (skipped)")
             continue
 
-        # Build column list from first row
-        cols = list(rows[0].keys())
-        col_list = ", ".join(f'"{c}"' for c in cols)
-        placeholders = ", ".join(f":{c}" for c in cols)
+        table_obj = Base.metadata.tables.get(table)
+        if table_obj is None:
+            print(f"  {table}: missing in SQLAlchemy metadata (skipped)")
+            continue
 
-        inserted = 0
-        skipped = 0
+        cols = list(rows[0].keys())
         for row in rows:
             # Parse JSON strings that PostgreSQL expects as dicts/lists
             for col in cols:
@@ -76,24 +82,27 @@ def migrate(sqlite_path: str, pg_url: str):
                     except (json.JSONDecodeError, ValueError):
                         pass
 
+        attempted = 0
+        skipped = 0
+        stmt = pg_insert(table_obj).on_conflict_do_nothing()
+        for batch in chunked(rows, 1000):
+            attempted += len(batch)
             try:
-                db.execute(
-                    text(
-                        f"INSERT INTO {table} ({col_list}) "
-                        f"VALUES ({placeholders}) "
-                        f"ON CONFLICT DO NOTHING"
-                    ),
-                    row,
-                )
-                inserted += 1
+                db.execute(stmt, batch)
+                db.commit()
             except Exception as exc:
                 db.rollback()
-                skipped += 1
-                print(f"    !! row skipped in {table}: {exc}")
-                db = Session()  # fresh session after rollback
+                # Fall back to row-by-row for this batch to maximize salvage.
+                for row in batch:
+                    try:
+                        db.execute(pg_insert(table_obj).values(**row).on_conflict_do_nothing())
+                        db.commit()
+                    except Exception as row_exc:
+                        db.rollback()
+                        skipped += 1
+                        print(f"    !! row skipped in {table}: {row_exc}")
 
-        db.commit()
-        print(f"  {table}: {inserted} inserted, {skipped} skipped")
+        print(f"  {table}: {attempted} attempted, {skipped} skipped")
 
     # Reset sequences so auto-increment IDs don't clash
     with pg_engine.connect() as conn:

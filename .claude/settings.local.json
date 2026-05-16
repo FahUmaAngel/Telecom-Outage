@@ -5,7 +5,12 @@
       "Bash(curl -s \"http://localhost:8000/api/v1/research/statistical-test?days=365&test=kruskal\")",
       "Bash(curl -s \"http://localhost:8000/api/v1/research/sla-compliance?days=365&benchmark=ITU-T_E.800\")",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); r=d[0]; print\\('keys:', list\\(r.keys\\(\\)\\)\\); print\\('by_severity type:', type\\(r['by_severity']\\).__name__\\)\")",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); r=d[0]; print\\('keys:', list\\(r.keys\\(\\)\\)\\); print\\('components[0]:', r['components'][0]\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); r=d[0]; print\\('keys:', list\\(r.keys\\(\\)\\)\\); print\\('components[0]:', r['components'][0]\\)\")",
+      "Bash(gh api *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('html_url',''\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
