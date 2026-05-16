@@ -50,7 +50,7 @@ export default function MapPage() {
                 <div className="map-legend premium-card glass">
                     <h4 className="font-heading">Legend</h4>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#0070f3" }}></span> Telia
+                        <span className="dot" style={{ backgroundColor: "#990ae3" }}></span> Telia
                     </div>
                     <div className="legend-item">
                         <span className="dot" style={{ backgroundColor: "#ff4d4f" }}></span> Tre (3)
