@@ -48,7 +48,7 @@ def parse_mobile_outage(data: Dict) -> Optional[Dict]:
         return outage if outage.get('id') or outage.get('description') else None
         
     except Exception as e:
-        logger.error(f"Error parsing mobile outage: {e}")
+        logger.exception(f"Error parsing mobile outage: {e}")
         return None
 
 def parse_fixed_outage(data: Dict) -> Optional[Dict]:
@@ -67,7 +67,7 @@ def parse_fixed_outage(data: Dict) -> Optional[Dict]:
         
         return outage if outage else None
     except Exception as e:
-        logger.error(f"Error parsing fixed outage: {e}")
+        logger.exception(f"Error parsing fixed outage: {e}")
         return None
 
 def extract_location_from_text(text: str) -> Optional[str]:
@@ -177,7 +177,7 @@ def _process_raw_entry(raw: Any) -> Optional[Dict]:
             
         return outage
     except Exception as e:
-        logger.error(f"Error processing raw entry: {e}")
+        logger.exception(f"Error processing raw entry: {e}")
         return None
 
 def parse_telia_outages(raw_outages: List) -> List[Dict]:

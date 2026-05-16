@@ -41,7 +41,7 @@ def init_db():
         db.commit()
         logger.info("Database initialized successfully.")
     except Exception as e:
-        logger.error(f"Error initializing DB: {e}")
+        logger.exception(f"Error initializing DB: {e}")
         db.rollback()
     finally:
         db.close()

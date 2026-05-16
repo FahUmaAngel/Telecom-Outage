@@ -141,7 +141,7 @@ def run_telia_backfill():
         db.commit()
         logger.info("Telia backfill: persisted %d incidents", saved)
     except Exception as exc:
-        logger.error("Telia backfill commit failed: %s", exc, exc_info=True)
+        logger.exception("Telia backfill commit failed: %s", exc)
         db.rollback()
     finally:
         db.close()

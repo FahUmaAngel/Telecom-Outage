@@ -38,7 +38,7 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         )
         return outage
     except Exception as e:
-        logger.error(f"Error mapping Telenor: {e}")
+        logger.exception(f"Error mapping Telenor: {e}")
         return None
 
 def map_telenor_outages(parsed_outages: List[Dict]) -> List[NormalizedOutage]:

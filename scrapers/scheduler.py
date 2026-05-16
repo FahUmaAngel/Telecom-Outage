@@ -19,7 +19,7 @@ def daily_cleanup():
         cleanup_old_data(db, days=30)
         logger.info("Daily cleanup job completed.")
     except Exception as e:
-        logger.error(f"Error during daily cleanup: {e}")
+        logger.exception(f"Error during daily cleanup: {e}")
     finally:
         db.close()
 

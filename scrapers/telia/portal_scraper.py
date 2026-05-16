@@ -144,7 +144,7 @@ def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
             interact_with_portal(page)
             if not captured: page.wait_for_timeout(10000)
         except Exception as e:
-            logger.error(f"PW err: {e}")
+            logger.exception(f"PW err: {e}")
         finally:
             browser.close()
 

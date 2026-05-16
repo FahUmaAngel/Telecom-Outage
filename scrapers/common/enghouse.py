@@ -104,7 +104,7 @@ class EnghouseFetcher:
             return None
             
         except Exception as e:
-            logger.error(f"[{self.operator}] Error extracting token: {e}")
+            logger.exception(f"[{self.operator}] Error extracting token: {e}")
             return None
 
     def get_messages(self) -> List[RawOutage]:
@@ -128,7 +128,7 @@ class EnghouseFetcher:
                 logger.warning(f"[{self.operator}] Failed to get messages from {url}: {response.status_code}")
                 
         except Exception as e:
-            logger.error(f"[{self.operator}] Error fetching messages: {e}")
+            logger.exception(f"[{self.operator}] Error fetching messages: {e}")
             
         return outages
 
@@ -153,7 +153,7 @@ class EnghouseFetcher:
                 logger.warning(f"[{self.operator}] Failed to get area tickets: {response.status_code}")
                 
         except Exception as e:
-            logger.error(f"[{self.operator}] Error fetching area tickets: {e}")
+            logger.exception(f"[{self.operator}] Error fetching area tickets: {e}")
             
         return outages
 
@@ -196,7 +196,7 @@ class EnghouseFetcher:
                     logger.info(f"[{self.operator}] Got {len(areas)} admin areas")
                     return areas
         except Exception as e:
-            logger.error(f"[{self.operator}] Error fetching admin areas: {e}")
+            logger.exception(f"[{self.operator}] Error fetching admin areas: {e}")
         return []
 
     def get_region_faults(self, region_id: str) -> List[RawOutage]:
@@ -221,5 +221,5 @@ class EnghouseFetcher:
                             scraped_at=datetime.now(timezone.utc)
                         ))
         except Exception as e:
-            logger.error(f"[{self.operator}] Error fetching region faults: {e}")
+            logger.exception(f"[{self.operator}] Error fetching region faults: {e}")
         return outages

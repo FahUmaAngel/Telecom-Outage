@@ -78,7 +78,7 @@ class TeliaFetcher(EnghouseFetcher):
                     scraped_at=datetime.now()
                 ))
         except Exception as e:
-            logger.error(f"[Telia] Error fetching fixed: {e}")
+            logger.exception(f"[Telia] Error fetching fixed: {e}")
         return outages
 
 def scrape_telia_outages():
