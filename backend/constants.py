@@ -4,7 +4,6 @@ class OperatorName(str, Enum):
     TELIA = "telia"
     LYCAMOBILE = "lycamobile"
     TRE = "tre"
-    TELE2 = "tele2"
 
 class LocationType(str, Enum):
     LAN = "lan"

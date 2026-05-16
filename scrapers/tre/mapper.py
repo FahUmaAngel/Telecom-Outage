@@ -76,9 +76,17 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         
         context_text = f"{location} {desc_sv} {title_sv}"
         affected_services = classify_services(context_text)
-        
-        # Filter out 'voice' and 'data' as requested by user
-        affected_services = [s for s in affected_services if s not in [ServiceType.VOICE, ServiceType.MOBILE_DATA]]
+
+        # Keep only the standardized mobile-generation service enums used by the schema.
+        allowed_services = {
+            ServiceType.MOBILE_5G_PLUS,
+            ServiceType.MOBILE_5G,
+            ServiceType.MOBILE_4G,
+            ServiceType.MOBILE_3G,
+            ServiceType.MOBILE_2G,
+            ServiceType.MOBILE,
+        }
+        affected_services = [service for service in affected_services if service in allowed_services]
         
         inc_id = parsed_outage.get('id')
         
@@ -112,4 +120,9 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         return None
 
 def map_tre_outages(parsed_outages: List[Dict]) -> List[NormalizedOutage]:
-    return [map_to_normalized(p) for p in parsed_outages if map_to_normalized(p)]
+    normalized_outages = []
+    for parsed_outage in parsed_outages:
+        normalized = map_to_normalized(parsed_outage)
+        if normalized:
+            normalized_outages.append(normalized)
+    return normalized_outages

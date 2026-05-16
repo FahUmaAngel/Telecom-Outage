@@ -53,9 +53,8 @@ export default function PrestandaPage() {
 
     const getOperatorColor = (name) => {
         const n = name.toLowerCase();
-        if (n.includes('telia')) return '#A31FD0'; // Purple
+                if (n.includes('telia')) return '#A31FD0'; // Purple
         if (n.includes('tre')) return '#EB6F2A';   // Orange
-        if (n.includes('tele2')) return '#005BBB'; // Blue
         if (n.includes('telenor')) return '#0070b8'; // Telenor Blue
         if (n.includes('lyca')) return '#22C55E';  // Green
         return 'var(--accent-primary)';

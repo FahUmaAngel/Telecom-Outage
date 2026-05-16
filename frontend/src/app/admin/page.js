@@ -204,7 +204,7 @@ function ScraperHealth({ scrapers, lang }) {
         <section className="admin-section">
             <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
             <div className="scraper-grid">
-                {scrapers.filter(s => s.operator !== 'tele2').map((s) => {
+                {scrapers.map((s) => {
                     const isOnline = Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
                     return (
                     <div key={s.operator} className="premium-card scraper-card">
@@ -585,8 +585,7 @@ function OutageManagement({ outageMgr, lang }) {
                 </p>
                 <ul className="sharing-list">
                     <li><strong>Telia:</strong> Halebop, Fello</li>
-                    <li><strong>Tele2:</strong> Comviq (shares network with Telenor)</li>
-                    <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio</li>
+                    <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio, Comviq</li>
                     <li><strong>Tre:</strong> Hallon</li>
                 </ul>
             </div>

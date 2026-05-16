@@ -67,21 +67,6 @@ While Tre uses the same **Enghouse MIMCS** backend as Telia and Telenor (hosted 
 
 ---
 
-## 4. Tele2 (includes Comviq)
-
-### **Sources**
-- **Outage Map:** [https://www.tele2.se/driftstorning-mobilnatet](https://www.tele2.se/driftstorning-mobilnatet)
-
-### **Scraping Workflow**
-1.  **Address Probing:**
-    *   Uses **Playwright** to load the search-based map.
-    *   Iterates through a `tele2_seed_addresses.json` file (a curated list of major Swedish cities/areas).
-    *   Types each address into the search bar and triggers the lookup.
-    *   Analyzes the resulting page text/DOM for keywords like "störning" (disturbance) or "pågående" (ongoing).
-    *   Captures status details for specific localized areas.
-
----
-
 ## Technical Summary
 
 | Operator | Technology | Data Format | Method |
@@ -89,4 +74,3 @@ While Tre uses the same **Enghouse MIMCS** backend as Telia and Telenor (hosted 
 | **Telia** | Playwright / Requests | JSON / XML | API Interception / Direct API |
 | **Telenor** | Selenium / Requests | HTML / JSON | Desktop Simulation / Direct API |
 | **Tre** | BeautifulSoup | JSON (__NEXT_DATA__) | Static Page Parsing |
-| **Tele2** | Playwright | HTML Text | Address Lookup Probing |

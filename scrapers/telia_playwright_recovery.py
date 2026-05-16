@@ -3,6 +3,7 @@ import re
 import os
 import json
 import time
+import argparse
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 import sys
@@ -56,14 +57,20 @@ def trigger_date_navigation(page, target_date_str):
         page.wait_for_timeout(2000)
 
         date_input = page.locator("//input[@placeholder='Välj datum']").first
-        js_script = f"""
-            var el = arguments[0];
-            el.value = '{target_date_str}';
-            el.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            el.dispatchEvent(new Event('change', {{ bubbles: true }}));
-            if (window.jQuery) {{ window.jQuery(el).trigger('change'); }}
+        js_script = """
+            (params) => {
+                var el = params.el;
+                var dateStr = params.dateStr;
+                el.value = dateStr;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                if (window.jQuery) { window.jQuery(el).trigger('change'); }
+            }
         """
-        page.evaluate(js_script, date_input.element_handle())
+        page.evaluate(
+            js_script,
+            {"el": date_input.element_handle(), "dateStr": target_date_str},
+        )
         date_input.press("Enter")
         page.wait_for_timeout(5000)
         return True
@@ -71,7 +78,7 @@ def trigger_date_navigation(page, target_date_str):
         logger.warning(f"Nav fail: {e}")
         return False
 
-def run_recovery():
+def run_recovery(start_date: datetime, end_date: datetime):
     db = SessionLocal()
     try:
         with sync_playwright() as p:
@@ -81,9 +88,8 @@ def run_recovery():
             captured = []
             page.on("response", lambda r: handle_recovery_response(r, captured))
 
-            current = datetime(2026, 4, 18)
-            end = datetime(2026, 4, 21)
-            while current <= end:
+            current = start_date
+            while current <= end_date:
                 date_str = current.strftime("%Y-%m-%d")
                 logger.info(f"Recovering {date_str}...")
                 page.goto(COVERAGE_PORTAL_URL, wait_until="networkidle")
@@ -144,5 +150,15 @@ def process_incidents(db, items, target_date_str):
     db.commit()
     logger.info(f"Saved {count} incidents for {target_date_str}")
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Recover Telia historical incidents for a date range.")
+    parser.add_argument("--start-date", required=True, help="Start date in YYYY-MM-DD format")
+    parser.add_argument("--end-date", required=True, help="End date in YYYY-MM-DD format")
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    run_recovery()
+    args = parse_args()
+    run_recovery(
+        start_date=datetime.strptime(args.start_date, "%Y-%m-%d"),
+        end_date=datetime.strptime(args.end_date, "%Y-%m-%d"),
+    )
