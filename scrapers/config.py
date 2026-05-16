@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/telecom_outage"
     SCRAPER_INTERVAL_MINUTES: int = 5
     LOG_LEVEL: str = "INFO"
+    ENABLE_SCHEDULER: bool = True
     SECRET_KEY: Optional[str] = None
     ALLOWED_ORIGINS: Optional[str] = None
     APP_ENV: str = "development"

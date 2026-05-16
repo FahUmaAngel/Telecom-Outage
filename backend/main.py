@@ -14,7 +14,6 @@ import logging
 # Add project root to path for scraper imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from scrapers.run import run_scrapers
 from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import auto_resolve_expired_outages
@@ -61,7 +60,8 @@ def scraper_job():
     try:
         logger.info("Running scheduled scraper job...")
         
-        # 1. Run Scrapers
+        # 1. Run Scrapers (lazy import so API can start without scraper deps)
+        from scrapers.run import run_scrapers
         run_scrapers()
         
         # 2. Auto-resolve expired outages
@@ -84,20 +84,23 @@ async def lifespan(app: FastAPI):
 
     ensure_default_admin()
     
-    # Startup: Start the scheduler
-    scheduler = AsyncIOScheduler()
-    
-    # Add scraper job (interval from settings, now set to 60 minutes)
-    scheduler.add_job(
-        scraper_job,
-        'interval',
-        minutes=settings.SCRAPER_INTERVAL_MINUTES,
-        id='scraper_job',
-        max_instances=1
-    )
-    
-    scheduler.start()
-    logger.info(f"✓ Background scheduler started - Scrapers run every {settings.SCRAPER_INTERVAL_MINUTES} minutes")
+    if getattr(settings, "ENABLE_SCHEDULER", True):
+        # Startup: Start the scheduler
+        scheduler = AsyncIOScheduler()
+        
+        # Add scraper job (interval from settings, now set to 60 minutes)
+        scheduler.add_job(
+            scraper_job,
+            'interval',
+            minutes=settings.SCRAPER_INTERVAL_MINUTES,
+            id='scraper_job',
+            max_instances=1
+        )
+        
+        scheduler.start()
+        logger.info(f"✓ Background scheduler started - Scrapers run every {settings.SCRAPER_INTERVAL_MINUTES} minutes")
+    else:
+        logger.info("Background scheduler disabled (ENABLE_SCHEDULER=false)")
     
     yield
     
