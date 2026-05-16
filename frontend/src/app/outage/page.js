@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "../../context/LanguageContext";
 import { api } from "../../lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { AlertCircle, ChevronLeft } from "lucide-react";
 
@@ -46,7 +46,7 @@ const ErrorState = ({ message, onBack, lang }) => (
     </div>
 );
 
-export default function OutageDetailByQueryPage() {
+function OutageDetailContent() {
     const { lang } = useLanguage();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -133,6 +133,14 @@ export default function OutageDetailByQueryPage() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function OutageDetailByQueryPage() {
+    return (
+        <Suspense fallback={<LoadingState />}>
+            <OutageDetailContent />
+        </Suspense>
     );
 }
 
