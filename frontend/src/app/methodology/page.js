@@ -148,6 +148,78 @@ export default function MethodologyPage() {
                 </div>
             </section>
 
+            {/* Architecture Diagram */}
+            <section className="section">
+                <h2 className="section-title">{t("Systemarkitektur", "System Architecture")}</h2>
+                <div className="arch-card">
+                    <div className="arch-diagram">
+                        {/* Layer 1: Sources */}
+                        <div className="arch-layer">
+                            <div className="arch-layer-label">{t("Datakällor", "Data Sources")}</div>
+                            <div className="arch-nodes">
+                                <div className="arch-node node-source">Telia<br/><span className="node-sub">Playwright</span></div>
+                                <div className="arch-node node-source">Telenor<br/><span className="node-sub">Selenium</span></div>
+                            </div>
+                        </div>
+
+                        <div className="arch-arrow-row">
+                            <div className="arch-arrow">↓</div>
+                            <div className="arch-arrow-label">HTTP scrape / parse HTML</div>
+                        </div>
+
+                        {/* Layer 2: Scraper */}
+                        <div className="arch-layer">
+                            <div className="arch-layer-label">{t("Skrapningslager", "Scraper Layer")}</div>
+                            <div className="arch-nodes">
+                                <div className="arch-node node-scraper">scrapers/run.py<br/><span className="node-sub">Scheduler (5 min)</span></div>
+                            </div>
+                        </div>
+
+                        <div className="arch-arrow-row">
+                            <div className="arch-arrow">↓</div>
+                            <div className="arch-arrow-label">SQLAlchemy ORM</div>
+                        </div>
+
+                        {/* Layer 3: Storage */}
+                        <div className="arch-layer">
+                            <div className="arch-layer-label">{t("Lagring", "Storage")}</div>
+                            <div className="arch-nodes">
+                                <div className="arch-node node-db">SQLite<br/><span className="node-sub">Outage · Operator · Region</span></div>
+                            </div>
+                        </div>
+
+                        <div className="arch-arrow-row">
+                            <div className="arch-arrow">↓</div>
+                            <div className="arch-arrow-label">FastAPI + SQLAlchemy</div>
+                        </div>
+
+                        {/* Layer 4: API */}
+                        <div className="arch-layer">
+                            <div className="arch-layer-label">{t("API-lager", "API Layer")}</div>
+                            <div className="arch-nodes">
+                                <div className="arch-node node-api">REST API<br/><span className="node-sub">/api/v1/research/*</span></div>
+                                <div className="arch-node node-api">numpy · scipy<br/><span className="node-sub">Statistical computation</span></div>
+                            </div>
+                        </div>
+
+                        <div className="arch-arrow-row">
+                            <div className="arch-arrow">↓</div>
+                            <div className="arch-arrow-label">JSON / fetch()</div>
+                        </div>
+
+                        {/* Layer 5: Frontend */}
+                        <div className="arch-layer">
+                            <div className="arch-layer-label">{t("Presentationslager", "Presentation Layer")}</div>
+                            <div className="arch-nodes">
+                                <div className="arch-node node-ui">/statistics<br/><span className="node-sub">MTTR · Kruskal-Wallis</span></div>
+                                <div className="arch-node node-ui">/sla-compliance<br/><span className="node-sub">ITU-T · ETSI · PTS</span></div>
+                                <div className="arch-node node-ui">/value-score<br/><span className="node-sub">CVS Ranking</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* SLA Thresholds table */}
             <section className="section">
                 <h2 className="section-title">{t("SLA-tröskelvärden (timmar)", "SLA Thresholds (hours)")}</h2>
@@ -284,6 +356,21 @@ export default function MethodologyPage() {
                 .ref-title { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; }
                 .ref-use { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-top: 2px; }
                 .ref-use-label { font-weight: 700; color: var(--text-muted); }
+                .arch-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 28px 20px; }
+                .arch-diagram { display: flex; flex-direction: column; align-items: center; gap: 0; }
+                .arch-layer { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+                .arch-layer-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); opacity: 0.6; }
+                .arch-nodes { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+                .arch-node { padding: 10px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-align: center; line-height: 1.5; min-width: 140px; }
+                .node-sub { display: block; font-size: 0.68rem; font-weight: 500; opacity: 0.75; margin-top: 2px; }
+                .node-source { background: rgba(163,31,208,0.1); border: 1px solid rgba(163,31,208,0.3); color: #A31FD0; }
+                .node-scraper { background: rgba(235,111,42,0.1); border: 1px solid rgba(235,111,42,0.3); color: #EB6F2A; }
+                .node-db { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: var(--status-warning); }
+                .node-api { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); color: var(--accent-primary); }
+                .node-ui { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3); color: var(--status-success); }
+                .arch-arrow-row { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; }
+                .arch-arrow { font-size: 1.2rem; color: var(--text-muted); opacity: 0.5; line-height: 1; }
+                .arch-arrow-label { font-size: 0.68rem; color: var(--text-muted); opacity: 0.6; font-family: monospace; }
             `}</style>
         </div>
     );

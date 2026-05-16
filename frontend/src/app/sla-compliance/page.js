@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
-import { ChevronDown, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { ChevronDown, CheckCircle2, XCircle, AlertCircle, Download } from "lucide-react";
+import { downloadCsv } from "../../lib/exportCsv";
+import PropTypes from "prop-types";
 
 const OPERATOR_COLORS = {
     telia: "#A31FD0",
@@ -29,6 +31,221 @@ const BENCHMARK_DESC = {
     "PTSFS_2014:1": "Swedish PTS: Critical ≤1h · Major ≤24h · Minor ≤96h",
 };
 
+function OperatorCard({ r, lang }) {
+    const rate = r.compliance_rate_pct.toFixed(1);
+    const color = getOpColor(r.operator_name);
+    const compliant = r.compliance_rate_pct >= 70;
+    const sevEntries = Object.entries(r.by_severity || {});
+    return (
+        <div className="op-card">
+            <div className="op-card-header">
+                <span className="op-badge" style={{ background: color }}>{r.operator_name.toUpperCase()}</span>
+                {compliant
+                    ? <span className="badge-ok"><CheckCircle2 size={13} /> {lang === "sv" ? "Uppfyller" : "Compliant"}</span>
+                    : <span className="badge-fail"><XCircle size={13} /> {lang === "sv" ? "Uppfyller ej" : "Non-compliant"}</span>
+                }
+            </div>
+            <div className="compliance-bar-wrap">
+                <div className="compliance-bar-track">
+                    <div className="compliance-bar-fill" style={{ width: `${rate}%`, background: color }} />
+                    <div className="threshold-line" />
+                </div>
+                <span className="compliance-pct">{rate}%</span>
+            </div>
+            <table className="severity-table">
+                <thead>
+                    <tr>
+                        <th>{lang === "sv" ? "Allvarlighet" : "Severity"}</th>
+                        <th>{lang === "sv" ? "Tröskel" : "Threshold"}</th>
+                        <th>N</th>
+                        <th>{lang === "sv" ? "Medel MTTR" : "Avg MTTR"}</th>
+                        <th>%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {sevEntries.map(([sevKey, sv]) => (
+                        <tr key={sevKey}>
+                            <td><span className={`sev-pill sev-${sevKey}`}>{sevKey}</span></td>
+                            <td className="mono">≤{sv.threshold_hours}h</td>
+                            <td className="mono">{sv.incidents}</td>
+                            <td className="mono">{sv.actual_mean_hours?.toFixed(1)}h</td>
+                            <td style={{ color: sv.compliance_pct >= 70 ? "var(--status-success)" : "var(--status-error)", fontWeight: 700 }}>
+                                {sv.compliance_pct?.toFixed(0)}%
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <div className="op-meta">
+                <span>N={r.total_incidents} {lang === "sv" ? "händelser" : "incidents"}</span>
+                <span>{lang === "sv" ? "Uppfyllda" : "Compliant"}: {r.compliant_count} / {r.total_incidents}</span>
+            </div>
+        </div>
+    );
+}
+OperatorCard.propTypes = {
+    r: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function ComparisonTable({ results, lang }) {
+    return (
+        <div className="table-card">
+            <table className="stats-table">
+                <thead>
+                    <tr>
+                        <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
+                        <th>{lang === "sv" ? "Efterlevnad" : "Compliance"}</th>
+                        <th>{lang === "sv" ? "Händelser" : "Incidents"}</th>
+                        <th>{lang === "sv" ? "Uppfyllda" : "Compliant"}</th>
+                        <th>High</th><th>Medium</th><th>Low</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {[...results].sort((a, b) => b.compliance_rate_pct - a.compliance_rate_pct).map(r => {
+                        const bySev = r.by_severity || {};
+                        return (
+                            <tr key={r.operator_name}>
+                                <td><span className="op-badge" style={{ background: getOpColor(r.operator_name) }}>{r.operator_name.toUpperCase()}</span></td>
+                                <td style={{ fontWeight: 700, color: r.compliance_rate_pct >= 70 ? "var(--status-success)" : "var(--status-error)" }}>
+                                    {r.compliance_rate_pct.toFixed(1)}%
+                                </td>
+                                <td>{r.total_incidents}</td>
+                                <td>{r.compliant_count} / {r.total_incidents}</td>
+                                {["high", "medium", "low"].map(sev => (
+                                    <td key={sev} className="mono">
+                                        {bySev[sev] ? `${bySev[sev].compliance_pct?.toFixed(0)}%` : "—"}
+                                    </td>
+                                ))}
+                                <td>
+                                    {r.compliance_rate_pct >= 70
+                                        ? <CheckCircle2 size={16} color="var(--status-success)" />
+                                        : <XCircle size={16} color="var(--status-error)" />
+                                    }
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+ComparisonTable.propTypes = {
+    results: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function PageFilters({ days, setDays, benchmark, setBenchmark, onExport, hasData, lang }) {
+    return (
+        <div className="filters-row">
+            <div className="premium-filter">
+                <label htmlFor="sla-period">PERIOD</label>
+                <div className="select-wrapper">
+                    <select id="sla-period" value={days} onChange={(e) => setDays(e.target.value)}>
+                        <option value="30">30 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="90">90 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="180">180 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="365">365 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="730">730 {lang === "sv" ? "dagar" : "days"}</option>
+                    </select>
+                    <ChevronDown size={14} className="select-icon" />
+                </div>
+            </div>
+            <div className="premium-filter">
+                <label htmlFor="sla-standard">STANDARD</label>
+                <div className="select-wrapper">
+                    <select id="sla-standard" value={benchmark} onChange={(e) => setBenchmark(e.target.value)}>
+                        {BENCHMARKS.map(b => <option key={b} value={b}>{BENCHMARK_LABELS[b]}</option>)}
+                    </select>
+                    <ChevronDown size={14} className="select-icon" />
+                </div>
+            </div>
+            <div className="premium-filter">
+                <label>{lang === "sv" ? "EXPORTERA" : "EXPORT"}</label>
+                <button className="export-btn" onClick={onExport} disabled={!hasData}>
+                    <Download size={13} /> CSV
+                </button>
+            </div>
+        </div>
+    );
+}
+PageFilters.propTypes = {
+    days: PropTypes.string.isRequired,
+    setDays: PropTypes.func.isRequired,
+    benchmark: PropTypes.string.isRequired,
+    setBenchmark: PropTypes.func.isRequired,
+    onExport: PropTypes.func.isRequired,
+    hasData: PropTypes.bool.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function ResultsPanel({ results, overallCompliance, benchmark, lang }) {
+    return (
+        <>
+            <div className="kpi-row">
+                <div className="kpi-card">
+                    <span className="kpi-label">{lang === "sv" ? "Genomsnittlig efterlevnad" : "Avg Compliance"}</span>
+                    <span className="kpi-value" style={{ color: Number(overallCompliance) >= 70 ? "var(--status-success)" : "var(--status-error)" }}>
+                        {overallCompliance}%
+                    </span>
+                </div>
+                <div className="kpi-card">
+                    <span className="kpi-label">Standard</span>
+                    <span className="kpi-value kpi-value--sm">{BENCHMARK_LABELS[benchmark]}</span>
+                </div>
+                <div className="kpi-card">
+                    <span className="kpi-label">{lang === "sv" ? "Operatörer" : "Operators"}</span>
+                    <span className="kpi-value">{results.length}</span>
+                </div>
+            </div>
+            <section className="section">
+                <h2 className="section-title">{lang === "sv" ? "Efterlevnad per operatör" : "Compliance per Operator"}</h2>
+                <div className="operator-grid">
+                    {results.map(r => <OperatorCard key={r.operator_name} r={r} lang={lang} />)}
+                </div>
+            </section>
+            <section className="section">
+                <h2 className="section-title">{lang === "sv" ? "Jämförelsetabell" : "Comparison Table"}</h2>
+                <ComparisonTable results={results} lang={lang} />
+            </section>
+        </>
+    );
+}
+ResultsPanel.propTypes = {
+    results: PropTypes.arrayOf(PropTypes.object).isRequired,
+    overallCompliance: PropTypes.string,
+    benchmark: PropTypes.string.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function buildExportRows(results, benchmark, days) {
+    return results.map(r => ({
+        operator: r.operator_name,
+        compliance_pct: r.compliance_rate_pct.toFixed(1),
+        total_incidents: r.total_incidents,
+        compliant_count: r.compliant_count,
+        high_pct: r.by_severity?.high?.compliance_pct?.toFixed(0) ?? "",
+        medium_pct: r.by_severity?.medium?.compliance_pct?.toFixed(0) ?? "",
+        low_pct: r.by_severity?.low?.compliance_pct?.toFixed(0) ?? "",
+        benchmark,
+        days,
+    }));
+}
+
+async function fetchSlaData(days, benchmark, setResults, setLoading) {
+    setLoading(true);
+    try {
+        const data = await api.research.slaCompliance({ days: Number.parseInt(days), benchmark });
+        setResults(Array.isArray(data) ? data : []);
+    } catch (err) {
+        console.error("SLA fetch failed:", err);
+    } finally {
+        setLoading(false);
+    }
+}
+
 export default function SLACompliancePage() {
     const { lang } = useLanguage();
     const [results, setResults] = useState([]);
@@ -36,26 +253,30 @@ export default function SLACompliancePage() {
     const [days, setDays] = useState("365");
     const [benchmark, setBenchmark] = useState("ITU-T_E.800");
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const data = await api.research.slaCompliance({
-                days: Number.parseInt(days),
-                benchmark,
-            });
-            setResults(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error("SLA fetch failed:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [days, benchmark]);
+    const fetchData = useCallback(
+        () => fetchSlaData(days, benchmark, setResults, setLoading),
+        [days, benchmark]
+    );
 
     useEffect(() => { fetchData(); }, [fetchData]);
+
+    const handleExport = () => downloadCsv(
+        `sla-compliance-${benchmark}-${days}d.csv`,
+        buildExportRows(results, benchmark, days)
+    );
 
     const overallCompliance = results.length > 0
         ? (results.reduce((s, r) => s + r.compliance_rate_pct, 0) / results.length).toFixed(1)
         : null;
+
+    let mainContent;
+    if (loading) {
+        mainContent = <div className="loading-container"><div className="spinner" /></div>;
+    } else if (results.length === 0) {
+        mainContent = <div className="empty-state">{lang === "sv" ? "Ingen data tillgänglig." : "No data available."}</div>;
+    } else {
+        mainContent = <ResultsPanel results={results} overallCompliance={overallCompliance} benchmark={benchmark} lang={lang} />;
+    }
 
     return (
         <div className="page-container animate-fade-in">
@@ -70,32 +291,12 @@ export default function SLACompliancePage() {
                             : "Comparison against international standards — ITU-T E.800, ETSI, PTS"}
                     </p>
                 </div>
-                <div className="filters-row">
-                    <div className="premium-filter">
-                        <label>PERIOD</label>
-                        <div className="select-wrapper">
-                            <select value={days} onChange={(e) => setDays(e.target.value)}>
-                                <option value="30">30 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="90">90 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="180">180 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="365">365 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="730">730 {lang === "sv" ? "dagar" : "days"}</option>
-                            </select>
-                            <ChevronDown size={14} className="select-icon" />
-                        </div>
-                    </div>
-                    <div className="premium-filter">
-                        <label>STANDARD</label>
-                        <div className="select-wrapper">
-                            <select value={benchmark} onChange={(e) => setBenchmark(e.target.value)}>
-                                {BENCHMARKS.map(b => (
-                                    <option key={b} value={b}>{BENCHMARK_LABELS[b]}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={14} className="select-icon" />
-                        </div>
-                    </div>
-                </div>
+                <PageFilters
+                    days={days} setDays={setDays}
+                    benchmark={benchmark} setBenchmark={setBenchmark}
+                    onExport={handleExport} hasData={results.length > 0}
+                    lang={lang}
+                />
             </header>
 
             <div className="benchmark-banner">
@@ -103,153 +304,9 @@ export default function SLACompliancePage() {
                 <span>{BENCHMARK_DESC[benchmark]}</span>
             </div>
 
-            {loading ? (
-                <div className="loading-container"><div className="spinner" /></div>
-            ) : results.length === 0 ? (
-                <div className="empty-state">
-                    {lang === "sv" ? "Ingen data tillgänglig." : "No data available."}
-                </div>
-            ) : (
-                <>
-                    <div className="kpi-row">
-                        <div className="kpi-card">
-                            <span className="kpi-label">
-                                {lang === "sv" ? "Genomsnittlig efterlevnad" : "Avg Compliance"}
-                            </span>
-                            <span className="kpi-value" style={{ color: Number(overallCompliance) >= 70 ? "var(--status-success)" : "var(--status-error)" }}>
-                                {overallCompliance}%
-                            </span>
-                        </div>
-                        <div className="kpi-card">
-                            <span className="kpi-label">{lang === "sv" ? "Standard" : "Standard"}</span>
-                            <span className="kpi-value kpi-value--sm">{BENCHMARK_LABELS[benchmark]}</span>
-                        </div>
-                        <div className="kpi-card">
-                            <span className="kpi-label">{lang === "sv" ? "Operatörer" : "Operators"}</span>
-                            <span className="kpi-value">{results.length}</span>
-                        </div>
-                    </div>
+            {mainContent}
 
-                    <section className="section">
-                        <h2 className="section-title">
-                            {lang === "sv" ? "Efterlevnad per operatör" : "Compliance per Operator"}
-                        </h2>
-                        <div className="operator-grid">
-                            {results.map(r => {
-                                const rate = r.compliance_rate_pct.toFixed(1);
-                                const color = getOpColor(r.operator_name);
-                                const compliant = r.compliance_rate_pct >= 70;
-                                const sevEntries = Object.entries(r.by_severity || {});
-                                return (
-                                    <div key={r.operator_name} className="op-card">
-                                        <div className="op-card-header">
-                                            <span className="op-badge" style={{ background: color }}>
-                                                {r.operator_name.toUpperCase()}
-                                            </span>
-                                            {compliant
-                                                ? <span className="badge-ok"><CheckCircle2 size={13} /> {lang === "sv" ? "Uppfyller" : "Compliant"}</span>
-                                                : <span className="badge-fail"><XCircle size={13} /> {lang === "sv" ? "Uppfyller ej" : "Non-compliant"}</span>
-                                            }
-                                        </div>
-
-                                        <div className="compliance-bar-wrap">
-                                            <div className="compliance-bar-track">
-                                                <div className="compliance-bar-fill" style={{ width: `${rate}%`, background: color }} />
-                                                <div className="threshold-line" />
-                                            </div>
-                                            <span className="compliance-pct">{rate}%</span>
-                                        </div>
-
-                                        <table className="severity-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>{lang === "sv" ? "Allvarlighet" : "Severity"}</th>
-                                                    <th>{lang === "sv" ? "Tröskel" : "Threshold"}</th>
-                                                    <th>N</th>
-                                                    <th>{lang === "sv" ? "Medel MTTR" : "Avg MTTR"}</th>
-                                                    <th>%</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {sevEntries.map(([sevKey, sv]) => (
-                                                    <tr key={sevKey}>
-                                                        <td><span className={`sev-pill sev-${sevKey}`}>{sevKey}</span></td>
-                                                        <td className="mono">≤{sv.threshold_hours}h</td>
-                                                        <td className="mono">{sv.incidents}</td>
-                                                        <td className="mono">{sv.actual_mean_hours?.toFixed(1)}h</td>
-                                                        <td style={{ color: sv.compliance_pct >= 70 ? "var(--status-success)" : "var(--status-error)", fontWeight: 700 }}>
-                                                            {sv.compliance_pct?.toFixed(0)}%
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-
-                                        <div className="op-meta">
-                                            <span>N={r.total_incidents} {lang === "sv" ? "händelser" : "incidents"}</span>
-                                            <span>{lang === "sv" ? "Uppfyllda" : "Compliant"}: {r.compliant_count} / {r.total_incidents}</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-                    <section className="section">
-                        <h2 className="section-title">
-                            {lang === "sv" ? "Jämförelsetabell" : "Comparison Table"}
-                        </h2>
-                        <div className="table-card">
-                            <table className="stats-table">
-                                <thead>
-                                    <tr>
-                                        <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                        <th>{lang === "sv" ? "Efterlevnad" : "Compliance"}</th>
-                                        <th>{lang === "sv" ? "Händelser" : "Incidents"}</th>
-                                        <th>{lang === "sv" ? "Uppfyllda" : "Compliant"}</th>
-                                        <th>High</th>
-                                        <th>Medium</th>
-                                        <th>Low</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {[...results].sort((a, b) => b.compliance_rate_pct - a.compliance_rate_pct).map(r => {
-                                        const bySev = r.by_severity || {};
-                                        return (
-                                            <tr key={r.operator_name}>
-                                                <td>
-                                                    <span className="op-badge" style={{ background: getOpColor(r.operator_name) }}>
-                                                        {r.operator_name.toUpperCase()}
-                                                    </span>
-                                                </td>
-                                                <td style={{ fontWeight: 700, color: r.compliance_rate_pct >= 70 ? "var(--status-success)" : "var(--status-error)" }}>
-                                                    {r.compliance_rate_pct.toFixed(1)}%
-                                                </td>
-                                                <td>{r.total_incidents}</td>
-                                                <td>{r.compliant_count} / {r.total_incidents}</td>
-                                                {["high", "medium", "low"].map(sev => (
-                                                    <td key={sev} className="mono">
-                                                        {bySev[sev] ? `${bySev[sev].compliance_pct?.toFixed(0)}%` : "—"}
-                                                    </td>
-                                                ))}
-                                                <td>
-                                                    {r.compliance_rate_pct >= 70
-                                                        ? <CheckCircle2 size={16} color="var(--status-success)" />
-                                                        : <XCircle size={16} color="var(--status-error)" />
-                                                    }
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            <style jsx>{`
+            <style jsx global>{`
                 .page-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
                 .page-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
                 .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
@@ -295,7 +352,7 @@ export default function SLACompliancePage() {
                 .stats-table tr:last-child td { border-bottom: none; }
                 .mono { font-family: monospace; }
                 .loading-container { display: flex; justify-content: center; align-items: center; min-height: 300px; }
-                .empty-state { text-align: center; color: var(--text-muted); padding: 60px 0; font-size: 0.9rem; }
+                .empty-state { text-align: center; color: var(--text-muted); padding: 60px 16px; font-size: 0.9rem; }
             `}</style>
         </div>
     );

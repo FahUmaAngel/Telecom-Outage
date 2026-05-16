@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
+import { downloadCsv } from "../../lib/exportCsv";
+import PropTypes from "prop-types";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 
 const OPERATOR_COLORS = {
@@ -55,6 +57,149 @@ const CompCell = ({ compMap, metricKey }) => {
         </td>
     );
 };
+CompCell.propTypes = {
+    compMap: PropTypes.object.isRequired,
+    metricKey: PropTypes.string.isRequired,
+};
+
+function RankingSection({ ranked, lang }) {
+    return (
+        <section className="section">
+            <h2 className="section-title">{lang === "sv" ? "CVS-ranking" : "CVS Ranking"}</h2>
+            <div className="rank-grid">
+                {ranked.map((s, i) => {
+                    const color = getOpColor(s.operator_name);
+                    const pct = s.composite_score.toFixed(1);
+                    return (
+                        <div key={s.operator_name} className={`rank-card${i === 0 ? " rank-first" : ""}`}>
+                            <div className="rank-medal">{RANK_MEDALS[i] || `${i + 1}.`}</div>
+                            <div className="rank-op-badge" style={{ background: color }}>{s.operator_name.toUpperCase()}</div>
+                            <div className="rank-score" style={{ color }}>{pct}<span className="rank-score-unit">/100</span></div>
+                            <div className="rank-bar-track">
+                                <div className="rank-bar-fill" style={{ width: `${pct}%`, background: color }} />
+                            </div>
+                            <div className="rank-meta">{s.interpretation}</div>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+RankingSection.propTypes = {
+    ranked: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function BreakdownTable({ ranked, lang }) {
+    return (
+        <section className="section">
+            <h2 className="section-title">{lang === "sv" ? "Komponentnedbrytning" : "Component Breakdown"}</h2>
+            <div className="table-card">
+                <table className="stats-table">
+                    <thead>
+                        <tr>
+                            <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
+                            <th>CVS</th>
+                            {Object.entries(CVS_WEIGHT_LABELS).map(([k, v]) => (
+                                <th key={k}>{lang === "sv" ? v.sv : v.en}<span className="weight-chip">{v.weight}</span></th>
+                            ))}
+                            <th>{lang === "sv" ? "Placering" : "Rank"}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ranked.map((s, i) => {
+                            const compMap = Object.fromEntries((s.components || []).map(c => [c.metric, c]));
+                            return (
+                                <tr key={s.operator_name}>
+                                    <td>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <span>{RANK_MEDALS[i]}</span>
+                                            <span className="op-badge" style={{ background: getOpColor(s.operator_name) }}>{s.operator_name.toUpperCase()}</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ fontWeight: 800, color: getOpColor(s.operator_name), fontFamily: "monospace" }}>
+                                        {s.composite_score.toFixed(1)}%
+                                    </td>
+                                    {Object.keys(CVS_WEIGHT_LABELS).map(k => (
+                                        <CompCell key={k} compMap={compMap} metricKey={k} />
+                                    ))}
+                                    <td>#{s.rank}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    );
+}
+BreakdownTable.propTypes = {
+    ranked: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function VSFilters({ days, setDays, onExport, hasData, lang }) {
+    return (
+        <div className="filters-row">
+            <div className="premium-filter">
+                <label htmlFor="period-vs">PERIOD</label>
+                <div className="select-wrapper">
+                    <select id="period-vs" value={days} onChange={(e) => setDays(e.target.value)}>
+                        <option value="30">30 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="90">90 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="180">180 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="365">365 {lang === "sv" ? "dagar" : "days"}</option>
+                        <option value="730">730 {lang === "sv" ? "dagar" : "days"}</option>
+                    </select>
+                    <ChevronDown size={14} className="select-icon" />
+                </div>
+            </div>
+            <div className="premium-filter">
+                <label>{lang === "sv" ? "EXPORTERA" : "EXPORT"}</label>
+                <button className="export-btn" onClick={onExport} disabled={!hasData}>
+                    <Download size={13} /> CSV
+                </button>
+            </div>
+        </div>
+    );
+}
+VSFilters.propTypes = {
+    days: PropTypes.string.isRequired,
+    setDays: PropTypes.func.isRequired,
+    onExport: PropTypes.func.isRequired,
+    hasData: PropTypes.bool.isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+async function fetchValueScoreData(days, setScores, setLoading) {
+    setLoading(true);
+    try {
+        const data = await api.research.valueScore({ days: Number.parseInt(days) });
+        setScores(Array.isArray(data) ? data : []);
+    } catch (err) {
+        console.error("ValueScore fetch failed:", err);
+    } finally {
+        setLoading(false);
+    }
+}
+
+function buildVsExportRows(ranked, days) {
+    return ranked.map((s, i) => {
+        const compMap = Object.fromEntries((s.components || []).map(c => [c.metric, c]));
+        return {
+            rank: i + 1,
+            operator: s.operator_name,
+            cvs: s.composite_score.toFixed(2),
+            mttr_score: compMap.mttr?.normalized_score?.toFixed(1) ?? "",
+            frequency_score: compMap.frequency?.normalized_score?.toFixed(1) ?? "",
+            downtime_score: compMap.downtime?.normalized_score?.toFixed(1) ?? "",
+            coverage_score: compMap.service_coverage?.normalized_score?.toFixed(1) ?? "",
+            sla_score: compMap.sla_compliance?.normalized_score?.toFixed(1) ?? "",
+            days,
+        };
+    });
+}
 
 export default function ValueScorePage() {
     const { lang } = useLanguage();
@@ -62,23 +207,64 @@ export default function ValueScorePage() {
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState("365");
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const data = await api.research.valueScore({ days: Number.parseInt(days) });
-            setScores(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error("ValueScore fetch failed:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [days]);
+    const fetchData = useCallback(
+        () => fetchValueScoreData(days, setScores, setLoading),
+        [days]
+    );
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
     const ranked = [...scores].sort((a, b) => b.composite_score - a.composite_score);
     const radarData = buildRadarData(ranked, lang);
     const barData = buildBarData(ranked);
+
+    const handleExport = () => downloadCsv(`value-score-${days}d.csv`, buildVsExportRows(ranked, days));
+
+    let pageContent;
+    if (loading) {
+        pageContent = <div className="loading-container"><div className="spinner" /></div>;
+    } else if (scores.length === 0) {
+        pageContent = <div className="empty-state">{lang === "sv" ? "Ingen data tillgänglig." : "No data available."}</div>;
+    } else {
+        pageContent = (
+            <>
+                <RankingSection ranked={ranked} lang={lang} />
+                <section className="section">
+                    <h2 className="section-title">{lang === "sv" ? "CVS-jämförelse" : "CVS Comparison"}</h2>
+                    <div className="chart-card">
+                        <ResponsiveContainer width="100%" height={280}>
+                            <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                                <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
+                                <YAxis domain={[0, 100]} tick={{ fill: "var(--text-secondary)", fontSize: 12 }} unit="%" />
+                                <Tooltip contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8 }} formatter={(v) => [`${v}%`, "CVS"]} />
+                                <Bar dataKey="CVS" fill="var(--accent-primary)" radius={[4, 4, 0, 0]} label={{ position: "top", fontSize: 11, fill: "var(--text-secondary)", formatter: (v) => `${v}%` }} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </section>
+                {ranked.length > 1 && (
+                    <section className="section">
+                        <h2 className="section-title">{lang === "sv" ? "Komponentjämförelse (radar)" : "Component Comparison (radar)"}</h2>
+                        <div className="chart-card">
+                            <ResponsiveContainer width="100%" height={320}>
+                                <RadarChart data={radarData}>
+                                    <PolarGrid stroke="var(--border-color)" />
+                                    <PolarAngleAxis dataKey="component" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
+                                    <Tooltip contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8, fontSize: 12 }} />
+                                    {ranked.map(s => (
+                                        <Radar key={s.operator_name} name={s.operator_name.toUpperCase()} dataKey={s.operator_name} stroke={getOpColor(s.operator_name)} fill={getOpColor(s.operator_name)} fillOpacity={0.08} strokeWidth={2} />
+                                    ))}
+                                    <Legend />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </section>
+                )}
+                <BreakdownTable ranked={ranked} lang={lang} />
+            </>
+        );
+    }
 
     return (
         <div className="page-container animate-fade-in">
@@ -93,169 +279,18 @@ export default function ValueScorePage() {
                             : "Composite CVS ranking based on MTTR, frequency, downtime, coverage, and SLA"}
                     </p>
                 </div>
-                <div className="filters-row">
-                    <div className="premium-filter">
-                        <label>PERIOD</label>
-                        <div className="select-wrapper">
-                            <select value={days} onChange={(e) => setDays(e.target.value)}>
-                                <option value="30">30 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="90">90 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="180">180 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="365">365 {lang === "sv" ? "dagar" : "days"}</option>
-                                <option value="730">730 {lang === "sv" ? "dagar" : "days"}</option>
-                            </select>
-                            <ChevronDown size={14} className="select-icon" />
-                        </div>
-                    </div>
-                </div>
+                <VSFilters days={days} setDays={setDays} onExport={handleExport} hasData={ranked.length > 0} lang={lang} />
             </header>
-
             <div className="methodology-note">
                 <strong>CVS = </strong>
                 {Object.entries(CVS_WEIGHT_LABELS).map(([k, v]) => (
                     <span key={k}>{v.weight} × {lang === "sv" ? v.sv : v.en}{" "}</span>
                 ))}
-                <span className="note-cite">
-                    — Soldani et al. (2006) · ITU-T G.1011 (2015)
-                </span>
+                <span className="note-cite">— Soldani et al. (2006) · ITU-T G.1011 (2015)</span>
             </div>
+            {pageContent}
 
-            {loading ? (
-                <div className="loading-container"><div className="spinner" /></div>
-            ) : scores.length === 0 ? (
-                <div className="empty-state">
-                    {lang === "sv" ? "Ingen data tillgänglig." : "No data available."}
-                </div>
-            ) : (
-                <>
-                    <section className="section">
-                        <h2 className="section-title">
-                            {lang === "sv" ? "CVS-ranking" : "CVS Ranking"}
-                        </h2>
-                        <div className="rank-grid">
-                            {ranked.map((s, i) => {
-                                const color = getOpColor(s.operator_name);
-                                const pct = s.composite_score.toFixed(1);
-                                return (
-                                    <div key={s.operator_name} className={`rank-card${i === 0 ? " rank-first" : ""}`}>
-                                        <div className="rank-medal">{RANK_MEDALS[i] || `${i + 1}.`}</div>
-                                        <div className="rank-op-badge" style={{ background: color }}>
-                                            {s.operator_name.toUpperCase()}
-                                        </div>
-                                        <div className="rank-score" style={{ color }}>
-                                            {pct}<span className="rank-score-unit">/100</span>
-                                        </div>
-                                        <div className="rank-bar-track">
-                                            <div className="rank-bar-fill" style={{ width: `${pct}%`, background: color }} />
-                                        </div>
-                                        <div className="rank-meta">{s.interpretation}</div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-                    <section className="section">
-                        <h2 className="section-title">
-                            {lang === "sv" ? "CVS-jämförelse" : "CVS Comparison"}
-                        </h2>
-                        <div className="chart-card">
-                            <ResponsiveContainer width="100%" height={280}>
-                                <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                    <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
-                                    <YAxis domain={[0, 100]} tick={{ fill: "var(--text-secondary)", fontSize: 12 }} unit="%" />
-                                    <Tooltip
-                                        contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8 }}
-                                        formatter={(v) => [`${v}%`, "CVS"]}
-                                    />
-                                    <Bar dataKey="CVS" fill="var(--accent-primary)" radius={[4, 4, 0, 0]}
-                                        label={{ position: "top", fontSize: 11, fill: "var(--text-secondary)", formatter: (v) => `${v}%` }}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </section>
-
-                    {ranked.length > 1 && (
-                        <section className="section">
-                            <h2 className="section-title">
-                                {lang === "sv" ? "Komponentjämförelse (radar)" : "Component Comparison (radar)"}
-                            </h2>
-                            <div className="chart-card">
-                                <ResponsiveContainer width="100%" height={320}>
-                                    <RadarChart data={radarData}>
-                                        <PolarGrid stroke="var(--border-color)" />
-                                        <PolarAngleAxis dataKey="component" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-                                        <Tooltip contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8, fontSize: 12 }} />
-                                        {ranked.map(s => (
-                                            <Radar
-                                                key={s.operator_name}
-                                                name={s.operator_name.toUpperCase()}
-                                                dataKey={s.operator_name}
-                                                stroke={getOpColor(s.operator_name)}
-                                                fill={getOpColor(s.operator_name)}
-                                                fillOpacity={0.08}
-                                                strokeWidth={2}
-                                            />
-                                        ))}
-                                        <Legend />
-                                    </RadarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </section>
-                    )}
-
-                    <section className="section">
-                        <h2 className="section-title">
-                            {lang === "sv" ? "Komponentnedbrytning" : "Component Breakdown"}
-                        </h2>
-                        <div className="table-card">
-                            <table className="stats-table">
-                                <thead>
-                                    <tr>
-                                        <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                        <th>CVS</th>
-                                        {Object.entries(CVS_WEIGHT_LABELS).map(([k, v]) => (
-                                            <th key={k}>
-                                                {lang === "sv" ? v.sv : v.en}
-                                                <span className="weight-chip">{v.weight}</span>
-                                            </th>
-                                        ))}
-                                        <th>{lang === "sv" ? "Placering" : "Rank"}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ranked.map((s, i) => {
-                                        const compMap = Object.fromEntries((s.components || []).map(c => [c.metric, c]));
-                                        return (
-                                            <tr key={s.operator_name}>
-                                                <td>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                                        <span>{RANK_MEDALS[i]}</span>
-                                                        <span className="op-badge" style={{ background: getOpColor(s.operator_name) }}>
-                                                            {s.operator_name.toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td style={{ fontWeight: 800, color: getOpColor(s.operator_name), fontFamily: "monospace" }}>
-                                                    {s.composite_score.toFixed(1)}%
-                                                </td>
-                                                {Object.keys(CVS_WEIGHT_LABELS).map(k => (
-                                                    <CompCell key={k} compMap={compMap} metricKey={k} />
-                                                ))}
-                                                <td>#{s.rank}</td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            <style jsx>{`
+            <style jsx global>{`
                 .page-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
                 .page-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
                 .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
@@ -266,6 +301,9 @@ export default function ValueScorePage() {
                 .select-wrapper { position: relative; }
                 .select-wrapper select { appearance: none; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 32px 8px 12px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; }
                 .select-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
+                .export-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); cursor: pointer; }
+                .export-btn:hover:not(:disabled) { border-color: var(--accent-primary); color: var(--accent-primary); }
+                .export-btn:disabled { opacity: 0.4; cursor: not-allowed; }
                 .methodology-note { background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.15); border-radius: 8px; padding: 12px 16px; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.8; }
                 .methodology-note strong { color: var(--text-primary); }
                 .note-cite { color: var(--text-muted); font-size: 0.78rem; }
@@ -293,7 +331,7 @@ export default function ValueScorePage() {
                 .comp-cell { display: flex; flex-direction: column; gap: 1px; }
                 .raw-val { font-size: 0.72rem; color: var(--text-muted); }
                 .loading-container { display: flex; justify-content: center; align-items: center; min-height: 300px; }
-                .empty-state { text-align: center; color: var(--text-muted); padding: 60px 0; font-size: 0.9rem; }
+                .empty-state { text-align: center; color: var(--text-muted); padding: 60px 16px; font-size: 0.9rem; }
             `}</style>
         </div>
     );

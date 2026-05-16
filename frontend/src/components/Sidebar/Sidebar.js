@@ -4,8 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "../../context/LanguageContext";
+import PropTypes from "prop-types";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
+  Sidebar.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+  };
   const pathname = usePathname();
   const { lang } = useLanguage();
   const [mounted, setMounted] = useState(false);
@@ -60,7 +65,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="sidebar animate-fade-in">
+    <aside className={`sidebar animate-fade-in${isOpen ? " sidebar--open" : ""}`}>
       <nav className="nav-menu">
         {sections.map((section, sIdx) => (
           <div key={section.key} className={`nav-section${sIdx === 0 ? " first-section" : ""}`}>
@@ -71,6 +76,7 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 href={item.path}
+                onClick={onClose}
                 className={`nav-item ${section.key === "research" ? "research-item" : ""} ${pathname === item.path ? "active" : ""}`}
               >
                 <span className="label">{resolvedLang === "sv" ? item.label_sv : item.label_en}</span>
@@ -192,7 +198,14 @@ export default function Sidebar() {
         }
 
         @media (max-width: 768px) {
-          .sidebar { display: none; }
+          .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 900;
+          }
+          .sidebar--open {
+            transform: translateX(0);
+          }
         }
       `}</style>
     </aside>

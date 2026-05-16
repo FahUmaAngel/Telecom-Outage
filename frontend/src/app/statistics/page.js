@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    Legend
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { ChevronDown, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ChevronDown, AlertCircle, CheckCircle2, Download } from "lucide-react";
+import { downloadCsv } from "../../lib/exportCsv";
+import PropTypes from "prop-types";
 
 const OPERATOR_COLORS = {
     telia: "#A31FD0",
@@ -16,10 +17,171 @@ const OPERATOR_COLORS = {
     lycamobile: "#22C55E",
 };
 
-const getOpColor = (name) => {
-    const key = (name || "").toLowerCase();
-    return OPERATOR_COLORS[key] || "var(--accent-primary)";
+const getOpColor = (name) =>
+    OPERATOR_COLORS[(name || "").toLowerCase()] || "var(--accent-primary)";
+
+const TOOLTIP_STYLE = { background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8 };
+
+function PercentilesTable({ percentiles, lang }) {
+    const rows = percentiles.filter(p => p.sample_size > 0);
+    if (rows.length === 0) return null;
+    return (
+        <section className="stats-section">
+            <h2 className="section-title">
+                {lang === "sv" ? "MTTR-percentiler per operatör" : "MTTR Percentiles per Operator"}
+            </h2>
+            <div className="table-card">
+                <table className="stats-table">
+                    <thead>
+                        <tr>
+                            <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
+                            <th>N</th><th>P50</th><th>P75</th><th>P90</th><th>P95</th><th>P99</th>
+                            <th>{lang === "sv" ? "Medel" : "Mean"}</th>
+                            <th>95% CI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map(p => (
+                            <tr key={p.operator_name}>
+                                <td><span className="op-badge" style={{ background: getOpColor(p.operator_name) }}>{p.operator_name.toUpperCase()}</span></td>
+                                <td>{p.sample_size}</td>
+                                <td>{p.median}h</td><td>{p.p75}h</td><td>{p.p90}h</td><td>{p.p95}h</td><td>{p.p99}h</td>
+                                <td>{p.mean}h</td>
+                                <td className="ci-cell">[{p.ci_95_low}–{p.ci_95_high}]</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    );
+}
+
+PercentilesTable.propTypes = {
+    percentiles: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
 };
+
+function PercentilesChart({ chartData, lang }) {
+    if (chartData.length === 0) return null;
+    return (
+        <section className="stats-section">
+            <h2 className="section-title">
+                {lang === "sv" ? "Percentilfördelning (timmar)" : "Percentile Distribution (hours)"}
+            </h2>
+            <div className="chart-card">
+                <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                        <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
+                        <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 12 }} unit="h" />
+                        <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => `${v}h`} />
+                        <Legend />
+                        <Bar dataKey="P50" fill="#6366f1" radius={[3,3,0,0]} />
+                        <Bar dataKey="P75" fill="#8b5cf6" radius={[3,3,0,0]} />
+                        <Bar dataKey="P90" fill="#a855f7" radius={[3,3,0,0]} />
+                        <Bar dataKey="P95" fill="#ec4899" radius={[3,3,0,0]} />
+                        <Bar dataKey="P99" fill="#f43f5e" radius={[3,3,0,0]} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        </section>
+    );
+}
+
+PercentilesChart.propTypes = {
+    chartData: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function DistributionHistograms({ distribution, lang }) {
+    const hasDist = distribution.filter(d => d.bins?.length > 0);
+    if (hasDist.length === 0) return null;
+    return (
+        <section className="stats-section">
+            <h2 className="section-title">
+                {lang === "sv" ? "MTTR-distribution (histogram)" : "MTTR Distribution (histogram)"}
+            </h2>
+            <div className="dist-grid">
+                {hasDist.map(d => {
+                    const histData = d.bins.map(b => ({ label: `${b.bin_start}–${b.bin_end}`, count: b.count }));
+                    return (
+                        <div key={d.operator_name} className="chart-card">
+                            <div className="chart-header">
+                                <span className="op-badge" style={{ background: getOpColor(d.operator_name) }}>{d.operator_name.toUpperCase()}</span>
+                                <span className="chart-meta">n={d.sample_size}{d.distribution_fit && ` · ${d.distribution_fit}`}</span>
+                            </div>
+                            <ResponsiveContainer width="100%" height={180}>
+                                <BarChart data={histData} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: "var(--text-muted)" }} interval="preserveStartEnd" />
+                                    <YAxis tick={{ fontSize: 10, fill: "var(--text-muted)" }} />
+                                    <Tooltip contentStyle={{ ...TOOLTIP_STYLE, fontSize: 12 }} />
+                                    <Bar dataKey="count" fill={getOpColor(d.operator_name)} radius={[2,2,0,0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
+DistributionHistograms.propTypes = {
+    distribution: PropTypes.arrayOf(PropTypes.object).isRequired,
+    lang: PropTypes.string.isRequired,
+};
+
+function TestResultCard({ testResult, lang }) {
+    if (!testResult) return null;
+    const pLabel = testResult.p_value < 0.001 ? "< 0.001" : testResult.p_value?.toFixed(4);
+    return (
+        <section className="stats-section">
+            <h2 className="section-title">{lang === "sv" ? "Hypotesprovning" : "Hypothesis Testing"}</h2>
+            <div className="test-card">
+                <div className="test-header">
+                    <span className="test-name">{testResult.test_name}</span>
+                    {testResult.significant
+                        ? <span className="badge-sig"><CheckCircle2 size={14} /> {lang === "sv" ? "Signifikant" : "Significant"}</span>
+                        : <span className="badge-nosig"><AlertCircle size={14} /> {lang === "sv" ? "Inte signifikant" : "Not Significant"}</span>
+                    }
+                </div>
+                <div className="test-stats">
+                    <div className="stat-item">
+                        <span className="stat-label">{lang === "sv" ? "Teststatistik" : "Test Statistic"}</span>
+                        <span className="stat-value">{testResult.statistic?.toFixed(4)}</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">p-värde</span>
+                        <span className="stat-value" style={{ color: testResult.significant ? "var(--status-success)" : "var(--status-warning)" }}>
+                            {pLabel}
+                        </span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">{lang === "sv" ? "Effektstorlek (η²)" : "Effect Size (η²)"}</span>
+                        <span className="stat-value">{testResult.effect_size == null ? "—" : testResult.effect_size.toFixed(4)}</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">{lang === "sv" ? "Stickprov" : "Sample Sizes"}</span>
+                        <span className="stat-value" style={{ fontSize: "0.85rem" }}>
+                            {testResult.sample_sizes && Object.entries(testResult.sample_sizes).map(([k, v]) => `${k.toUpperCase()}=${v}`).join(" · ")}
+                        </span>
+                    </div>
+                </div>
+                {testResult.interpretation && (
+                    <p className="test-interpretation">{testResult.interpretation}</p>
+                )}
+            </div>
+        </section>
+    );
+}
+
+TestResultCard.propTypes = {
+    testResult: PropTypes.object,
+    lang: PropTypes.string.isRequired,
+};
+
 export default function StatisticsPage() {
     const { lang } = useLanguage();
     const [percentiles, setPercentiles] = useState([]);
@@ -50,21 +212,22 @@ export default function StatisticsPage() {
 
     useEffect(() => { fetchAll(); }, [fetchAll]);
 
-    if (loading) {
-        return <div className="loading-container"><div className="spinner"></div></div>;
-    }
+    if (loading) return <div className="loading-container"><div className="spinner" /></div>;
 
-    const percentileChartData = percentiles
-        .filter(p => p.sample_size > 0)
-        .map(p => ({
-            name: p.operator_name.toUpperCase(),
-            P50: p.median,
-            P75: p.p75,
-            P90: p.p90,
-            P95: p.p95,
-            P99: p.p99,
-            color: getOpColor(p.operator_name),
-        }));
+    const validPercentiles = percentiles.filter(p => p.sample_size > 0);
+    const chartData = validPercentiles.map(p => ({
+        name: p.operator_name.toUpperCase(),
+        P50: p.median, P75: p.p75, P90: p.p90, P95: p.p95, P99: p.p99,
+    }));
+
+    const handleExport = () => downloadCsv(`mttr-statistics-${days}d.csv`,
+        validPercentiles.map(p => ({
+            operator: p.operator_name, n: p.sample_size,
+            mean_h: p.mean, median_h: p.median, p75_h: p.p75,
+            p90_h: p.p90, p95_h: p.p95, p99_h: p.p99,
+            ci_low: p.ci_95_low, ci_high: p.ci_95_high,
+        }))
+    );
 
     return (
         <div className="stats-container animate-fade-in">
@@ -81,7 +244,7 @@ export default function StatisticsPage() {
                 </div>
                 <div className="filters-row">
                     <div className="premium-filter">
-                        <label htmlFor="period">{lang === "sv" ? "PERIOD" : "PERIOD"}</label>
+                        <label htmlFor="period">PERIOD</label>
                         <div className="select-wrapper">
                             <select id="period" value={days} onChange={(e) => setDays(e.target.value)}>
                                 <option value="30">30 {lang === "sv" ? "dagar" : "days"}</option>
@@ -103,178 +266,35 @@ export default function StatisticsPage() {
                             <ChevronDown size={14} className="select-icon" />
                         </div>
                     </div>
+                    <div className="premium-filter">
+                        <label>{lang === "sv" ? "EXPORTERA" : "EXPORT"}</label>
+                        <button className="export-btn" onClick={handleExport} disabled={validPercentiles.length === 0}>
+                            <Download size={13} /> CSV
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* Percentile Table */}
-            {percentiles.filter(p => p.sample_size > 0).length > 0 && (
-                <section className="stats-section">
-                    <h2 className="section-title">
-                        {lang === "sv" ? "MTTR-percentiler per operatör" : "MTTR Percentiles per Operator"}
-                    </h2>
-                    <div className="table-card">
-                        <table className="stats-table">
-                            <thead>
-                                <tr>
-                                    <th>{lang === "sv" ? "Operatör" : "Operator"}</th>
-                                    <th>N</th>
-                                    <th>P50</th>
-                                    <th>P75</th>
-                                    <th>P90</th>
-                                    <th>P95</th>
-                                    <th>P99</th>
-                                    <th>{lang === "sv" ? "Medel" : "Mean"}</th>
-                                    <th>95% CI</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {percentiles.filter(p => p.sample_size > 0).map(p => (
-                                    <tr key={p.operator_name}>
-                                        <td>
-                                            <span className="op-badge" style={{ background: getOpColor(p.operator_name) }}>
-                                                {p.operator_name.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td>{p.sample_size}</td>
-                                        <td>{p.median}h</td>
-                                        <td>{p.p75}h</td>
-                                        <td>{p.p90}h</td>
-                                        <td>{p.p95}h</td>
-                                        <td>{p.p99}h</td>
-                                        <td>{p.mean}h</td>
-                                        <td className="ci-cell">[{p.ci_95_low}–{p.ci_95_high}]</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            )}
+            <PercentilesTable percentiles={percentiles} lang={lang} />
+            <PercentilesChart chartData={chartData} lang={lang} />
+            <DistributionHistograms distribution={distribution} lang={lang} />
+            <TestResultCard testResult={testResult} lang={lang} />
 
-            {/* Percentile Bar Chart */}
-            {percentileChartData.length > 0 && (
-                <section className="stats-section">
-                    <h2 className="section-title">
-                        {lang === "sv" ? "Percentilfördelning (timmar)" : "Percentile Distribution (hours)"}
-                    </h2>
-                    <div className="chart-card">
-                        <ResponsiveContainer width="100%" height={320}>
-                            <BarChart data={percentileChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
-                                <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 12 }} unit="h" />
-                                <Tooltip
-                                    contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8 }}
-                                    formatter={(v) => `${v}h`}
-                                />
-                                <Legend />
-                                <Bar dataKey="P50" name="P50" fill="#6366f1" radius={[3,3,0,0]} />
-                                <Bar dataKey="P75" name="P75" fill="#8b5cf6" radius={[3,3,0,0]} />
-                                <Bar dataKey="P90" name="P90" fill="#a855f7" radius={[3,3,0,0]} />
-                                <Bar dataKey="P95" name="P95" fill="#ec4899" radius={[3,3,0,0]} />
-                                <Bar dataKey="P99" name="P99" fill="#f43f5e" radius={[3,3,0,0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </section>
-            )}
-
-            {/* Distribution Histogram */}
-            {distribution.filter(d => d.bins && d.bins.length > 0).length > 0 && (
-                <section className="stats-section">
-                    <h2 className="section-title">
-                        {lang === "sv" ? "MTTR-distribution (histogram)" : "MTTR Distribution (histogram)"}
-                    </h2>
-                    <div className="dist-grid">
-                        {distribution.filter(d => d.bins && d.bins.length > 0).map(d => {
-                            const histData = d.bins.map(b => ({
-                                label: `${b.bin_start}–${b.bin_end}`,
-                                count: b.count,
-                            }));
-                            return (
-                                <div key={d.operator_name} className="chart-card">
-                                    <div className="chart-header">
-                                        <span className="op-badge" style={{ background: getOpColor(d.operator_name) }}>
-                                            {d.operator_name.toUpperCase()}
-                                        </span>
-                                        <span className="chart-meta">
-                                            n={d.sample_size}
-                                            {d.distribution_fit && ` · ${d.distribution_fit}`}
-                                        </span>
-                                    </div>
-                                    <ResponsiveContainer width="100%" height={180}>
-                                        <BarChart data={histData} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                            <XAxis dataKey="label" tick={{ fontSize: 9, fill: "var(--text-muted)" }} interval="preserveStartEnd" />
-                                            <YAxis tick={{ fontSize: 10, fill: "var(--text-muted)" }} />
-                                            <Tooltip
-                                                contentStyle={{ background: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: 8, fontSize: 12 }}
-                                            />
-                                            <Bar dataKey="count" fill={getOpColor(d.operator_name)} radius={[2,2,0,0]} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </section>
-            )}
-
-            {/* Statistical Test Result */}
-            {testResult && (
-                <section className="stats-section">
-                    <h2 className="section-title">
-                        {lang === "sv" ? "Hypotesprovning" : "Hypothesis Testing"}
-                    </h2>
-                    <div className="test-card">
-                        <div className="test-header">
-                            <span className="test-name">{testResult.test_name}</span>
-                            {testResult.significant
-                                ? <span className="badge-sig"><CheckCircle2 size={14} /> {lang === "sv" ? "Signifikant" : "Significant"}</span>
-                                : <span className="badge-nosig"><AlertCircle size={14} /> {lang === "sv" ? "Inte signifikant" : "Not Significant"}</span>
-                            }
-                        </div>
-                        <div className="test-stats">
-                            <div className="stat-item">
-                                <span className="stat-label">{lang === "sv" ? "Teststatistik" : "Test Statistic"}</span>
-                                <span className="stat-value">{testResult.statistic?.toFixed(4)}</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">p-värde</span>
-                                <span className="stat-value" style={{ color: testResult.significant ? "var(--status-success)" : "var(--status-warning)" }}>
-                                    {testResult.p_value < 0.001 ? "< 0.001" : testResult.p_value?.toFixed(4)}
-                                </span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">{lang === "sv" ? "Effektstorlek (η²)" : "Effect Size (η²)"}</span>
-                                <span className="stat-value">{testResult.effect_size != null ? testResult.effect_size.toFixed(4) : "—"}</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">{lang === "sv" ? "Stickprov" : "Sample Sizes"}</span>
-                                <span className="stat-value" style={{ fontSize: "0.85rem" }}>
-                                    {testResult.sample_sizes && Object.entries(testResult.sample_sizes).map(([k,v]) => `${k.toUpperCase()}=${v}`).join(" · ")}
-                                </span>
-                            </div>
-                        </div>
-                        {testResult.interpretation && (
-                            <p className="test-interpretation">{testResult.interpretation}</p>
-                        )}
-                    </div>
-                </section>
-            )}
-
-            <style jsx>{`
+            <style jsx global>{`
                 .stats-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
                 .page-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; }
                 .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
-                .filters-row { display: flex; gap: 16px; flex-wrap: wrap; }
+                .filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
                 .premium-filter { display: flex; flex-direction: column; gap: 6px; }
                 .premium-filter label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; color: var(--text-muted); }
                 .select-wrapper { position: relative; }
                 .select-wrapper select { appearance: none; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 32px 8px 12px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; }
                 .select-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
+                .export-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); cursor: pointer; }
+                .export-btn:hover:not(:disabled) { border-color: var(--accent-primary); color: var(--accent-primary); }
+                .export-btn:disabled { opacity: 0.4; cursor: not-allowed; }
                 .stats-section { margin-bottom: 36px; }
-                .section-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; letter-spacing: 0.02em; }
+                .section-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
                 .table-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow-x: auto; }
                 .stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
                 .stats-table th { padding: 12px 16px; text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
@@ -296,7 +316,7 @@ export default function StatisticsPage() {
                 .stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
                 .stat-value { font-size: 1rem; font-weight: 700; color: var(--text-primary); font-family: monospace; }
                 .test-interpretation { margin-top: 16px; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; border-top: 1px solid var(--border-color); padding-top: 16px; }
-                .loading-container { display: flex; justify-content: center; align-items: center; min-height: 300px; }
+                .loading-container { display: flex; justify-content: center; align-items: center; min-height: 320px; }
                 .text-gradient { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
             `}</style>
         </div>
