@@ -11,7 +11,7 @@ from scrapers.tre.fetch import scrape_tre_outages
 from scrapers.tre.parser import parse_tre_outages
 from scrapers.tre.mapper import map_tre_outages
 
-from scrapers.telia import scrape_telia_outages, parse_telia_outages, scrape_portal_granular
+from scrapers.telia import scrape_portal_granular
 
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import save_outage
@@ -27,51 +27,13 @@ logging.basicConfig(
 logger = logging.getLogger("ScraperRunner")
 
 def _run_telia_scraper(db):
-    """Execution logic for Telia scraper."""
+    """Execution logic for Telia scraper (Playwright portal)."""
     try:
-        logger.info("Running Telia (Enhanced API Scraper)...")
-        raw_outages = scrape_telia_outages()
-        parsed_outages = parse_telia_outages(raw_outages)
-        
-        if parsed_outages:
-            logger.info(f"✓ Telia API scraper found {len(parsed_outages)} outages")
-            for outage in parsed_outages:
-                inc_id = outage.get('id', 'N/A')
-                desc = outage.get('description', {})
-                location_text = outage.get('location', 'Sweden')
-                context_text = f"{inc_id} {location_text} {desc.get('sv', '')}"
-                
-                normalized = NormalizedOutage(
-                    operator=OperatorEnum.TELIA,
-                    incident_id=inc_id,
-                    title={"sv": inc_id, "en": inc_id},
-                    description=desc,
-                    location=location_text,
-                    status=classify_status(context_text, OutageStatus.ACTIVE),
-                    severity=SeverityLevel.MEDIUM,
-                    affected_services=outage.get('affected_services', classify_services(context_text)),
-                    source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
-                    started_at=parse_swedish_date(outage.get('start_time')),
-                    estimated_fix_time=parse_swedish_date(outage.get('estimated_fix_time'))
-                )
-                
-                county_name = extract_region_from_text(location_text, SWEDISH_COUNTIES)
-                if county_name:
-                    normalized.location = county_name
-                    coords = get_county_coordinates(county_name, jitter=True)
-                    if coords:
-                        normalized.latitude, normalized.longitude = coords
-                
-                save_outage(db, normalized, {"source": "telia_api_enhanced", "raw": outage})
-            
-            db.commit()
-        else:
-            logger.warning("! Telia API scraper found no outages - falling back to Playwright Portal Scraper")
-            scrape_portal_granular()
-            logger.info("Telia Portal Scraper fallback completed")
+        logger.info("Running Telia (Playwright Portal Scraper)...")
+        scrape_portal_granular()
+        logger.info("✓ Telia Portal Scraper completed")
     except Exception as e:
-        logger.error(f"Telia enhanced scraper failed: {e}", exc_info=True)
-        db.rollback()
+        logger.error(f"Telia scraper failed: {e}", exc_info=True)
 
 def _process_telenor_outage(db, outage):
     """Helper to process and save a single Telenor outage."""

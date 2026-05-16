@@ -192,3 +192,68 @@ class ResolvePlaceResponse(BaseModel):
     longitude: float
     display_name: str
     region_id: Optional[int] = None
+
+
+# ===========================================================================
+# Research Analytics Schemas (IEEE paper)
+# ===========================================================================
+
+class PercentileStats(BaseModel):
+    """Distribution percentiles for MTTR analysis."""
+    operator_name: str
+    sample_size: int
+    mean: float
+    median: float
+    p75: float
+    p90: float
+    p95: float
+    p99: float
+    std_dev: float
+    min_value: float
+    max_value: float
+    ci_95_low: float
+    ci_95_high: float
+
+class HistogramBin(BaseModel):
+    bin_start: float
+    bin_end: float
+    count: int
+
+class DistributionResponse(BaseModel):
+    operator_name: str
+    sample_size: int
+    bins: List[HistogramBin]
+    distribution_fit: Optional[str] = None
+
+class SLAComplianceResult(BaseModel):
+    operator_name: str
+    benchmark: str
+    total_incidents: int
+    compliant_count: int
+    non_compliant_count: int
+    compliance_rate_pct: float
+    by_severity: Dict[str, Dict[str, float]]
+
+class ValueScoreComponent(BaseModel):
+    metric: str
+    raw_value: float
+    normalized_score: float
+    weight: float
+    weighted_score: float
+
+class ValueScoreResult(BaseModel):
+    operator_name: str
+    composite_score: float
+    rank: int
+    components: List[ValueScoreComponent]
+    interpretation: str
+
+class StatisticalTestResult(BaseModel):
+    test_name: str
+    statistic: float
+    p_value: float
+    significant: bool
+    interpretation: str
+    sample_sizes: Dict[str, int]
+    effect_size: Optional[float] = None
+

@@ -174,14 +174,26 @@ class EnghouseFetcher:
         except ValueError:
             logger.warning(f"[{self.operator}] Invalid JSON from AreaTicketList")
 
+    SERVICES = (
+        "NR700_DATANSA,NR1800_DATANSA,NR2100_DATANSA,NR2600_DATANSA,NR3500_DATANSA,"
+        "LTE700_DATA,LTE800_DATA,LTE900_DATA,LTE1800_DATA,LTE2100_DATA,LTE2600_DATA,"
+        "GSM900_VOICE,GSM1800_VOICE"
+    )
+
     def get_admin_areas(self) -> List[Dict]:
         """Get list of administrative areas (regions/counties)."""
+        token = self._token or self.get_token()
         try:
             url = f"{self.base_url}/Fault/AdminAreaList"
-            response = self.session.get(url, timeout=10)
-            if response.status_code == 200:
+            params = {"services": self.SERVICES}
+            if token:
+                params[self.token_param] = token
+            self.session.headers.update({"Referer": f"{self.base_url}?appmode=outage"})
+            response = self.session.get(url, params=params, timeout=15)
+            if response.status_code == 200 and response.text.strip():
                 areas = response.json()
                 if isinstance(areas, list):
+                    logger.info(f"[{self.operator}] Got {len(areas)} admin areas")
                     return areas
         except Exception as e:
             logger.error(f"[{self.operator}] Error fetching admin areas: {e}")

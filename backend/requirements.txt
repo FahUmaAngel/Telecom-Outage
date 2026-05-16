@@ -7,3 +7,5 @@ h11>=0.16.0
 starlette>=0.37.2
 anyio>=4.4.0
 zipp>=3.19.1
+numpy>=1.26.0
+scipy>=1.13.0
