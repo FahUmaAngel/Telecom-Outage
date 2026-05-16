@@ -221,7 +221,7 @@ function ScraperHealth({ scrapers, lang }) {
                                 <span className={`run-badge run-badge--${failed ? "fail" : neverRun ? "never" : "ok"}`}>
                                     {failed ? (lang === "sv" ? "Fel" : "Failed") :
                                      neverRun ? (lang === "sv" ? "Aldrig kört" : "Never run") :
-                                     (lang === "sv" ? "OK" : "OK")}
+                                     "OK"}
                                 </span>
                             </div>
 
