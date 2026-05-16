@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
 
-// Dynamic import for Map to avoid SSR issues with Leaflet
-const Map = dynamic(() => import("../../components/Map/Map"), {
+// Dynamic import for OutageMap to avoid SSR issues with Leaflet
+const OutageMap = dynamic(() => import("../../components/Map/Map"), {
     ssr: false,
     loading: () => <div className="map-placeholder glass">Initializing Navigation Satellite...</div>
 });
@@ -15,7 +15,6 @@ export default function MapPage() {
     const { lang } = useLanguage();
     const [outages, setOutages] = useState([]);
     const [hotspots, setHotspots] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,8 +27,6 @@ export default function MapPage() {
                 setHotspots(hotspotsData);
             } catch (err) {
                 console.error("Failed to fetch map data:", err);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -48,7 +45,7 @@ export default function MapPage() {
             </div>
 
             <div className="map-container-main">
-                <Map outages={outages} hotspots={hotspots} />
+                <OutageMap outages={outages} hotspots={hotspots} />
 
                 <div className="map-legend premium-card glass">
                     <h4 className="font-heading">Legend</h4>
@@ -59,7 +56,7 @@ export default function MapPage() {
                         <span className="dot" style={{ backgroundColor: "#ff4d4f" }}></span> Tre (3)
                     </div>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#52c41a" }}></span> Lycamobile
+                        <span className="dot" style={{ backgroundColor: "#007bff" }}></span> Telenor
                     </div>
                 </div>
             </div>

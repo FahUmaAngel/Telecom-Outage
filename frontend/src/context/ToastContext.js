@@ -1,14 +1,23 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 const ToastContext = createContext();
+
+let toastCounter = 0;
 
 export function ToastProvider({ children }) {
     const [toasts, setToasts] = useState([]);
 
+    const removeToast = useCallback((id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
+
     const addToast = useCallback((message, type = 'info', duration = 5000) => {
-        const id = Date.now() + Math.random();
+        const id = globalThis.crypto?.randomUUID?.() || 
+                   globalThis.crypto?.getRandomValues?.(new Uint32Array(1))[0].toString(36) || 
+                   `toast-${Date.now()}-${toastCounter++}`;
         const toast = { id, message, type, duration };
 
         setToasts(prev => [...prev, toast]);
@@ -20,18 +29,20 @@ export function ToastProvider({ children }) {
         }
 
         return id;
-    }, []);
+    }, [removeToast]);
 
-    const removeToast = useCallback((id) => {
-        setToasts(prev => prev.filter(t => t.id !== id));
-    }, []);
+    const value = useMemo(() => ({ toasts, addToast, removeToast }), [toasts, addToast, removeToast]);
 
     return (
-        <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+        <ToastContext.Provider value={value}>
             {children}
         </ToastContext.Provider>
     );
 }
+
+ToastProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
 
 export function useToast() {
     const context = useContext(ToastContext);

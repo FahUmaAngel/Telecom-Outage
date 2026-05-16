@@ -4,7 +4,7 @@ Base class for 3rd party crowd aggregators.
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class CrowdSignal(BaseModel):
     operator: str
@@ -13,7 +13,7 @@ class CrowdSignal(BaseModel):
     longitude: float
     count: int
     source_name: str
-    detected_at: datetime = datetime.utcnow()
+    detected_at: datetime = Field(default_factory=datetime.utcnow)
 
 class BaseCrowdAggregator(ABC):
     def __init__(self, name: str):

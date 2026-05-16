@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for API responses.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -27,55 +27,71 @@ class RegionResponse(BaseModel):
     name: Dict[str, str]
     outage_count: Optional[int] = 0
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class OutageResponse(BaseModel):
     id: int
-    incident_id: Optional[str]
+    incident_id: Optional[str] = None
+    operator_id: Optional[int] = None
     operator_name: str
     region_id: Optional[int] = None
     region_name: Optional[Dict[str, str]] = None
+    raw_data_id: Optional[int] = None
     
     title: Dict[str, str] # Bilingual
-    description: Optional[Dict[str, str]]
+    description: Optional[Dict[str, str]] = None
     
-    status: OutageStatus
-    severity: SeverityLevel
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
     
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
-    estimated_fix_time: Optional[datetime]
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
     
-    location: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     
-    affected_services: List[str]
-    updated_at: Optional[datetime]
+    affected_services: List[str] = []
+    place: Optional[str] = None
+    quality_issues: Optional[List[str]] = None
+    updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        val_str = str(v)
+        if "OutageStatus" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+    model_config = {"extra": "ignore"}
 
 class ReportCreate(BaseModel):
+    operator_name: Optional[str] = Field(default=None, max_length=50)
+    title: str = Field(min_length=3, max_length=160)
+    description: Optional[str] = Field(default=None, max_length=2000)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+class ReportResponse(BaseModel):
+    id: int
     operator_name: Optional[str] = None
     title: str
     description: Optional[str] = None
     latitude: float
     longitude: float
-
-class ReportResponse(BaseModel):
-    id: int
-    operator_name: Optional[str]
-    title: str
-    description: Optional[str]
-    latitude: float
-    longitude: float
     status: str
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = {"extra": "ignore"}
 
 class MTTRResponse(BaseModel):
     operator_name: str
@@ -120,7 +136,7 @@ class UserResponse(UserBase):
 
 class HotspotResponse(BaseModel):
     operator_name: str
-    region_name: Optional[Dict[str, str]]
+    region_name: Optional[Dict[str, str]] = None
     latitude: float
     longitude: float
     report_count: int
@@ -134,3 +150,110 @@ class OperatorResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class OutageUpdate(BaseModel):
+    incident_id: Optional[str] = None
+    operator_id: Optional[int] = None
+    region_id: Optional[int] = None
+    raw_data_id: Optional[int] = None
+    title: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
+    status: Optional[OutageStatus] = None
+    severity: Optional[SeverityLevel] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    estimated_fix_time: Optional[datetime] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    affected_services: Optional[List[str]] = None
+    place: Optional[str] = None
+
+    @field_validator('status', mode='before')
+    @classmethod
+    def normalize_status(cls, v):
+        if v is None: return v
+        return str(v).lower()
+
+    @field_validator('severity', mode='before')
+    @classmethod
+    def normalize_severity(cls, v):
+        if v is None: return v
+        val_str = str(v)
+        if "SeverityLevel" in val_str:
+            val_str = val_str.split('.')[-1]
+        return val_str.lower()
+
+class ResolvePlaceRequest(BaseModel):
+    query: str
+
+class ResolvePlaceResponse(BaseModel):
+    latitude: float
+    longitude: float
+    display_name: str
+    region_id: Optional[int] = None
+
+
+# ===========================================================================
+# Research Analytics Schemas (IEEE paper)
+# ===========================================================================
+
+class PercentileStats(BaseModel):
+    """Distribution percentiles for MTTR analysis."""
+    operator_name: str
+    sample_size: int
+    mean: float
+    median: float
+    p75: float
+    p90: float
+    p95: float
+    p99: float
+    std_dev: float
+    min_value: float
+    max_value: float
+    ci_95_low: float
+    ci_95_high: float
+
+class HistogramBin(BaseModel):
+    bin_start: float
+    bin_end: float
+    count: int
+
+class DistributionResponse(BaseModel):
+    operator_name: str
+    sample_size: int
+    bins: List[HistogramBin]
+    distribution_fit: Optional[str] = None
+
+class SLAComplianceResult(BaseModel):
+    operator_name: str
+    benchmark: str
+    total_incidents: int
+    compliant_count: int
+    non_compliant_count: int
+    compliance_rate_pct: float
+    by_severity: Dict[str, Dict[str, float]]
+
+class ValueScoreComponent(BaseModel):
+    metric: str
+    raw_value: float
+    normalized_score: float
+    weight: float
+    weighted_score: float
+
+class ValueScoreResult(BaseModel):
+    operator_name: str
+    composite_score: float
+    rank: int
+    components: List[ValueScoreComponent]
+    interpretation: str
+
+class StatisticalTestResult(BaseModel):
+    test_name: str
+    statistic: float
+    p_value: float
+    significant: bool
+    interpretation: str
+    sample_sizes: Dict[str, int]
+    effect_size: Optional[float] = None
+

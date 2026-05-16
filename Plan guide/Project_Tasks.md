@@ -7,7 +7,8 @@ This task list is generated based on the architectural documents in the `Plan gu
 ### Telecom Operators
 - **Telia**: [Driftinformation - Mobila Nätet](https://www.telia.se/foretag/support/driftinformation?category=mobila-natet)
 - **Tre**: [Täckningskarta](https://www.tre.se/varfor-tre/tackning/tackningskarta)
-- **Lycamobile**: [5G Coverage](https://www.lycamobile.se/sv/5g-coverage/)
+- **Telenor**: Scraper implemented (1,090 outages)
+- **Lycamobile**: [5G Coverage](https://www.lycamobile.se/sv/5g-coverage/) — scraper not yet implemented
 
 ## 🏗️ Backend Development (FastAPI / Node.js)
 - [x] **Infrastructure & Core**
@@ -28,6 +29,11 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [x] `GET /api/analytics/reliability` - Operator reliability comparison
   - [x] `POST /api/reports` - Crowdsourced report submission
   - [x] Auth Endpoints (CORS & Base setup done)
+  - [x] `GET /api/research/mttr-percentiles` - MTTR percentiles per operator
+  - [x] `GET /api/research/mttr-distribution` - MTTR histogram distribution
+  - [x] `GET /api/research/statistical-test` - Kruskal-Wallis / ANOVA
+  - [x] `GET /api/research/sla-compliance` - SLA compliance vs ITU-T/ETSI/PTS
+  - [x] `GET /api/research/value-score` - Consumer Value Score (CVS)
 - [x] **Core Engine Services**
   - [x] Implement Deduplication logic
   - [x] Implement Severity Scoring engine
@@ -38,41 +44,51 @@ This task list is generated based on the architectural documents in the `Plan gu
   - [x] Implement Database cleanup tasks
 
 ## 🌐 Frontend Development (React / Next.js)
-- [ ] **Setup & UI Kit**
-  - [ ] Initialize Next.js with App Router and TypeScript
-  - [ ] Configure Tailwind CSS / Vanilla CSS strategy
-  - [ ] Create Reusable UI Components (Button, Modal, Filter, Badge)
-- [ ] **Interactive Map**
-  - [ ] Integrate Mapbox / Leaflet
-  - [ ] Implement Outage Marker Layer with clusters
-  - [ ] Create Map Legend and Info Overlays
-- [ ] **Pages & Features**
-  - [ ] **Home**: Live Outage Map with real-time updates
-  - [ ] **Outage List**: Searchable and filterable list of incidents
-  - [ ] **Incident Details**: Deep dive into specific outages with timeline
-  - [ ] **Analytics Dashboards**:
-    - [ ] MTTR Charts
-    - [ ] Reliability Comparison (Bar charts)
-    - [ ] Trends & Heatmaps
-  - [ ] **Reporting Flow**: Multistep form for user reports
-  - [ ] **Transparency**: Static pages for Methodology, Sources, etc.
-  - [ ] **Admin Dashboard**: Incident validation and system health
-- [ ] **State & API Integration**
-  - [ ] Implement custom hooks for data fetching (`useOutages`, etc.)
-  - [ ] Set up Real-time updates (Polling or WebSockets)
-  - [ ] Implement Auth flow (Login, protected routes)
+- [x] **Setup & UI Kit**
+  - [x] Initialize Next.js with App Router
+  - [x] Configure CSS strategy (styled-jsx + CSS variables)
+  - [x] Dark / Light theme toggle
+  - [x] EN / SV language toggle
+  - [x] Responsive layout — Header, Sidebar (mobile hamburger + slide-in)
+- [x] **Interactive Map**
+  - [x] Integrate Leaflet
+  - [x] Implement Outage Marker Layer
+  - [x] Create Map Legend and Info Overlays
+  - [ ] Marker clustering (not yet implemented)
+- [x] **Pages & Features**
+  - [x] **Home** (`/`): Live dashboard with KPI cards, charts, operator comparison
+  - [x] **Live Map** (`/map`): Real-time outage map with Leaflet
+  - [x] **Regions** (`/regions`): Outages grouped by region
+  - [x] **Analytics** (`/analytics`): MTTR charts, reliability comparison
+  - [x] **Performance** (`/prestanda`): Operator performance metrics
+  - [x] **Reports** (`/reports`): Searchable and filterable outage list
+  - [x] **Report Outage** (`/report`): Multistep form for crowdsourced reports
+  - [x] **Admin** (`/admin`): Incident validation and system health
+  - [x] **Statistics** (`/statistics`): MTTR percentiles, histograms, hypothesis testing — CSV export
+  - [x] **SLA Compliance** (`/sla-compliance`): Compliance vs ITU-T E.800 / ETSI / PTS — CSV export
+  - [x] **Value Score** (`/value-score`): Consumer Value Score (CVS) radar + ranking — CSV export
+  - [x] **Methodology** (`/methodology`): Research questions, pipeline, architecture diagram, references
+- [x] **State & API Integration**
+  - [x] API client (`lib/api.js`) with custom fetch hooks
+  - [x] Toast notifications
+  - [x] CSV export utility (`lib/exportCsv.js`)
+  - [ ] Real-time updates (Polling / WebSockets) — not yet implemented
+  - [ ] Auth flow (Login, protected routes) — not yet implemented
 
 ## 🕵️ Data Ingestion (Scrapers & Workers)
 - [x] **Scraper Implementation**
-  - [x] **Telia**: Fetcher, HTML/API Parser, and Data Mapper
-  - [x] **Tre**: Fetcher, HTML/JSON Parser, and Data Mapper
+  - [x] **Telia**: Fetcher, HTML/API Parser, and Data Mapper (962 outages)
+  - [x] **Tre**: Fetcher, HTML/JSON Parser, and Data Mapper (229 outages)
+  - [x] **Telenor**: Fetcher, Parser, and Data Mapper (1,090 outages)
   - [x] **Crowd**: Listener for user reports and 3rd party aggregators
+  - [ ] **Lycamobile**: Not yet implemented
+  - [ ] **Tele2**: Raw data collected but not imported as outages
 - [x] **Processing Pipeline**
   - [x] Implement Data Normalizer (Standardize formats)
   - [x] Implement Identity Mapping (Link raw data to known operators/locations)
-  - [x] Set up Immutable Raw Data storage
+  - [x] Set up Immutable Raw Data storage (25,796 raw rows)
 - [x] **Orchestration**
-  - [x] Create the main Scraper Runner script
+  - [x] Create the main Scraper Runner script (`run_scheduler.bat`)
   - [x] Configure execution frequency (1–5 minutes)
 
 ## 🚀 DevOps & Deployment

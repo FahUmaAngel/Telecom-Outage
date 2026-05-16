@@ -6,14 +6,16 @@ import requests
 import logging
 from bs4 import BeautifulSoup
 import json
-from datetime import datetime
-from common.models import OperatorEnum, RawOutage
+from datetime import datetime, timezone
+from scrapers.common.models import OperatorEnum, RawOutage
 
 logger = logging.getLogger(__name__)
 
 TRE_URLS = [
     "https://www.tre.se/varfor-tre/tackning/driftstorningar",
-    "https://www.tre.se/varfor-tre/tackning/tackningskarta"
+    # NOTE: tackningskarta contains the same data as driftstorningar - scraping only from 
+    # one source prevents duplicate incidents in the database.
+    # "https://www.tre.se/varfor-tre/tackning/tackningskarta"
 ]
 
 class TreFetcher:
@@ -41,7 +43,7 @@ class TreFetcher:
                             operator=OperatorEnum.TRE,
                             source_url=url,
                             raw_data=data,
-                            scraped_at=datetime.utcnow()
+                            scraped_at=datetime.now(timezone.utc)
                         ))
                     else:
                         logger.warning(f"[Tre] No __NEXT_DATA__ found on {url}")

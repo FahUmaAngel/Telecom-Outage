@@ -1,0 +1,57 @@
+import sqlite3
+from datetime import datetime, timedelta, timezone
+
+db_path = 'telecom_outage.db'
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# Get Tre ID
+cursor.execute("SELECT id FROM operators WHERE name = 'tre' COLLATE NOCASE;")
+tre_id = cursor.fetchone()[0]
+
+# Calculate MTTR for last year (365 days) manually with final logic
+since_date = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
+
+cursor.execute("""
+    SELECT start_time, end_time, updated_at, status
+    FROM outages 
+    WHERE operator_id = %s 
+    AND start_time >= %s 
+    AND start_time IS NOT NULL 
+    AND (end_time IS NOT NULL OR updated_at IS NOT NULL);
+""", (tre_id, since_date))
+
+outages = cursor.fetchall()
+
+total_hours = 0.0
+valid_count = 0
+
+def parse_date(s):
+    if not s: return None
+    if '.' in s:
+        return datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f")
+    return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+
+for start_str, end_str, updated_str, status in outages:
+    try:
+        start = parse_date(start_str)
+        actual_end = parse_date(end_str) or parse_date(updated_str)
+        
+        if not actual_end or not start: continue
+
+        diff = actual_end - start
+        hours = abs(diff.total_seconds() / 3600.0)
+        
+        if 0 < hours < 8760:
+            total_hours += hours
+            valid_count += 1
+    except Exception as e:
+        continue
+
+avg_hours = round(total_hours / valid_count, 2) if valid_count > 0 else 0
+
+print("Final Manual Verification for Tre (Last 365 days - ABSOLUTE DURATION):")
+print(f"Total valid outages: {valid_count}")
+print(f"Average MTTR: {avg_hours} hours")
+
+conn.close()

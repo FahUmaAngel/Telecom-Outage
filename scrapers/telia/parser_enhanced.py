@@ -3,7 +3,7 @@ Enhanced Telia outage data parser.
 Parses API responses from CoveragePortal and GLUP systems.
 Supports bilingual output (Swedish-English).
 """
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import logging
 import json
 import sys
@@ -17,53 +17,32 @@ from common.translation import create_bilingual_text, SWEDISH_CITIES, SWEDISH_CO
 
 logger = logging.getLogger(__name__)
 
+# Constants to avoid duplication
+MOBILE_NETWORK = 'Mobile Network'
 
 def parse_mobile_outage(data: Dict) -> Optional[Dict]:
-    """
-    Parse mobile network outage from CoveragePortal API response.
-    
-    Expected format:
-    {
-        "FaultId": "12345",
-        "Text": "På grund av ett kabelfel...",
-        "EventTime": "2025-12-26T10:00:00",
-        "EstimatedCloseTime": "2025-12-26T18:00:00",
-        "ExternalId": "EXT-123"
-    }
-    
-    Args:
-        data: Raw API response dictionary
-        
-    Returns:
-        Parsed outage dictionary or None
-    """
+    """Parse mobile network outage from CoveragePortal API response."""
     try:
         outage = {}
-        
-        # Extract ID
         outage['id'] = data.get('FaultId') or data.get('ExternalId')
         
-        # Extract and translate description
         text = data.get('Text', '')
         if text:
             outage['description'] = create_bilingual_text(text)
         
-        # Extract timestamps
         if 'EventTime' in data:
             outage['start_time'] = data['EventTime']
         
         if 'EstimatedCloseTime' in data:
             outage['estimated_fix_time'] = data['EstimatedCloseTime']
         
-        # Extract location if mentioned in text
         location = extract_location_from_text(text)
         if location:
             outage['location'] = location
+        elif '_region_name' in data:
+            outage['location'] = data['_region_name']
         
-        # Determine severity from text
         outage['severity'] = determine_severity_from_text(text)
-        
-        # Extract affected services
         outage['affected_services'] = extract_services_from_text(text)
         
         return outage if outage.get('id') or outage.get('description') else None
@@ -72,21 +51,10 @@ def parse_mobile_outage(data: Dict) -> Optional[Dict]:
         logger.error(f"Error parsing mobile outage: {e}")
         return None
 
-
 def parse_fixed_outage(data: Dict) -> Optional[Dict]:
-    """
-    Parse fixed network outage from GLUP API response.
-    
-    Args:
-        data: Raw API response dictionary
-        
-    Returns:
-        Parsed outage dictionary or None
-    """
+    """Parse fixed network outage from GLUP API response."""
     try:
         outage = {}
-        
-        # GLUP format varies - handle different structures
         if 'affected_counties' in data:
             counties_text = data['affected_counties']
             if counties_text and len(counties_text.strip()) > 0:
@@ -98,11 +66,9 @@ def parse_fixed_outage(data: Dict) -> Optional[Dict]:
                 outage['description'] = create_bilingual_text(info_text)
         
         return outage if outage else None
-        
     except Exception as e:
         logger.error(f"Error parsing fixed outage: {e}")
         return None
-
 
 def extract_location_from_text(text: str) -> Optional[str]:
     """Extract location (city or county) from Swedish text."""
@@ -121,9 +87,9 @@ def extract_location_from_text(text: str) -> Optional[str]:
     
     # Look for location patterns
     location_patterns = [
-        r'i\s+([A-ZÅÄÖ][a-zåäö]+(?:\s+[A-ZÅÄÖ][a-zåäö]+)?)',  # "i Stockholm"
-        r'vid\s+([A-ZÅÄÖ][a-zåäö]+)',  # "vid Uppsala"
-        r'område\s+([A-ZÅÄÖ][a-zåäö]+)',  # "område Malmö"
+        r'i\s+([A-ZÅÄÖ][a-zåäö]+(?:\s+[A-ZÅÄÖ][a-zåäö]+)?)',
+        r'vid\s+([A-ZÅÄÖ][a-zåäö]+)',
+        r'område\s+([A-ZÅÄÖ][a-zåäö]+)',
     ]
     
     for pattern in location_patterns:
@@ -133,7 +99,6 @@ def extract_location_from_text(text: str) -> Optional[str]:
     
     return None
 
-
 def determine_severity_from_text(text: str) -> str:
     """Determine severity level from Swedish text."""
     if not text:
@@ -141,23 +106,16 @@ def determine_severity_from_text(text: str) -> str:
     
     text_lower = text.lower()
     
-    # Critical keywords
-    critical_keywords = ['kritisk', 'allvarlig', 'omfattande', 'stor störning', 'major']
-    if any(kw in text_lower for kw in critical_keywords):
+    if any(kw in text_lower for kw in ['kritisk', 'allvarlig', 'omfattande', 'stor störning', 'major']):
         return "critical"
     
-    # High severity
-    high_keywords = ['stor', 'betydande', 'viktig', 'omfattar']
-    if any(kw in text_lower for kw in high_keywords):
+    if any(kw in text_lower for kw in ['stor', 'betydande', 'viktig', 'omfattar']):
         return "high"
     
-    # Low severity
-    low_keywords = ['liten', 'begränsad', 'lokal', 'minor']
-    if any(kw in text_lower for kw in low_keywords):
+    if any(kw in text_lower for kw in ['liten', 'begränsad', 'lokal', 'minor']):
         return "low"
     
     return "medium"
-
 
 def extract_services_from_text(text: str) -> List[str]:
     """Extract affected services from Swedish text."""
@@ -168,8 +126,8 @@ def extract_services_from_text(text: str) -> List[str]:
     text_lower = text.lower()
     
     service_keywords = {
-        'mobilnät': 'Mobile Network',
-        'mobil': 'Mobile Network',
+        'mobilnät': MOBILE_NETWORK,
+        'mobil': MOBILE_NETWORK,
         '5g': '5G',
         '4g': '4G',
         'lte': 'LTE',
@@ -187,81 +145,48 @@ def extract_services_from_text(text: str) -> List[str]:
         if keyword in text_lower and service not in services:
             services.append(service)
     
-    return services if services else ['Mobile Network']
-
+    return services if services else [MOBILE_NETWORK]
 
 def parse_counties_list(text: str) -> List[str]:
     """Parse list of affected counties from GLUP response."""
-    counties = []
-    
-    # Try to extract county names
-    for county in SWEDISH_COUNTIES:
-        if county in text:
-            counties.append(county)
-    
-    return counties
+    return [county for county in SWEDISH_COUNTIES if county in text]
 
+def _process_raw_entry(raw: Any) -> Optional[Dict]:
+    """Process a single raw outage entry."""
+    try:
+        if hasattr(raw, 'raw_data'):
+            data = raw.raw_data
+            source_url = raw.source_url
+        else:
+            data = raw
+            source_url = None
+        
+        if not isinstance(data, dict):
+            return None
+
+        outage = None
+        if 'FaultId' in data or 'Text' in data:
+            outage = parse_mobile_outage(data)
+        elif 'affected_counties' in data or 'important_info' in data:
+            outage = parse_fixed_outage(data)
+        else:
+            logger.warning(f"Unknown outage format: {list(data.keys())}")
+            
+        if outage and source_url:
+            outage['source_url'] = source_url
+            
+        return outage
+    except Exception as e:
+        logger.error(f"Error processing raw entry: {e}")
+        return None
 
 def parse_telia_outages(raw_outages: List) -> List[Dict]:
-    """
-    Parse list of raw Telia outages (from RawOutage.raw_data).
-    
-    Args:
-        raw_outages: List of RawOutage objects or raw data dicts
-        
-    Returns:
-        List of parsed outage dictionaries
-    """
+    """Parse list of raw Telia outages."""
     parsed = []
-    
     for raw in raw_outages:
-        try:
-            # Handle RawOutage objects
-            if hasattr(raw, 'raw_data'):
-                data = raw.raw_data
-                source_url = raw.source_url
-            else:
-                data = raw
-                source_url = None
-            
-            # Determine type and parse accordingly
-            if isinstance(data, dict):
-                # Check if it's mobile or fixed format
-                if 'FaultId' in data or 'Text' in data:
-                    # Mobile outage
-                    outage = parse_mobile_outage(data)
-                elif 'affected_counties' in data or 'important_info' in data:
-                    # Fixed outage
-                    outage = parse_fixed_outage(data)
-                else:
-                    logger.warning(f"Unknown outage format: {list(data.keys())}")
-                    continue
-                
-                if outage:
-                    if source_url:
-                        outage['source_url'] = source_url
-                    parsed.append(outage)
-                    
-        except Exception as e:
-            logger.error(f"Error parsing outage: {e}")
-            continue
+        outage = _process_raw_entry(raw)
+        if outage:
+            parsed.append(outage)
     
     logger.info(f"Parsed {len(parsed)} outages from {len(raw_outages)} raw entries")
     return parsed
-
-
-if __name__ == "__main__":
-    # Test the parser
-    logging.basicConfig(level=logging.INFO)
-    
-    # Test with sample mobile outage
-    sample_mobile = {
-        "FaultId": "12345",
-        "Text": "På grund av ett kabelfel i Stockholm kan du uppleva störningar i mobilnätet. Vi arbetar med att åtgärda felet.",
-        "EventTime": "2025-12-26T10:00:00",
-        "EstimatedCloseTime": "2025-12-26T18:00:00"
-    }
-    
-    print("Testing mobile outage parser:")
-    result = parse_mobile_outage(sample_mobile)
-    print(json.dumps(result, indent=2, ensure_ascii=False))

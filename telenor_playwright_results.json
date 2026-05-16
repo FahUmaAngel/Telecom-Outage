@@ -1,0 +1,247 @@
+{
+  "outages": [
+    {
+      "incident_id": "34763680",
+      "operator": "Telenor",
+      "location": "Blekinge län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 23.apr 09:52",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34763680"
+    },
+    {
+      "incident_id": "34928713",
+      "operator": "Telenor",
+      "location": "Blekinge län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 16.maj 11:21",
+      "estimated_end": "lör 16.maj 16:00",
+      "status": "active",
+      "title": "34928713"
+    },
+    {
+      "incident_id": "34774031",
+      "operator": "Telenor",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 25.apr 14:25",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34774031"
+    },
+    {
+      "incident_id": "34097325",
+      "operator": "Telenor",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 27.dec 14:39",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34097325"
+    },
+    {
+      "incident_id": "34637018",
+      "operator": "Telenor",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 30.mar 14:29",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34637018"
+    },
+    {
+      "incident_id": "34774217",
+      "operator": "Telenor",
+      "location": "Dalarnas län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 25.apr 18:26",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34774217"
+    },
+    {
+      "incident_id": "34575443",
+      "operator": "Telenor",
+      "location": "Gävleborgs län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 18.mar 15:20",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34575443"
+    },
+    {
+      "incident_id": "34243713",
+      "operator": "Telenor",
+      "location": "Jämtlands län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 22.jan 00:49",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34243713"
+    },
+    {
+      "incident_id": "34630465",
+      "operator": "Telenor",
+      "location": "Kalmar län",
+      "description": "Felsökning pågår",
+      "start_time": "sön 29.mar 16:16",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34630465"
+    },
+    {
+      "incident_id": "34887554",
+      "operator": "Telenor",
+      "location": "Norrbottens län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 11.maj 22:15",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34887554"
+    },
+    {
+      "incident_id": "34271268",
+      "operator": "Telenor",
+      "location": "Norrbottens län",
+      "description": "Felsökning pågår",
+      "start_time": "tis 27.jan 00:18",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34271268"
+    },
+    {
+      "incident_id": "34887446",
+      "operator": "Telenor",
+      "location": "Norrbottens län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 11.maj 22:15",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34887446"
+    },
+    {
+      "incident_id": "34580114",
+      "operator": "Telenor",
+      "location": "Norrbottens län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 19.mar 00:05",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34580114"
+    },
+    {
+      "incident_id": "34888167",
+      "operator": "Telenor",
+      "location": "Skåne län",
+      "description": "Felsökning pågår",
+      "start_time": "tis 12.maj 08:28",
+      "estimated_end": "lör 16.maj 15:00",
+      "status": "active",
+      "title": "34888167"
+    },
+    {
+      "incident_id": "34728000",
+      "operator": "Telenor",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 17.apr 00:02",
+      "estimated_end": "lör 16.maj 12:00",
+      "status": "active",
+      "title": "34728000"
+    },
+    {
+      "incident_id": "34773961",
+      "operator": "Telenor",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "lör 25.apr 12:51",
+      "estimated_end": "lör 16.maj 12:00",
+      "status": "active",
+      "title": "34773961"
+    },
+    {
+      "incident_id": "34688798",
+      "operator": "Telenor",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "fre 10.apr 00:54",
+      "estimated_end": "lör 16.maj 12:00",
+      "status": "active",
+      "title": "34688798"
+    },
+    {
+      "incident_id": "34784597",
+      "operator": "Telenor",
+      "location": "Södermanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 27.apr 23:50",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34784597"
+    },
+    {
+      "incident_id": "34928135",
+      "operator": "Telenor",
+      "location": "Uppsala län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 12.mar 07:22",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34928135"
+    },
+    {
+      "incident_id": "34914671",
+      "operator": "Telenor",
+      "location": "Västmanlands län",
+      "description": "Felsökning pågår",
+      "start_time": "tors 14.maj 02:32",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34914671"
+    },
+    {
+      "incident_id": "34525819",
+      "operator": "Telenor",
+      "location": "Västra Götalands län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 09.mar 14:17",
+      "estimated_end": "lör 16.maj 12:00",
+      "status": "active",
+      "title": "34525819"
+    },
+    {
+      "incident_id": "34662145",
+      "operator": "Telenor",
+      "location": "Västra Götalands län",
+      "description": "Väder",
+      "start_time": "tors 09.apr 14:42",
+      "estimated_end": "lör 16.maj 13:00",
+      "status": "active",
+      "title": "34662145"
+    },
+    {
+      "incident_id": "34663038",
+      "operator": "Telenor",
+      "location": "Västra Götalands län",
+      "description": "Felsökning pågår",
+      "start_time": "mån 06.apr 20:40",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34663038"
+    },
+    {
+      "incident_id": "34452401",
+      "operator": "Telenor",
+      "location": "Västra Götalands län",
+      "description": "Felsökning pågår",
+      "start_time": "ons 25.feb 11:00",
+      "estimated_end": "lör 16.maj 14:00",
+      "status": "active",
+      "title": "34452401"
+    }
+  ],
+  "timestamp": "2026-05-16T11:47:15.579447",
+  "success": true,
+  "method": "playwright_telenor"
+}

@@ -3,7 +3,7 @@ User report endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Annotated
 from ..dependencies import get_db
 from ..schemas import ReportCreate, ReportResponse, HotspotResponse
 from scrapers.db.models import UserReport, Operator
@@ -12,14 +12,14 @@ from scrapers.common.crowd_engine import detect_hotspots, aggregate_external_sig
 router = APIRouter(prefix="/api/v1/reports", tags=["reports"])
 
 @router.get("/hotspots", response_model=List[HotspotResponse])
-def get_hotspots(db: Session = Depends(get_db)):
+def get_hotspots(db: Annotated[Session, Depends(get_db)]):
     """Get active crowd hotspots and external signals."""
     hotspots = detect_hotspots(db)
     external = aggregate_external_signals()
     return hotspots + external
 
 @router.post("/", response_model=ReportResponse)
-def create_report(report: ReportCreate, db: Session = Depends(get_db)):
+def create_report(report: ReportCreate, db: Annotated[Session, Depends(get_db)]):
     """Submit a new outage report."""
     operator_id = None
     if report.operator_name:
@@ -51,9 +51,10 @@ def create_report(report: ReportCreate, db: Session = Depends(get_db)):
     )
 
 @router.get("/", response_model=List[ReportResponse])
-def get_reports(db: Session = Depends(get_db)):
+def get_reports(db: Annotated[Session, Depends(get_db)]):
     """List all user reports."""
-    reports = db.query(UserReport).all()
+    from sqlalchemy.orm import joinedload
+    reports = db.query(UserReport).options(joinedload(UserReport.operator)).all()
     return [
         ReportResponse(
             id=r.id,

@@ -97,7 +97,7 @@ export default function AnalyticsPage() {
                                 <Tooltip cursor={{ fill: 'var(--surface-hover)' }} />
                                 <Bar dataKey="score" radius={[0, 4, 4, 0]} barSize={20}>
                                     {reliabilityChartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--accent-primary)' : 'var(--text-muted)'} />
+                                        <Cell key={`cell-${entry.name}`} fill={index === 0 ? 'var(--accent-primary)' : 'var(--text-muted)'} />
                                     ))}
                                 </Bar>
                             </BarChart>

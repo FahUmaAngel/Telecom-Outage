@@ -1,12 +1,10 @@
 """
 Database Models (SQLAlchemy).
 """
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Text, Float, JSON, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Float, JSON, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from geoalchemy2 import Geometry
 from .connection import Base
-from ..common.models import OperatorEnum, SeverityLevel, OutageStatus
 
 class Operator(Base):
     __tablename__ = "operators"
@@ -50,8 +48,8 @@ class Outage(Base):
     title = Column(JSON) # Bilingual {"sv": "...", "en": "..."}
     description = Column(JSON, nullable=True) # Bilingual
     
-    status = Column(Enum(OutageStatus))
-    severity = Column(Enum(SeverityLevel))
+    status = Column(String, nullable=True)   # e.g. "active", "resolved", "scheduled", "investigating"
+    severity = Column(String, nullable=True)  # e.g. "low", "medium", "high", "critical"
     
     start_time = Column(DateTime(timezone=True), nullable=True)
     end_time = Column(DateTime(timezone=True), nullable=True)
@@ -61,9 +59,9 @@ class Outage(Base):
     # SQLite fallback: using specific columns instead of PostGIS Geometry
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    # geom = Column(Geometry("POINT", srid=4326), nullable=True)
     
     affected_services = Column(JSON) # List of strings/enums
+    place = Column(String, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -94,12 +92,25 @@ class UserReport(Base):
 
 class User(Base):
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String, default="user") # admin, researcher, user
     is_active = Column(Boolean, default=True)
-    
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ScraperRun(Base):
+    __tablename__ = "scraper_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    operator = Column(String, index=True)           # telia / telenor / tre
+    started_at = Column(DateTime(timezone=True))
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String)                          # success / failed / partial
+    outages_found = Column(Integer, default=0)
+    outages_resolved = Column(Integer, default=0)
+    retry_count = Column(Integer, default=0)
+    error_message = Column(Text, nullable=True)
 

@@ -11,23 +11,17 @@ class OperatorEnum(str, Enum):
     """Telecom operator names."""
     TELIA = "telia"
     TRE = "tre"
-    LYCAMOBILE = "lycamobile"
+    TELENOR = "telenor"
 
 
 class ServiceType(str, Enum):
-    """Telecom service types."""
-    MOBILE = "mobile"
+    """Mobile generation service types. Only 5G+, 5G, 4G, 3G, 2G."""
     MOBILE_5G_PLUS = "5g+"
     MOBILE_5G = "5g"
     MOBILE_4G = "4g"
     MOBILE_3G = "3g"
     MOBILE_2G = "2g"
-    MOBILE_DATA = "data"
-    VOICE = "voice"
-    SMS = "sms"
-    MMS = "mms"
-    BROADBAND = "broadband"
-    FIBER = "fiber"
+    MOBILE = "mobile"  # Legacy fallback only
 
 
 class SeverityLevel(str, Enum):

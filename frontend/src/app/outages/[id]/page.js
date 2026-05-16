@@ -7,16 +7,256 @@ import { useLanguage } from "../../../context/LanguageContext";
 import { api } from "../../../lib/api";
 import {
     AlertCircle,
-    Calendar,
     Clock,
     CheckCircle2,
     Activity,
     MapPin,
     ShieldAlert,
     ChevronLeft,
-    Wrench,
-    ArrowRight
+    Wrench
 } from "lucide-react";
+import PropTypes from "prop-types";
+
+const LoadingState = () => (
+    <div className="detail-page-loading">
+        <div className="spinner"></div>
+        <style jsx>{`
+            .detail-page-loading {
+                height: 70vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border: 3px solid var(--surface-light);
+                border-top-color: var(--accent-primary);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
+    </div>
+);
+
+const ErrorState = ({ error, lang, onBack }) => (
+    <div className="error-state glass">
+        <AlertCircle size={48} className="error-icon" />
+        <h2>{error || (lang === "sv" ? "Avbrottet hittades inte" : "Outage not found")}</h2>
+        <button onClick={onBack} className="back-btn">
+            {lang === "sv" ? "Gå tillbaka" : "Go back"}
+        </button>
+        <style jsx>{`
+            .error-state {
+                padding: 60px 40px;
+                text-align: center;
+                margin-top: 50px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            .error-icon { color: var(--status-critical); opacity: 0.8; }
+            .back-btn {
+                padding: 10px 24px;
+                background: var(--accent-primary);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: var(--transition-base);
+            }
+            .back-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        `}</style>
+    </div>
+);
+
+ErrorState.propTypes = {
+    error: PropTypes.string,
+    lang: PropTypes.string.isRequired,
+    onBack: PropTypes.func.isRequired
+};
+
+
+
+const OutageTimeline = ({ outage, lang, hasUpdates, isResolved, hasEstimation, resolutionDesc }) => (
+    <section className="premium-card history-section">
+        <h3 className="section-title">{lang === "sv" ? "Incidentförlopp" : "Incident Timeline"}</h3>
+        <div className="visual-timeline">
+            {/* Step 1: Detected */}
+            <div className={`timeline-node completed`}>
+                <div className="node-marker">
+                    <AlertCircle size={16} />
+                </div>
+                <div className="node-content">
+                    <div className="node-header">
+                        <span className="node-title">{lang === "sv" ? "Problem identifierat" : "Issue Detected"}</span>
+                        <span className="node-time">{new Date(outage.start_time).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="node-desc">{lang === "sv" ? `Avbrott rapporterat hos ${outage.operator_name}` : `Outage reported at ${outage.operator_name}`}</p>
+                </div>
+            </div>
+
+            {/* Step 2: Investigation / Updates */}
+            <div className={`timeline-node ${hasUpdates || isResolved ? 'completed' : 'active'}`}>
+                <div className="node-marker">
+                    <Activity size={16} />
+                </div>
+                <div className="node-content">
+                    <div className="node-header">
+                        <span className="node-title">{lang === "sv" ? "Undersökning pågår" : "Investigation"}</span>
+                        {hasUpdates && <span className="node-time">{new Date(outage.updated_at).toLocaleTimeString()}</span>}
+                    </div>
+                    <p className="node-desc">{lang === "sv" ? "Tekniker analyserar omfattningen och förbereder åtgärder." : "Engineers are analyzing the impact and preparing repairs."}</p>
+                </div>
+            </div>
+
+            {/* Step 3: ETA / Fix Scheduled (Optional) */}
+            {hasEstimation && (
+                <div className={`timeline-node ${isResolved ? 'completed' : 'active'}`}>
+                    <div className="node-marker highlight">
+                        <Wrench size={16} />
+                    </div>
+                    <div className="node-content">
+                        <div className="node-header">
+                            <span className="node-title">{lang === "sv" ? "Åtgärd planerad" : "Fix Scheduled"}</span>
+                            <span className="node-time">{new Date(outage.estimated_fix_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <p className="node-desc">{lang === "sv" ? "Beräknad tid för lösning är satt." : "Estimated time for resolution has been confirmed."}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Step 4: Resolved */}
+            <div className={`timeline-node ${isResolved ? 'completed resolved' : 'pending'}`}>
+                <div className="node-marker">
+                    <CheckCircle2 size={16} />
+                </div>
+                <div className="node-content">
+                    <div className="node-header">
+                        <span className="node-title">{lang === "sv" ? "Återställt" : "Resolution"}</span>
+                        {isResolved && <span className="node-time">{outage.end_time ? new Date(outage.end_time).toLocaleTimeString() : new Date(outage.updated_at).toLocaleTimeString()}</span>}
+                    </div>
+                    <p className="node-desc">{resolutionDesc}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+);
+
+OutageTimeline.propTypes = {
+    outage: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired,
+    hasUpdates: PropTypes.bool,
+    isResolved: PropTypes.bool,
+    hasEstimation: PropTypes.bool,
+    resolutionDesc: PropTypes.string
+};
+
+const OutageSidebar = ({ outage, lang }) => (
+    <aside className="details-sidebar">
+        <div className="premium-card status-panel">
+            <h3 className="panel-title">{lang === "sv" ? "Status" : "Summary"}</h3>
+            <div className="summary-datum">
+                <span className="datum-label">{lang === "sv" ? "Senaste synk" : "Last Sync"}</span>
+                <span className="datum-value">
+                    {outage.updated_at ? new Date(outage.updated_at).toLocaleTimeString() : new Date(outage.start_time).toLocaleTimeString()}
+                </span>
+            </div>
+            {outage.estimated_fix_time && (
+                <div className="summary-datum highlight">
+                    <span className="datum-label">{lang === "sv" ? "Beräknad lösning" : "ETA Resolution"}</span>
+                    <span className="datum-value indigo-text">{new Date(outage.estimated_fix_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="datum-sub">{new Date(outage.estimated_fix_time).toLocaleDateString()}</span>
+                </div>
+            )}
+            <button className="btn-refresh" onClick={() => globalThis.window.location.reload()}>
+                {lang === "sv" ? "Uppdatera" : "Refresh"}
+            </button>
+            {outage.source_url && (
+                <a href={outage.source_url} target="_blank" rel="noopener noreferrer" className="btn-source">
+                    {lang === "sv" ? "Visa källa" : "View Source"} ↗
+                </a>
+            )}
+        </div>
+    </aside>
+);
+
+OutageSidebar.propTypes = {
+    outage: PropTypes.object.isRequired,
+    lang: PropTypes.string.isRequired
+};
+
+const OutageHero = ({ outage, t, lang, regionName }) => (
+    <section className="premium-card hero-section">
+        <div className="operator-chip">
+            {outage.operator_name}
+        </div>
+        <h1 className="detail-title">{t(outage.title)}</h1>
+
+        <div className="meta-info-grid">
+            <div className="info-item">
+                <div className="info-header">
+                    <MapPin size={14} />
+                    <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
+                </div>
+                <span className="info-value">
+                    {regionName}
+                </span>
+            </div>
+            <div className="info-item">
+                <div className="info-header">
+                    <ShieldAlert size={14} />
+                    <span className="info-label">{lang === "sv" ? "Allvarlighetsgrad" : "Severity"}</span>
+                </div>
+                <span className={`info-value severity-${outage.severity.toLowerCase()}`}>
+                    {outage.severity}
+                </span>
+            </div>
+            <div className="info-item">
+                <div className="info-header">
+                    <Clock size={14} />
+                    <span className="info-label">{lang === "sv" ? "Starttid" : "Started"}</span>
+                </div>
+                <span className="info-value">
+                    {outage.start_time ? new Date(outage.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : "-"}
+                </span>
+            </div>
+            <div className="info-item">
+                <div className="info-header">
+                    <Activity size={14} />
+                    <span className="info-label">Status</span>
+                </div>
+                <span className="info-value">{outage.status}</span>
+            </div>
+        </div>
+
+        <div className="description-section">
+            <h4 className="sub-title">{lang === "sv" ? "Beskrivning" : "Description"}</h4>
+            <p className="description-text">{t(outage.description)}</p>
+        </div>
+
+        {outage.affected_services?.length > 0 && (
+            <div className="services-section">
+                <h4 className="sub-title">{lang === "sv" ? "Berörda tjänster" : "Affected Services"}</h4>
+                <div className="service-list">
+                    {outage.affected_services.map(service => (
+                        <span key={service} className="service-tag">{service}</span>
+                    ))}
+                </div>
+            </div>
+        )}
+    </section>
+);
+
+OutageHero.propTypes = {
+    outage: PropTypes.object.isRequired,
+    t: PropTypes.func.isRequired,
+    lang: PropTypes.string.isRequired,
+    regionName: PropTypes.string.isRequired
+};
 
 export default function OutageDetailPage() {
     const { id } = useParams();
@@ -42,75 +282,25 @@ export default function OutageDetailPage() {
         if (id) fetchOutage();
     }, [id, lang]);
 
-    if (loading) {
-        return (
-            <div className="detail-page-loading">
-                <div className="spinner"></div>
-                <style jsx>{`
-                    .detail-page-loading {
-                        height: 70vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .spinner {
-                        width: 40px;
-                        height: 40px;
-                        border: 3px solid var(--surface-light);
-                        border-top-color: var(--accent-primary);
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                    }
-                    @keyframes spin { to { transform: rotate(360deg); } }
-                `}</style>
-            </div>
-        );
-    }
-
-    if (error || !outage) {
-        return (
-            <div className="error-state glass">
-                <AlertCircle size={48} className="error-icon" />
-                <h2>{error || (lang === "sv" ? "Avbrottet hittades inte" : "Outage not found")}</h2>
-                <button onClick={() => router.back()} className="back-btn">
-                    {lang === "sv" ? "Gå tillbaka" : "Go back"}
-                </button>
-                <style jsx>{`
-                    .error-state {
-                        padding: 60px 40px;
-                        text-align: center;
-                        margin-top: 50px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 20px;
-                    }
-                    .error-icon { color: var(--status-critical); opacity: 0.8; }
-                    .back-btn {
-                        padding: 10px 24px;
-                        background: var(--accent-primary);
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-weight: 700;
-                        cursor: pointer;
-                        transition: var(--transition-base);
-                    }
-                    .back-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-                `}</style>
-            </div>
-        );
-    }
+    if (loading) return <LoadingState />;
+    if (error || !outage) return <ErrorState error={error} lang={lang} onBack={() => router.back()} />;
 
     const isResolved = outage.status.toLowerCase() === "resolved";
     const hasEstimation = !!outage.estimated_fix_time;
     const hasUpdates = outage.updated_at && new Date(outage.updated_at) > new Date(outage.start_time);
 
+    const resolvedText = lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.";
+    const pendingText = lang === "sv" ? "Väntar på verifiering." : "Awaiting final verification.";
+    const resolutionDesc = isResolved ? resolvedText : pendingText;
+    
+    const defaultRegion = lang === "sv" ? "Sverige" : "Sweden";
+    const regionName = outage.region_name ? t(outage.region_name) : defaultRegion;
+
     return (
         <div className="outage-detail-container animate-fade-in">
             <header className="detail-header">
                 <Link href="/" className="back-link">
-                    <ChevronLeft size={18} /> {lang === "sv" ? "Dashboard" : "Dashboard"}
+                    <ChevronLeft size={18} /> Dashboard
                 </Link>
                 <div className={`status-badge-detail status-${outage.status.toLowerCase()}`}>
                     <span className="dot"></span>
@@ -120,154 +310,19 @@ export default function OutageDetailPage() {
 
             <div className="detail-grid">
                 <div className="main-column">
-                    <section className="premium-card hero-section">
-                        <div className="operator-chip">
-                            {outage.operator_name}
-                        </div>
-                        <h1 className="detail-title">{t(outage.title)}</h1>
+                    <OutageHero outage={outage} t={t} lang={lang} regionName={regionName} />
 
-                        <div className="meta-info-grid">
-                            <div className="info-item">
-                                <div className="info-header">
-                                    <MapPin size={14} />
-                                    <span className="info-label">{lang === "sv" ? "Plats" : "Location"}</span>
-                                </div>
-                                <span className="info-value">{outage.location || "Sweden"}</span>
-                            </div>
-                            <div className="info-item">
-                                <div className="info-header">
-                                    <ShieldAlert size={14} />
-                                    <span className="info-label">{lang === "sv" ? "Allvarlighetsgrad" : "Severity"}</span>
-                                </div>
-                                <span className={`info-value severity-${outage.severity.toLowerCase()}`}>
-                                    {outage.severity}
-                                </span>
-                            </div>
-                            <div className="info-item">
-                                <div className="info-header">
-                                    <Clock size={14} />
-                                    <span className="info-label">{lang === "sv" ? "Starttid" : "Started"}</span>
-                                </div>
-                                <span className="info-value">
-                                    {outage.start_time ? new Date(outage.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : "-"}
-                                </span>
-                            </div>
-                            <div className="info-item">
-                                <div className="info-header">
-                                    <Activity size={14} />
-                                    <span className="info-label">{lang === "sv" ? "Status" : "Status"}</span>
-                                </div>
-                                <span className="info-value">{outage.status}</span>
-                            </div>
-                        </div>
-
-                        <div className="description-section">
-                            <h4 className="sub-title">{lang === "sv" ? "Beskrivning" : "Description"}</h4>
-                            <p className="description-text">{t(outage.description)}</p>
-                        </div>
-
-                        {outage.affected_services?.length > 0 && (
-                            <div className="services-section">
-                                <h4 className="sub-title">{lang === "sv" ? "Berörda tjänster" : "Affected Services"}</h4>
-                                <div className="service-list">
-                                    {outage.affected_services.map(service => (
-                                        <span key={service} className="service-tag">{service}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </section>
-
-                    <section className="premium-card history-section">
-                        <h3 className="section-title">{lang === "sv" ? "Incidentförlopp" : "Incident Timeline"}</h3>
-                        <div className="visual-timeline">
-                            {/* Step 1: Detected */}
-                            <div className={`timeline-node completed`}>
-                                <div className="node-marker">
-                                    <AlertCircle size={16} />
-                                </div>
-                                <div className="node-content">
-                                    <div className="node-header">
-                                        <span className="node-title">{lang === "sv" ? "Problem identifierat" : "Issue Detected"}</span>
-                                        <span className="node-time">{new Date(outage.start_time).toLocaleTimeString()}</span>
-                                    </div>
-                                    <p className="node-desc">{lang === "sv" ? `Avbrott rapporterat hos ${outage.operator_name}` : `Outage reported at ${outage.operator_name}`}</p>
-                                </div>
-                            </div>
-
-                            {/* Step 2: Investigation / Updates */}
-                            <div className={`timeline-node ${hasUpdates || isResolved ? 'completed' : 'active'}`}>
-                                <div className="node-marker">
-                                    <Activity size={16} />
-                                </div>
-                                <div className="node-content">
-                                    <div className="node-header">
-                                        <span className="node-title">{lang === "sv" ? "Undersökning pågår" : "Investigation"}</span>
-                                        {hasUpdates && <span className="node-time">{new Date(outage.updated_at).toLocaleTimeString()}</span>}
-                                    </div>
-                                    <p className="node-desc">{lang === "sv" ? "Tekniker analyserar omfattningen och förbereder åtgärder." : "Engineers are analyzing the impact and preparing repairs."}</p>
-                                </div>
-                            </div>
-
-                            {/* Step 3: ETA / Fix Scheduled (Optional) */}
-                            {hasEstimation && (
-                                <div className={`timeline-node ${isResolved ? 'completed' : 'active'}`}>
-                                    <div className="node-marker highlight">
-                                        <Wrench size={16} />
-                                    </div>
-                                    <div className="node-content">
-                                        <div className="node-header">
-                                            <span className="node-title">{lang === "sv" ? "Åtgärd planerad" : "Fix Scheduled"}</span>
-                                            <span className="node-time">{new Date(outage.estimated_fix_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                        </div>
-                                        <p className="node-desc">{lang === "sv" ? "Beräknad tid för lösning är satt." : "Estimated time for resolution has been confirmed."}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 4: Resolved */}
-                            <div className={`timeline-node ${isResolved ? 'completed resolved' : 'pending'}`}>
-                                <div className="node-marker">
-                                    <CheckCircle2 size={16} />
-                                </div>
-                                <div className="node-content">
-                                    <div className="node-header">
-                                        <span className="node-title">{lang === "sv" ? "Återställt" : "Resolution"}</span>
-                                        {isResolved && <span className="node-time">{outage.end_time ? new Date(outage.end_time).toLocaleTimeString() : new Date(outage.updated_at).toLocaleTimeString()}</span>}
-                                    </div>
-                                    <p className="node-desc">{isResolved ? (lang === "sv" ? "Tjänsterna är nu fullt återställda." : "All services have been fully restored.") : (lang === "sv" ? "Väntarบน verifiering." : "Awaiting final verification.")}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <OutageTimeline 
+                        outage={outage} 
+                        lang={lang} 
+                        hasUpdates={hasUpdates} 
+                        isResolved={isResolved} 
+                        hasEstimation={hasEstimation} 
+                        resolutionDesc={resolutionDesc} 
+                    />
                 </div>
 
-                <aside className="details-sidebar">
-                    <div className="premium-card status-panel">
-                        <h3 className="panel-title">{lang === "sv" ? "Status" : "Summary"}</h3>
-                        <div className="summary-datum">
-                            <span className="datum-label">{lang === "sv" ? "Senaste synk" : "Last Sync"}</span>
-                            <span className="datum-value">
-                                {outage.updated_at ? new Date(outage.updated_at).toLocaleTimeString() : new Date(outage.start_time).toLocaleTimeString()}
-                            </span>
-                        </div>
-                        {outage.estimated_fix_time && (
-                            <div className="summary-datum highlight">
-                                <span className="datum-label">{lang === "sv" ? "Beräknad lösning" : "ETA Resolution"}</span>
-                                <span className="datum-value indigo-text">{new Date(outage.estimated_fix_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                <span className="datum-sub">{new Date(outage.estimated_fix_time).toLocaleDateString()}</span>
-                            </div>
-                        )}
-                        <button className="btn-refresh" onClick={() => window.location.reload()}>
-                            {lang === "sv" ? "Uppdatera" : "Refresh"}
-                        </button>
-                        {outage.source_url && (
-                            <a href={outage.source_url} target="_blank" rel="noopener noreferrer" className="btn-source">
-                                {lang === "sv" ? "Visa källa" : "View Source"} ↗
-                            </a>
-                        )}
-                    </div>
-                </aside>
+                <OutageSidebar outage={outage} lang={lang} />
             </div>
 
             <style jsx>{`

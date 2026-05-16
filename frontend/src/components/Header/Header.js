@@ -1,32 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
+import PropTypes from "prop-types";
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
+    Header.propTypes = { onMenuClick: PropTypes.func.isRequired };
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const resolvedLang = mounted ? lang : "sv";
+  const resolvedTheme = mounted ? theme : "dark";
+  const darkLabel = resolvedLang === "sv" ? "MORKT" : "DARK";
+  const lightLabel = resolvedLang === "sv" ? "LJUST" : "LIGHT";
+  const themeToggleLabel = resolvedTheme === "light" ? darkLabel : lightLabel;
 
   return (
     <header className="header glass animate-fade-in">
-      <div className="logo font-heading">
-        <span className="text-gradient">Telecom</span> Outage
+      <div className="logo-row">
+        <button className="hamburger" onClick={onMenuClick} aria-label="Toggle menu">
+          <span /><span /><span />
+        </button>
+        <div className="logo font-heading">
+          <span className="text-gradient">Telecom</span> Outage
+        </div>
       </div>
 
       <div className="search-container">
         <div className="search-icon-css"></div>
         <input
           type="text"
-          placeholder={lang === "sv" ? "Sök..." : "Search..."}
+          placeholder={resolvedLang === "sv" ? "Sok..." : "Search..."}
         />
       </div>
 
       <div className="actions">
         <button onClick={toggleLanguage} className="action-btn">
-          {lang === "sv" ? "SV" : "EN"}
+          {resolvedLang === "sv" ? "SV" : "EN"}
         </button>
         <button onClick={toggleTheme} className="action-btn theme-btn">
-          {theme === "light" ? (lang === "sv" ? "MÖRKT" : "DARK") : (lang === "sv" ? "LJUST" : "LIGHT")}
+          {themeToggleLabel}
         </button>
       </div>
 
@@ -111,9 +130,32 @@ export default function Header() {
           min-width: 70px;
         }
 
+        .logo-row { display: flex; align-items: center; gap: 10px; }
+        .hamburger {
+          display: none;
+          flex-direction: column;
+          justify-content: center;
+          gap: 5px;
+          width: 36px;
+          height: 36px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 6px;
+          border-radius: var(--radius-sm);
+        }
+        .hamburger:hover { background: var(--surface-hover); }
+        .hamburger span {
+          display: block;
+          height: 2px;
+          background: var(--text-primary);
+          border-radius: 2px;
+          width: 100%;
+        }
         @media (max-width: 768px) {
           .header { padding: 0 16px; }
           .search-container { display: none; }
+          .hamburger { display: flex; }
         }
       `}</style>
     </header>
