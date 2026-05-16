@@ -204,7 +204,7 @@ function ScraperHealth({ scrapers, lang }) {
         <section className="admin-section">
             <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
             <div className="scraper-grid">
-                {scrapers.map((s) => {
+                {scrapers.filter(s => s.operator?.toLowerCase() !== 'tele2').map((s) => {
                     const isOnline = Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
                     return (
                     <div key={s.operator} className="premium-card scraper-card">
@@ -585,7 +585,14 @@ function OutageManagement({ outageMgr, lang }) {
                 </p>
                 <ul className="sharing-list">
                     <li><strong>Telia:</strong> Halebop, Fello</li>
-                    <li><strong>Telenor:</strong> Lycamobile, Vimla, Fibio, Comviq</li>
+                    <li>
+                        <strong>Telenor:</strong> Lycamobile, Vimla, Fibio, Comviq
+                        <em className="sharing-note">
+                            {" "}({lang === "sv"
+                                ? "Comviq (tidigare Tele2) delar nät med Telenor"
+                                : "Comviq (formerly Tele2) shares network with Telenor"})
+                        </em>
+                    </li>
                     <li><strong>Tre:</strong> Hallon</li>
                 </ul>
             </div>
@@ -647,6 +654,7 @@ function OutageManagement({ outageMgr, lang }) {
                 .sharing-title { margin: 0 0 12px 0; display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 1.1rem; }
                 .sharing-text { margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-secondary); opacity: 0.9; }
                 .sharing-list { margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-primary); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+                .sharing-note { font-style: italic; font-size: 0.8rem; color: var(--text-muted); margin-left: 4px; }
                 .table-card { padding: 0; overflow: hidden; box-shadow: var(--shadow-md); border-radius: 20px; border: 1px solid var(--border-color); background: var(--surface-color); }
                 .table-wrapper { overflow-x: auto; max-height: 800px; }
                 .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
