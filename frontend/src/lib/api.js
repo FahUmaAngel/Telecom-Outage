@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const AUTH_TOKEN_STORAGE_KEY = "telecom-outage-auth-token";
 let authToken = null;
 

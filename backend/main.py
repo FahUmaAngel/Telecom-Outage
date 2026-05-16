@@ -3,6 +3,8 @@ FastAPI Entry Point with Background Scheduler.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from .routers import outages, operators, reports, analytics, auth, regions, admin, research_analytics
 from .middleware import LoggingMiddleware, SecurityHeadersMiddleware
 from contextlib import asynccontextmanager
@@ -146,6 +148,22 @@ app.include_router(research_analytics.router)
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Telecom Outage API is running"}
+
+# Optional: serve exported frontend (Next.js output: export) when present.
+# This allows deploying backend + frontend together as a single service.
+_frontend_out = os.path.join(os.path.dirname(__file__), "..", "frontend", "out")
+if os.path.isdir(_frontend_out):
+    app.mount("/", StaticFiles(directory=_frontend_out, html=True), name="frontend")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def _frontend_fallback(full_path: str):
+        # Let API routes be handled by routers, not the static site.
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        index_path = os.path.join(_frontend_out, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        raise HTTPException(status_code=404, detail="Not found")
 
 @app.get("/api/v1/scheduler/status")
 def scheduler_status():
