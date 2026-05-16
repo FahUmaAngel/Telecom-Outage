@@ -56,14 +56,14 @@ def parse_telia_html(html_content: str) -> List[Dict]:
                 if outage_data:
                     outages.append(outage_data)
             except Exception as e:
-                logger.error(f"Error parsing outage container: {e}")
+                logger.exception(f"Error parsing outage container: {e}")
                 continue
         
         logger.info(f"Parsed {len(outages)} outages from Telia HTML")
         return outages
         
     except Exception as e:
-        logger.error(f"Error parsing Telia HTML: {e}")
+        logger.exception(f"Error parsing Telia HTML: {e}")
         return []
 
 
@@ -113,7 +113,7 @@ def extract_outage_from_container(container) -> Optional[Dict]:
         return None
         
     except Exception as e:
-        logger.error(f"Error extracting outage data: {e}")
+        logger.exception(f"Error extracting outage data: {e}")
         return None
 
 
@@ -144,7 +144,7 @@ def parse_telia_json(json_data: dict) -> List[Dict]:
         return outages
         
     except Exception as e:
-        logger.error(f"Error parsing Telia JSON: {e}")
+        logger.exception(f"Error parsing Telia JSON: {e}")
         return []
 
 

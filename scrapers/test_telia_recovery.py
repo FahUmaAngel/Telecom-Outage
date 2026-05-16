@@ -76,10 +76,10 @@ def test_recovery():
             for inc in area_incs:
                 logger.info(f"  - {inc['incident_id']}: {inc.get('description', '')[:50]}")
         except Exception as e:
-            logger.error(f"Failed to expand {county}: {e}")
+            logger.exception(f"Failed to expand {county}: {e}")
             
     except Exception as e:
-        logger.error(f"Test failed: {e}")
+        logger.exception(f"Test failed: {e}")
     finally:
         if driver:
             driver.quit()

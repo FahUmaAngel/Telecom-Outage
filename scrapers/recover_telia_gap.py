@@ -135,7 +135,7 @@ def save_incident(db, inc, target_date_str):
         save_outage(db, normalized, {"source": "telia_recovery_final", "raw": inc, "recovery_date": target_date_str})
         return True
     except Exception as save_err:
-        logger.error(f"Error saving {inc.get('incident_id')}: {save_err}")
+        logger.exception(f"Error saving {inc.get('incident_id')}: {save_err}")
         return False
 
 def recover_telia_for_date(db, driver, target_date_obj):
@@ -149,7 +149,7 @@ def recover_telia_for_date(db, driver, target_date_obj):
         try:
             process_county(driver, county, target_date_str, all_incidents)
         except Exception as e:
-            logger.error(f"Error on {county}: {e}")
+            logger.exception(f"Error on {county}: {e}")
             continue
 
     # Save to DB
@@ -183,7 +183,7 @@ def run_recovery():
         logger.info(f"Recovery complete. Total Telia incidents saved: {total_saved}")
         
     except Exception as e:
-        logger.error(f"Fatal recovery error: {e}")
+        logger.exception(f"Fatal recovery error: {e}")
     finally:
         if driver:
             driver.quit()

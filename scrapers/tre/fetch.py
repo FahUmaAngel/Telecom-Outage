@@ -51,7 +51,7 @@ class TreFetcher:
                     logger.warning(f"[Tre] Failed to fetch page {url}: {response.status_code}")
                     
             except Exception as e:
-                logger.error(f"[Tre] Error fetching {url}: {e}")
+                logger.exception(f"[Tre] Error fetching {url}: {e}")
             
         return outages
 

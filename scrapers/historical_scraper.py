@@ -364,7 +364,7 @@ def scrape_telia_history(start_date: datetime, end_date: datetime) -> Dict:
         logger.info(f"Total unique incidents collected: {len(results['outages'])}")
         
     except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
+        logger.exception(f"Fatal error: {e}", exc_info=True)
         results['error'] = str(e)
     finally:
         if driver:
@@ -435,7 +435,7 @@ def scrape_telenor_current() -> Dict:
         logger.info(f"Telenor: found {len(results['outages'])} incidents")
         
     except Exception as e:
-        logger.error(f"Telenor scrape error: {e}")
+        logger.exception(f"Telenor scrape error: {e}")
         results['error'] = str(e)
     
     return results
@@ -581,7 +581,7 @@ def scrape_tre_current() -> Dict:
         logger.info(f"Tre: found {len(results['outages'])} incidents")
         
     except Exception as e:
-        logger.error(f"Tre scrape error: {e}")
+        logger.exception(f"Tre scrape error: {e}")
         results['error'] = str(e)
     
     return results

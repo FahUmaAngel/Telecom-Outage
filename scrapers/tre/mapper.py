@@ -116,7 +116,7 @@ def map_to_normalized(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         return normalized
         
     except Exception as e:
-        logger.error(f"Error mapping Tre: {e}")
+        logger.exception(f"Error mapping Tre: {e}")
         return None
 
 def map_tre_outages(parsed_outages: List[Dict]) -> List[NormalizedOutage]:

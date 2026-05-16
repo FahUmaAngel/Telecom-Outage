@@ -54,7 +54,7 @@ def parse_telenor_outage(data: Dict) -> Optional[Dict]:
         return outage if outage.get('id') else None
         
     except Exception as e:
-        logger.error(f"Error parsing Telenor outage: {e}")
+        logger.exception(f"Error parsing Telenor outage: {e}")
         return None
 
 def _extract_location(text: str) -> Optional[str]:

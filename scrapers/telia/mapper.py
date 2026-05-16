@@ -39,7 +39,7 @@ def map_to_standard(raw_outages: List[Dict]) -> List[NormalizedOutage]:
             if outage:
                 normalized.append(outage)
         except Exception as e:
-            logger.error(f"Error mapping outage: {e}")
+            logger.exception(f"Error mapping outage: {e}")
             continue
     
     logger.info(f"Mapped {len(normalized)} Telia outages to standard format")
@@ -92,7 +92,7 @@ def map_single_outage(raw: Dict) -> Optional[NormalizedOutage]:
         return outage
         
     except Exception as e:
-        logger.error(f"Error in map_single_outage: {e}")
+        logger.exception(f"Error in map_single_outage: {e}")
         return None
 
 

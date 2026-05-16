@@ -164,7 +164,7 @@ def navigate_to_date(driver: webdriver.Chrome, target_date: datetime) -> bool:
         logger.info(f"Date injected: {date_str}")
         return True
     except Exception as e:
-        logger.error(f"navigate_to_date error for {date_str}: {e}")
+        logger.exception(f"navigate_to_date error for {date_str}: {e}")
         return False
 
 
@@ -286,7 +286,7 @@ def run_historical_scrape(start_year: int = 2025, start_month: int = 1) -> Dict:
         result['success'] = True
 
     except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
+        logger.exception(f"Fatal error: {e}", exc_info=True)
         result['error'] = str(e)
     finally:
         if driver:

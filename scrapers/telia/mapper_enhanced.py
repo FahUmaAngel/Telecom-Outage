@@ -162,7 +162,7 @@ def map_to_normalized_outage(parsed_outage: Dict) -> Optional[NormalizedOutage]:
         return outage
         
     except Exception as e:
-        logger.error(f"Error mapping outage to normalized format: {e}")
+        logger.exception(f"Error mapping outage to normalized format: {e}")
         return None
 
 

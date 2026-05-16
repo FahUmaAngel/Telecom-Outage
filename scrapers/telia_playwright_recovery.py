@@ -145,7 +145,7 @@ def process_incidents(db, items, target_date_str):
             if map_and_save_recovery_incident(db, item, target_date_str):
                 count += 1
         except Exception as e:
-            logger.error(f"Save error for {item.get('ExternalId')}: {e}")
+            logger.exception(f"Save error for {item.get('ExternalId')}: {e}")
             
     db.commit()
     logger.info(f"Saved {count} incidents for {target_date_str}")

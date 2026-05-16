@@ -45,11 +45,11 @@ def fetch_telia_outages(timeout: int = 30) -> Optional[str]:
         return response.text
         
     except requests.exceptions.Timeout:
-        logger.error(f"Timeout while fetching Telia data (timeout={timeout}s)")
+        logger.exception(f"Timeout while fetching Telia data (timeout={timeout}s)")
         return None
         
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching Telia data: {e}")
+        logger.exception(f"Error fetching Telia data: {e}")
         return None
 
 
@@ -78,10 +78,10 @@ def fetch_telia_api(api_url: str, timeout: int = 30) -> Optional[dict]:
         return data
         
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching Telia API data: {e}")
+        logger.exception(f"Error fetching Telia API data: {e}")
         return None
     except ValueError as e:
-        logger.error(f"Error parsing JSON from Telia API: {e}")
+        logger.exception(f"Error parsing JSON from Telia API: {e}")
         return None
 
 

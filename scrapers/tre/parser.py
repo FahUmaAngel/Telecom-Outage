@@ -42,7 +42,7 @@ def parse_tre_outages(raw_outages: List) -> List[Dict]:
                         logger.info("Found Tre outage block, parsing...")
                         parsed.extend(parse_markdown_text(text))
         except Exception as e:
-            logger.error(f"Error parsing Tre outage: {e}")
+            logger.exception(f"Error parsing Tre outage: {e}")
     return parsed
 
 def _extract_services(desc_text: str) -> List[str]:

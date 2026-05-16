@@ -154,7 +154,7 @@ def scrape_telenor_with_playwright() -> Dict:
             results["success"] = len(results["outages"]) > 0
 
         except Exception as e:
-            logger.error(f"Critical error: {e}", exc_info=True)
+            logger.exception(f"Critical error: {e}", exc_info=True)
             results["error"] = str(e)
         finally:
             browser.close()
