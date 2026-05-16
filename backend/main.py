@@ -84,8 +84,14 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     global scheduler
 
+    try:
+        from scrapers.db.init_db import init_db
+        init_db()
+    except Exception:
+        logger.exception("DB init failed (non-fatal)")
+
     ensure_default_admin()
-    
+
     if getattr(settings, "ENABLE_SCHEDULER", True):
         # Startup: Start the scheduler
         scheduler = AsyncIOScheduler()
