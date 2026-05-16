@@ -56,7 +56,7 @@ export default function MapPage() {
                         <span className="dot" style={{ backgroundColor: "#ff4d4f" }}></span> Tre (3)
                     </div>
                     <div className="legend-item">
-                        <span className="dot" style={{ backgroundColor: "#007bff" }}></span> Telenor
+                        <span className="dot" style={{ backgroundColor: "#00b9f1" }}></span> Telenor
                     </div>
                 </div>
             </div>
