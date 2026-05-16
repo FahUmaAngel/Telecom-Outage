@@ -134,7 +134,7 @@ LoadingState.propTypes = {
   lang: PropTypes.string.isRequired,
 };
 
-const OutageList = ({ outages, lang, onOutageClick }) => (
+const OutageList = ({ outages, lang, t, onOutageClick }) => (
   <div className="event-list custom-scrollbar">
     {outages.length > 0 ? (
       outages.slice(0, 15).map((outage) => (
@@ -473,7 +473,7 @@ export default function Home() {
             <h3 className="section-title">{lang === "sv" ? "Händelseflöde" : "Event Stream"}</h3>
             <div className="count-badge">{filteredOutages.length}</div>
           </div>
-          <OutageList outages={filteredOutages} lang={lang} />
+          <OutageList outages={filteredOutages} lang={lang} t={t} />
         </div>
       </div>
 

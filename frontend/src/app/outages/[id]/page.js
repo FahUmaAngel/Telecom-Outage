@@ -216,8 +216,8 @@ const OutageHero = ({ outage, t, lang, regionName }) => (
                     <ShieldAlert size={14} />
                     <span className="info-label">{lang === "sv" ? "Allvarlighetsgrad" : "Severity"}</span>
                 </div>
-                <span className={`info-value severity-${outage.severity.toLowerCase()}`}>
-                    {outage.severity}
+                <span className={`info-value severity-${(outage.severity || "unknown").toLowerCase()}`}>
+                    {outage.severity || (lang === "sv" ? "Okänd" : "Unknown")}
                 </span>
             </div>
             <div className="info-item">
