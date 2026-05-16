@@ -20,7 +20,7 @@ try:
 except ImportError:
     SELENIUM_AVAILABLE = False
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, encoding='utf-8')
 logger = logging.getLogger(__name__)
 
 TELENOR_BASE_URL = "https://mboss.telenor.se/coverageportal?appmode=outage"

@@ -177,6 +177,20 @@ def parse_incident_dates(item):
     end = clean(item.get("EstimatedEndTimeStr") or item.get("EstimatedCloseTime"))
     return start, end
 
+def _save_raw_data(cursor, telia_id, inc_id, item, timestamp) -> int:
+    """Insert raw JSON into raw_data table and return its id."""
+    cursor.execute("""
+        INSERT INTO raw_data (operator, source_url, data, scraped_at)
+        VALUES (?, ?, ?, ?)
+    """, (
+        'telia',
+        f"{BASE_URL}?appmode=outage",
+        json.dumps(item),
+        timestamp,
+    ))
+    return cursor.lastrowid
+
+
 def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
     """Processes and saves a single incident to the DB."""
     inc_id = item.get("ExternalId")
@@ -184,10 +198,10 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
 
     county_name = item.get("CountyName") or ""
     if county_name.lower() == "unknown": county_name = ""
-    
+
     lat, lon = extract_incident_coords(item, county_name)
     precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
-    
+
     raw_location = ", ".join([p for p in [precise_city, item.get("AreaName"), county_name] if p])
     location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or (county_name if county_name else (item.get("AreaName") or "Unknown"))
     region_id = region_id_map.get(location)
@@ -195,24 +209,28 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
     start_time, end_time = parse_incident_dates(item)
     desc_raw = item.get("Description") or item.get("Text") or ""
     services = json.dumps(extract_services(desc_raw + " " + item.get("AffectedServices", "")))
-    
+
     title_json = json.dumps({"sv": str(inc_id), "en": str(inc_id)})
     desc_json = json.dumps({"sv": desc_raw, "en": desc_raw})
 
-    cursor.execute("SELECT id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
+    raw_data_id = _save_raw_data(cursor, telia_id, inc_id, item, timestamp)
+
+    cursor.execute("SELECT id, raw_data_id FROM outages WHERE incident_id = ? AND operator_id = ?", (inc_id, telia_id))
     row = cursor.fetchone()
 
     if row:
+        existing_id, existing_raw_data_id = row
+        new_raw_id = raw_data_id if existing_raw_data_id is None else existing_raw_data_id
         cursor.execute("""
             UPDATE outages SET location=?, region_id=?, latitude=?, longitude=?, start_time=?, estimated_fix_time=?,
-            description=?, affected_services=?, title=?, updated_at=?, status='active' WHERE id=?
-        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services, title_json, timestamp, row[0]))
+            description=?, affected_services=?, title=?, updated_at=?, status='active', raw_data_id=? WHERE id=?
+        """, (location, region_id, lat, lon, start_time, end_time, desc_json, services, title_json, timestamp, new_raw_id, existing_id))
     else:
         cursor.execute("""
             INSERT INTO outages (incident_id, operator_id, region_id, title, description, location, latitude, longitude,
-            start_time, estimated_fix_time, status, severity, affected_services, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?)
-        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services, timestamp, timestamp))
+            start_time, estimated_fix_time, status, severity, affected_services, raw_data_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'medium', ?, ?, ?, ?)
+        """, (inc_id, telia_id, region_id, title_json, desc_json, location, lat, lon, start_time, end_time, services, raw_data_id, timestamp, timestamp))
 
 
 def scrape_portal_granular():
@@ -250,9 +268,11 @@ def scrape_portal_granular():
         timestamp = datetime.now().isoformat()
         for item in unique_incidents.values():
             process_single_incident(item, telia_id, region_id_map, timestamp, cursor)
-        
+
         conn.commit()
+
     logger.info("Scraping complete")
+    return list(unique_incidents.keys())
 
 
 if __name__ == "__main__":

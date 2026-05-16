@@ -3,9 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../../lib/api";
 import { useLanguage } from "../../context/LanguageContext";
-import {
-    ChevronDown
-} from "lucide-react";
+import { ChevronDown, TrendingDown, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 
 export default function PrestandaPage() {
     const { lang } = useLanguage();
@@ -59,6 +58,15 @@ export default function PrestandaPage() {
         if (n.includes('lyca')) return '#22C55E';  // Green
         return 'var(--accent-primary)';
     };
+
+    // Derived stats
+    const bestOperator = mttrData.length > 0
+        ? mttrData.reduce((a, b) => (a.average_mttr_hours <= b.average_mttr_hours ? a : b))
+        : null;
+    const totalOutages = mttrData.reduce((s, d) => s + (d.outage_count || 0), 0);
+    const avgAll = mttrData.length > 0
+        ? (mttrData.reduce((s, d) => s + (d.average_mttr_hours || 0), 0) / mttrData.length).toFixed(1)
+        : null;
 
     let gridContent;
     if (mttrData.length > 0) {
@@ -155,6 +163,65 @@ export default function PrestandaPage() {
                     </p>
                 </div>
             </div>
+
+            {/* KPI summary bar */}
+            {mttrData.length > 0 && (
+                <div className="kpi-row">
+                    <div className="kpi-card">
+                        <Clock size={18} className="kpi-icon" />
+                        <div>
+                            <div className="kpi-label">{lang === "sv" ? "Snitt MTTR" : "Avg MTTR"}</div>
+                            <div className="kpi-value">{avgAll}h</div>
+                        </div>
+                    </div>
+                    <div className="kpi-card">
+                        <TrendingDown size={18} className="kpi-icon best" />
+                        <div>
+                            <div className="kpi-label">{lang === "sv" ? "Snabbast" : "Fastest"}</div>
+                            <div className="kpi-value best">{bestOperator?.operator_name} — {bestOperator?.average_mttr_hours}h</div>
+                        </div>
+                    </div>
+                    <div className="kpi-card">
+                        <AlertTriangle size={18} className="kpi-icon" />
+                        <div>
+                            <div className="kpi-label">{lang === "sv" ? "Totalt analyserade" : "Total analyzed"}</div>
+                            <div className="kpi-value">{totalOutages}</div>
+                        </div>
+                    </div>
+                    <div className="kpi-card">
+                        <CheckCircle size={18} className="kpi-icon" />
+                        <div>
+                            <div className="kpi-label">{lang === "sv" ? "Operatörer" : "Operators"}</div>
+                            <div className="kpi-value">{mttrData.length}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Bar chart comparison */}
+            {mttrData.length > 0 && (
+                <div className="premium-card chart-card">
+                    <h2 className="section-title">
+                        {lang === "sv" ? "MTTR jämförelse" : "MTTR Comparison"}
+                    </h2>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={mttrData} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+                            <XAxis dataKey="operator_name" tick={{ fill: "#A0A5B8", fontSize: 13 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: "#A0A5B8", fontSize: 12 }} axisLine={false} tickLine={false}
+                                label={{ value: lang === "sv" ? "Timmar" : "Hours", angle: -90, position: "insideLeft", fill: "#555870", fontSize: 11 }} />
+                            <Tooltip
+                                contentStyle={{ background: "#1A1D2D", border: "1px solid #2A2E40", borderRadius: 8, color: "#fff" }}
+                                formatter={(val) => [`${val}h`, "MTTR"]}
+                            />
+                            <Bar dataKey="average_mttr_hours" radius={[6, 6, 0, 0]}>
+                                {mttrData.map((d) => (
+                                    <Cell key={d.operator_name} fill={getOperatorColor(d.operator_name)} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            )}
 
             {/* Operator Cards Grid */}
             <div className="operator-grid">
@@ -360,9 +427,47 @@ export default function PrestandaPage() {
                     border: 1px dashed #2A2E40;
                 }
 
+                .kpi-row {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 16px;
+                    margin-bottom: 24px;
+                }
+                .kpi-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    background: #1A1D2D;
+                    border: 1px solid #2A2E40;
+                    border-radius: 10px;
+                    padding: 18px 20px;
+                }
+                .kpi-icon { color: #555870; flex-shrink: 0; }
+                .kpi-icon.best { color: #22C55E; }
+                .kpi-label { font-size: 0.7rem; color: #555870; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+                .kpi-value { font-size: 1.1rem; font-weight: 700; color: #fff; }
+                .kpi-value.best { color: #22C55E; font-size: 0.95rem; }
+
+                .chart-card {
+                    margin-bottom: 32px;
+                    padding: 28px 32px;
+                    background: #141724;
+                    border: 1px solid #232738;
+                    border-radius: 12px;
+                }
+                .section-title {
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    color: #555870;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    margin-bottom: 20px;
+                }
+
                 @media (max-width: 1024px) {
                     .operator-grid { grid-template-columns: 1fr; }
                     .performance-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+                    .kpi-row { grid-template-columns: repeat(2, 1fr); }
                 }
             `}</style>
         </div>

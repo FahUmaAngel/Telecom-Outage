@@ -2,6 +2,8 @@
 title Telecom Outage Scheduler
 cd /d "d:\94 FAH works\Telecom-Outage"
 set PYTHONPATH=d:\94 FAH works\Telecom-Outage
+set PYTHONUTF8=1
+chcp 65001 >nul
 
 if not exist logs mkdir logs
 

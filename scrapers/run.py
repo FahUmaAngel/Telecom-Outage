@@ -14,7 +14,7 @@ from scrapers.tre.mapper import map_tre_outages
 from scrapers.telia import scrape_portal_granular
 
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import save_outage
+from scrapers.db.crud import save_outage, auto_resolve_expired_outages, resolve_missing_outages, enrich_missing_geodata, enrich_region_ids, enrich_place_codes
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
@@ -22,7 +22,8 @@ from scrapers.common.engine import extract_region_from_text, classify_services, 
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    encoding='utf-8',
 )
 logger = logging.getLogger("ScraperRunner")
 
@@ -30,8 +31,10 @@ def _run_telia_scraper(db):
     """Execution logic for Telia scraper (Playwright portal)."""
     try:
         logger.info("Running Telia (Playwright Portal Scraper)...")
-        scrape_portal_granular()
+        seen_ids = scrape_portal_granular() or []
         logger.info("✓ Telia Portal Scraper completed")
+        resolved = resolve_missing_outages(db, OperatorEnum.TELIA, seen_ids)
+        logger.info(f"Telia: delta-resolved {resolved} vanished incidents")
     except Exception as e:
         logger.error(f"Telia scraper failed: {e}", exc_info=True)
 
@@ -69,16 +72,20 @@ def _process_telenor_outage(db, outage):
 def _run_telenor_scraper(db):
     """Execution logic for Telenor scraper."""
     try:
-        logger.info("Running Telenor (Selenium)...")
-        from scrapers.telenor_selenium_scraper import scrape_telenor_with_selenium
-        telenor_result = scrape_telenor_with_selenium()
+        logger.info("Running Telenor (Playwright)...")
+        from scrapers.telenor_playwright_scraper import scrape_telenor_with_playwright
+        telenor_result = scrape_telenor_with_playwright()
         
         if telenor_result['success']:
             logger.info(f"✓ Telenor scraper succeeded. Found {len(telenor_result['outages'])} outages")
+            seen_ids = []
             for outage in telenor_result['outages']:
                 _process_telenor_outage(db, outage)
-            
+                seen_ids.append(str(outage['incident_id']))
+
             db.commit()
+            resolved = resolve_missing_outages(db, OperatorEnum.TELENOR, seen_ids)
+            logger.info(f"Telenor: delta-resolved {resolved} vanished incidents")
         else:
             logger.error("✗ Telenor scraper failed")
     except Exception as e:
@@ -92,12 +99,15 @@ def _run_tre_scraper(db):
         raw = scrape_tre_outages()
         parsed = parse_tre_outages(raw)
         mapped = map_tre_outages(parsed)
-        
+
+        seen_ids = []
         for item in mapped:
             save_outage(db, item, {"source": "tre_scraper"})
-            
+            seen_ids.append(item.incident_id)
+
         db.commit()
-        logger.info(f"Tre: processed {len(mapped)} outages")
+        resolved = resolve_missing_outages(db, OperatorEnum.TRE, seen_ids)
+        logger.info(f"Tre: processed {len(mapped)} outages, delta-resolved {resolved}")
     except Exception as e:
         logger.error(f"Tre failed: {e}")
         db.rollback()
@@ -110,6 +120,18 @@ def run_scrapers():
         _run_telia_scraper(db)
         _run_telenor_scraper(db)
         _run_tre_scraper(db)
+        resolved = auto_resolve_expired_outages(db)
+        if resolved:
+            logger.info(f"Auto-resolved {resolved} expired outages")
+        enriched = enrich_missing_geodata(db)
+        if enriched:
+            logger.info(f"Enriched geodata for {enriched} records")
+        region_filled = enrich_region_ids(db)
+        if region_filled:
+            logger.info(f"Filled region_id for {region_filled} records")
+        place_filled = enrich_place_codes(db)
+        if place_filled:
+            logger.info(f"Filled place code for {place_filled} records")
     finally:
         db.close()
     logger.info("Scraper run completed.")

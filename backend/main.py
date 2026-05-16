@@ -3,7 +3,7 @@ FastAPI Entry Point with Background Scheduler.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import outages, operators, reports, analytics, auth, regions, admin
+from .routers import outages, operators, reports, analytics, auth, regions, admin, research_analytics
 from .middleware import LoggingMiddleware, SecurityHeadersMiddleware
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -138,6 +138,7 @@ app.include_router(reports.router)
 app.include_router(analytics.router)
 app.include_router(regions.router, prefix="/api/v1")
 app.include_router(admin.router)
+app.include_router(research_analytics.router)
 
 @app.get("/")
 def read_root():

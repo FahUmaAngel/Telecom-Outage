@@ -123,6 +123,14 @@ export const api = {
     regions: {
         list: () => fetcher("/api/v1/regions"),
     },
+    research: {
+        benchmarks: () => fetcher("/api/v1/research/benchmarks"),
+        mttrPercentiles: (params) => fetcher("/api/v1/research/mttr-percentiles", { params }),
+        mttrDistribution: (params) => fetcher("/api/v1/research/mttr-distribution", { params }),
+        slaCompliance: (params) => fetcher("/api/v1/research/sla-compliance", { params }),
+        valueScore: (params) => fetcher("/api/v1/research/value-score", { params }),
+        statisticalTest: (params) => fetcher("/api/v1/research/statistical-test", { params }),
+    },
     admin: {
         scrapers: () => fetcher("/api/v1/admin/scrapers"),
         outages: {

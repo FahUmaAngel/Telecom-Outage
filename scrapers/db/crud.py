@@ -97,6 +97,33 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         db.add(new_outage)
         return new_outage
 
+def resolve_missing_outages(db: Session, operator_enum, seen_incident_ids: list) -> int:
+    """
+    Delta-based resolve: mark active outages not seen in the latest scrape as resolved.
+    Used when an operator removes an incident from their portal once fixed.
+    """
+    operator_id = get_operator_id(db, operator_enum.value)
+    if not operator_id:
+        return 0
+
+    now = datetime.now(timezone.utc)
+    missing = db.query(Outage).filter(
+        Outage.operator_id == operator_id,
+        Outage.status != 'resolved',
+        ~Outage.incident_id.in_(seen_incident_ids)
+    ).all()
+
+    for outage in missing:
+        outage.status = 'resolved'
+        outage.end_time = now
+        outage.updated_at = now
+
+    if missing:
+        db.commit()
+
+    return len(missing)
+
+
 def auto_resolve_expired_outages(db: Session):
     """
     Find outages that are still active/scheduled but their end dates/ETAs have passed.
@@ -123,6 +150,8 @@ def auto_resolve_expired_outages(db: Session):
     total_resolved = 0
     for outage in expired_end + expired_eta:
         outage.status = 'resolved'
+        if outage.end_time is None:
+            outage.end_time = now
         outage.updated_at = now
         total_resolved += 1
         
@@ -131,6 +160,118 @@ def auto_resolve_expired_outages(db: Session):
         print(f"AUTO-RESOLVE: Marked {total_resolved} expired outages as 'resolved'.")
     
     return total_resolved
+
+def enrich_missing_geodata(db: Session) -> int:
+    """
+    Enrichment pass: for records that have a location name but missing lat/lon,
+    attempt geocoding again. Runs after every scraper cycle.
+    """
+    from scrapers.common.geocoding import get_county_coordinates
+    from scrapers.common.translation import SWEDISH_COUNTIES
+    from scrapers.common.engine import extract_region_from_text
+
+    SKIP_LOCATIONS = {None, '', 'Unknown', 'Sverige', 'Sweden'}
+
+    candidates = db.query(Outage).filter(
+        Outage.latitude == None,
+        Outage.location != None,
+        Outage.location != '',
+        Outage.location != 'Unknown',
+    ).all()
+
+    enriched = 0
+    now = datetime.now(timezone.utc)
+
+    for outage in candidates:
+        loc = outage.location or ''
+
+        # Try direct county lookup first
+        coords = get_county_coordinates(loc, jitter=True)
+
+        # If not found, try extracting county from location string
+        if not coords:
+            county = extract_region_from_text(loc, SWEDISH_COUNTIES)
+            if county:
+                outage.location = county
+                coords = get_county_coordinates(county, jitter=True)
+
+        if coords:
+            outage.latitude, outage.longitude = coords
+            outage.updated_at = now
+            enriched += 1
+
+    if enriched:
+        db.commit()
+
+    return enriched
+
+
+def enrich_region_ids(db: Session) -> int:
+    """
+    Fill region_id for outages that have a location name but no region_id.
+    Matches outage.location against regions.name (sv field).
+    """
+    import json as _json
+    from scrapers.db.models import Region
+
+    regions = db.query(Region).all()
+    region_map = {}
+    for r in regions:
+        try:
+            sv = _json.loads(r.name).get('sv', '').lower()
+            if sv:
+                region_map[sv] = r.id
+        except Exception:
+            region_map[str(r.name).lower()] = r.id
+
+    candidates = db.query(Outage).filter(
+        Outage.region_id == None,
+        Outage.location != None,
+        Outage.location != '',
+    ).all()
+
+    now = datetime.now(timezone.utc)
+    filled = 0
+    for outage in candidates:
+        key = (outage.location or '').lower()
+        rid = region_map.get(key)
+        if rid:
+            outage.region_id = rid
+            outage.updated_at = now
+            filled += 1
+
+    if filled:
+        db.commit()
+    return filled
+
+
+def enrich_place_codes(db: Session) -> int:
+    """
+    Fill place (Plus Code / Open Location Code) from lat/lon for records missing it.
+    """
+    from openlocationcode import openlocationcode as olc
+
+    candidates = db.query(Outage).filter(
+        Outage.place == None,
+        Outage.latitude != None,
+        Outage.longitude != None,
+    ).all()
+
+    now = datetime.now(timezone.utc)
+    filled = 0
+    for outage in candidates:
+        try:
+            code = olc.encode(float(outage.latitude), float(outage.longitude), codeLength=10)
+            outage.place = code
+            outage.updated_at = now
+            filled += 1
+        except Exception:
+            pass
+
+    if filled:
+        db.commit()
+    return filled
+
 
 def cleanup_old_data(db: Session, days: int = 30):
     """
