@@ -2,14 +2,30 @@ services:
   - type: web
     name: telecom-outage
     runtime: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: >
+      pip install -r backend/requirements.txt &&
+      playwright install chromium &&
+      playwright install-deps chromium &&
+      cd frontend && npm install && NEXT_OUTPUT_EXPORT=true npm run build
+    startCommand: >
+      python -c "from scrapers.db.init_db import init_db; init_db()" &&
+      uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: telecom-outage-db
+          property: connectionString
       - key: ALLOWED_ORIGINS
         value: https://fahumaangel.github.io
-      - key: DATABASE_URL
-        sync: false
       - key: SECRET_KEY
         sync: false
       - key: ENABLE_SCHEDULER
         value: "true"
+      - key: APP_ENV
+        value: production
+
+databases:
+  - name: telecom-outage-db
+    databaseName: telecom_outage
+    user: telecom_user
+    plan: free
