@@ -282,11 +282,12 @@ const OutageList = ({ outages, lang, t, onOutageClick }) => (
 OutageList.propTypes = {
   outages: PropTypes.array.isRequired,
   lang: PropTypes.string.isRequired,
+  t: PropTypes.func.isRequired,
   onOutageClick: PropTypes.func,
 };
 
 export default function Home() {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const { addToast } = useToast();
   const [outages, setOutages] = useState([]);
   const [operators, setOperators] = useState([]);
