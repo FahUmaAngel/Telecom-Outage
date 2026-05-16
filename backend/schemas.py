@@ -97,6 +97,10 @@ class MTTRResponse(BaseModel):
     operator_name: str
     average_mttr_hours: float
     outage_count: int
+    active_count: int = 0
+    stale_count: int = 0
+    resolved_by_absence_count: int = 0
+    estimated_mttr_hours: float = 0.0
 
 class ReliabilityResponse(BaseModel):
     operator_name: str

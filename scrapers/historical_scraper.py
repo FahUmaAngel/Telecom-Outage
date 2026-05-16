@@ -8,7 +8,7 @@ import logging
 import time
 import re
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional, Union
 
 try:
     from selenium import webdriver
@@ -55,7 +55,7 @@ def get_chrome_driver():
     return driver
 
 
-def _parse_incident_row(row, location: str = None) -> Dict or None:
+def _parse_incident_row(row, location: str = None) -> Optional[Dict]:
     """Parse a table row to extract incident data. Returns incident dict or None."""
     cells = row.find_all('td')
     if len(cells) < 4:
@@ -172,6 +172,7 @@ def set_date_and_get_incidents(driver, target_date: str) -> List[Dict]:
     """
     all_incidents = []
     
+    wait = WebDriverWait(driver, 10)
     if not _click_element_safe(wait, By.XPATH, "//span[contains(., 'Nätverkshistorik')]", "Nätverkshistorik"):
         return []
     
@@ -243,7 +244,7 @@ def _scrape_current_incidents(driver, all_incident_ids: set, results: dict):
         logger.warning(f"Could not expand counties: {e}")
 
 
-def _extract_county_name(row) -> str or None:
+def _extract_county_name(row) -> Optional[str]:
     """Extract county name from row element."""
     try:
         parent_text = row.find_element(By.XPATH, "./ancestor::tr").text
@@ -363,9 +364,9 @@ def scrape_telia_history(start_date: datetime, end_date: datetime) -> Dict:
         results['success'] = True
         logger.info(f"Total unique incidents collected: {len(results['outages'])}")
         
-    except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
-        results['error'] = str(e)
+    except Exception:
+        logger.exception("Fatal error")
+        results['error'] = "Fatal error during scraping"
     finally:
         if driver:
             driver.quit()
@@ -373,7 +374,7 @@ def scrape_telia_history(start_date: datetime, end_date: datetime) -> Dict:
     return results
 
 
-def _find_county_in_text(text: str) -> str or None:
+def _find_county_in_text(text: str) -> Optional[str]:
     """Find Swedish county mentioned in text."""
     for county in SWEDISH_COUNTIES:
         if county in text or county.replace(' län', '') in text:
@@ -434,9 +435,9 @@ def scrape_telenor_current() -> Dict:
         results['success'] = True
         logger.info(f"Telenor: found {len(results['outages'])} incidents")
         
-    except Exception as e:
-        logger.error(f"Telenor scrape error: {e}")
-        results['error'] = str(e)
+    except Exception:
+        logger.exception("Telenor scrape error")
+        results['error'] = "Telenor scrape failed"
     
     return results
 
@@ -580,9 +581,9 @@ def scrape_tre_current() -> Dict:
         results['success'] = True
         logger.info(f"Tre: found {len(results['outages'])} incidents")
         
-    except Exception as e:
-        logger.error(f"Tre scrape error: {e}")
-        results['error'] = str(e)
+    except Exception:
+        logger.exception("Tre scrape error")
+        results['error'] = "Tre scrape failed"
     
     return results
 

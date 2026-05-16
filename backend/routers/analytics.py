@@ -51,6 +51,8 @@ def get_mttr(db: Annotated[Session, Depends(get_db)]):
     for op in operators:
         outages = db.query(Outage).filter(
             Outage.operator_id == op.id,
+            Outage.status == 'resolved',
+            Outage.resolution_type == 'official_resolved',
             Outage.start_time.isnot(None),
             Outage.end_time.isnot(None)
         ).all()
@@ -230,11 +232,28 @@ def get_dynamic_mttr(
             outages = _filter_by_service(outages, service)
             
         outages = _get_unique_outages(outages)
-        avg_h = _calculate_avg_mttr(outages)
+        
+        # Counts
+        active_count = sum(1 for o in outages if o.status != 'resolved' and not o.is_stale)
+        stale_count = sum(1 for o in outages if o.is_stale)
+        resolved_by_absence_count = sum(1 for o in outages if o.resolution_type == 'resolved_by_absence')
+        
+        # Official MTTR (strictly 'official_resolved')
+        official_outages = [o for o in outages if o.status == 'resolved' and o.resolution_type == 'official_resolved']
+        official_mttr = _calculate_avg_mttr(official_outages)
+        
+        # Estimated MTTR (includes resolved_by_absence)
+        resolved_outages = [o for o in outages if o.status == 'resolved']
+        estimated_mttr = _calculate_avg_mttr(resolved_outages)
+        
         results.append(MTTRResponse(
             operator_name=op.name.upper(),
-            average_mttr_hours=round(avg_h, 2),
-            outage_count=len(outages)
+            average_mttr_hours=round(official_mttr, 2),
+            outage_count=len(official_outages),
+            active_count=active_count,
+            stale_count=stale_count,
+            resolved_by_absence_count=resolved_by_absence_count,
+            estimated_mttr_hours=round(estimated_mttr, 2)
         ))
         
     return results

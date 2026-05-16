@@ -7,7 +7,7 @@ from .models import Outage, RawData, Operator, Region
 from ..common.models import NormalizedOutage, OperatorEnum
 from ..common.translation import SWEDISH_COUNTIES
 from ..common.engine import extract_region_from_text
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import json
 
 from sqlalchemy import func
@@ -40,6 +40,7 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         if existing and existing.status != 'resolved':
             print(f"INFO: Outage {normalized.incident_id} is now scheduled. Marking as resolved.")
             existing.status = 'resolved'
+            existing.resolution_type = 'official_resolved'
             existing.end_time = datetime.now(timezone.utc)
             existing.updated_at = datetime.now(timezone.utc)
             return existing
@@ -83,14 +84,19 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         
         # Priority: Use end_time only if status is resolved
         if normalized.status == 'resolved':
-            existing.end_time = normalized.end_time or existing.end_time or datetime.now(timezone.utc)
+            if existing.status != 'resolved': # Newly resolved
+                existing.end_time = normalized.end_time or datetime.now(timezone.utc)
+                existing.resolution_type = 'official_resolved'
         else:
             existing.end_time = None
+            existing.resolution_type = None
         
         # Stop using ETA as end_time or at all in normalized flow as per request
         existing.estimated_fix_time = None 
             
         existing.updated_at = datetime.now(timezone.utc)
+        existing.last_seen_at = datetime.now(timezone.utc)
+        existing.missing_count = 0
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
         existing.region_id = region_id # Update region if detected
@@ -115,6 +121,10 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
             latitude=normalized.latitude,
             longitude=normalized.longitude,
             affected_services=affected_services_json,
+            first_seen_at=datetime.now(timezone.utc),
+            last_seen_at=datetime.now(timezone.utc),
+            missing_count=0,
+            resolution_type='official_resolved' if normalized.status == 'resolved' else None
         )
         db.add(new_outage)
         return new_outage
@@ -124,7 +134,7 @@ def auto_resolve_expired_outages(db: Session):
     Find outages that are still active/scheduled but their end dates/ETAs have passed.
     Mark them as 'resolved' in the database.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     
     # 1. Check end_time (definite resolution time)
     expired_end = db.query(Outage).filter(
@@ -145,6 +155,7 @@ def auto_resolve_expired_outages(db: Session):
     total_resolved = 0
     for outage in expired_end + expired_eta:
         outage.status = 'resolved'
+        outage.resolution_type = 'official_resolved'
         outage.end_time = now
         outage.updated_at = now
         total_resolved += 1
@@ -180,13 +191,14 @@ def cleanup_old_data(db: Session, days: int = 30):
 
 def mark_missing_outages_resolved(db: Session, operator_name: str, current_incident_ids: list):
     """
-    Mark outages as 'resolved' if they are not in the current list of incident IDs for an operator.
+    Increment missing count for active outages not in current scrape.
+    Mark as 'resolved_by_absence' if missing count >= 360 or missing for > 15 days.
     """
     operator_id = get_operator_id(db, operator_name)
     if not operator_id:
         return 0
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     
     # Find active outages for this operator that are NOT in the current_incident_ids
     query = db.query(Outage).filter(
@@ -196,14 +208,51 @@ def mark_missing_outages_resolved(db: Session, operator_name: str, current_incid
     )
     
     missing_outages = query.all()
-    count = len(missing_outages)
+    resolved_count = 0
     
-    if count > 0:
-        for outage in missing_outages:
+    for outage in missing_outages:
+        outage.missing_count = (outage.missing_count or 0) + 1
+        outage.updated_at = now
+        
+        last_seen = outage.last_seen_at or outage.created_at
+        days_missing = (now - last_seen).days if last_seen else 0
+        
+        if outage.missing_count >= 360 or days_missing >= 15:
             outage.status = 'resolved'
-            outage.end_time = now
+            outage.resolution_type = 'resolved_by_absence'
+            outage.end_time = last_seen  # Resolve using the last time it was seen
             outage.updated_at = now
+            resolved_count += 1
+            
+    if missing_outages:
         db.commit()
-        print(f"SYNC: Marked {count} missing {operator_name} outages as 'resolved'.")
+        if resolved_count > 0:
+            print(f"SYNC: Marked {resolved_count} missing {operator_name} outages as 'resolved_by_absence'.")
+    
+    return resolved_count
+
+def mark_stale_active_incidents(db: Session, threshold_days: int = 15):
+    """
+    Find active incidents older than `threshold_days` and mark them as stale.
+    """
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    stale_cutoff = now - timedelta(days=threshold_days)
+    
+    stale_outages = db.query(Outage).filter(
+        Outage.status != 'resolved',
+        Outage.is_stale == False,
+        Outage.first_seen_at < stale_cutoff
+    ).all()
+    
+    count = 0
+    for outage in stale_outages:
+        outage.is_stale = True
+        outage.stale_reason = f'Active for > {threshold_days} days'
+        outage.updated_at = now
+        count += 1
+        
+    if count > 0:
+        db.commit()
+        print(f"STALE CHECK: Marked {count} active incidents as stale (>{threshold_days} days).")
     
     return count

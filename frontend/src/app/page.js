@@ -142,7 +142,10 @@ const OutageList = ({ outages, lang, onOutageClick }) => (
           href={`/outages/${outage.id}`} 
           key={outage.id} 
           className="event-item"
-          onClick={onOutageClick ? () => onOutageClick(outage) : undefined}
+          onClick={(e) => {
+            console.log('Dashboard: Navigating to outage:', outage.id);
+            if (onOutageClick) onOutageClick(outage);
+          }}
         >
           <div className="event-content">
             <div className="status-indicator-line" style={{ backgroundColor: outage.status.toLowerCase() === 'resolved' ? 'var(--status-success)' : 'var(--status-critical)' }}></div>

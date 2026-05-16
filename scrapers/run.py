@@ -14,7 +14,7 @@ from scrapers.tre.mapper import map_tre_outages
 from scrapers.telia import scrape_telia_outages, parse_telia_outages, scrape_portal_granular
 
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import save_outage, mark_missing_outages_resolved
+from scrapers.db.crud import save_outage, mark_missing_outages_resolved, mark_stale_active_incidents
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
@@ -184,6 +184,11 @@ def run_scrapers():
         _run_telenor_scraper(db)
         _run_tre_scraper(db)
         _run_tele2_scraper(db)
+        
+        # Mark stale active incidents (> 15 days)
+        mark_stale_active_incidents(db)
+        
+        db.commit()
     finally:
         db.close()
     logger.info("Scraper run completed.")

@@ -285,6 +285,7 @@ export default function OutageDetailPage() {
     useEffect(() => {
         const fetchOutage = async () => {
             try {
+                console.log("Fetching outage detail for ID:", id);
                 const data = await api.outages.get(id);
                 setOutage(data);
             } catch (err) {

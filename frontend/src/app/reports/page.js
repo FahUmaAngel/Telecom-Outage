@@ -204,7 +204,15 @@ const ReportRow = ({ outage, lang, t }) => {
                 {formatDate(outage.end_time)}
             </td>
             <td className="actions-cell">
-                <Link href={`/outages/${outage.id}`} className="view-link">
+                <Link 
+                    href={`/outages/${outage.id}`} 
+                    className="view-link"
+                    onClick={(e) => {
+                        console.log('Navigating to outage:', outage.id);
+                        // Optional: force navigation if Link fails
+                        // router.push(`/outages/${outage.id}`);
+                    }}
+                >
                     {lang === "sv" ? "Visa" : "View"}
                 </Link>
             </td>

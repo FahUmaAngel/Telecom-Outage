@@ -186,8 +186,10 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
     county_name = item.get("CountyName") or ""
     if county_name.lower() == "unknown": county_name = ""
     
-    lat, lon = extract_incident_coords(item, county_name)
-    precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
+    # Use pre-resolved coordinates and city
+    lat = item.get('_resolved_lat')
+    lon = item.get('_resolved_lon')
+    precise_city = item.get('_resolved_city')
     
     raw_location = ", ".join([p for p in [precise_city, item.get("AreaName"), county_name] if p])
     location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or (county_name if county_name else (item.get("AreaName") or "Unknown"))
@@ -235,8 +237,24 @@ def scrape_portal_granular():
     unique_incidents = {item.get("ExternalId"): item for item in captured if item.get("ExternalId")}
     logger.info(f"Processing {len(unique_incidents)} unique incidents. Token: {'Yes' if token else 'No'}")
 
+    # Resolve locations BEFORE opening the database transaction to prevent locking
+    logger.info("Resolving locations for incidents...")
+    for inc_id, item in unique_incidents.items():
+        county_name = item.get("CountyName") or ""
+        if county_name.lower() == "unknown": county_name = ""
+        lat, lon = extract_incident_coords(item, county_name)
+        
+        precise_city = None
+        if lat and lon:
+            # We only sleep and request if we actually need to resolve
+            precise_city = resolve_location_name(lat, lon)
+            
+        item['_resolved_lat'] = lat
+        item['_resolved_lon'] = lon
+        item['_resolved_city'] = precise_city
+
     db_path = get_db_path()
-    with sqlite3.connect(db_path) as conn:
+    with sqlite3.connect(db_path, timeout=30.0) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM operators WHERE name = 'telia'")
         res = cursor.fetchone()

@@ -66,6 +66,14 @@ class Outage(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
+    # New Lifecycle Tracking Fields
+    first_seen_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_seen_at = Column(DateTime(timezone=True), server_default=func.now())
+    missing_count = Column(Integer, default=0)
+    is_stale = Column(Boolean, default=False)
+    stale_reason = Column(String, nullable=True)
+    resolution_type = Column(String, nullable=True) # 'official_resolved', 'resolved_by_absence'
+    
     operator = relationship("Operator", back_populates="outages")
     region = relationship("Region", back_populates="outages")
     raw_data = relationship("RawData", back_populates="outages")

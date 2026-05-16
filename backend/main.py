@@ -17,7 +17,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from scrapers.run import run_scrapers
 from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import auto_resolve_expired_outages
+from scrapers.db.crud import auto_resolve_expired_outages, mark_stale_active_incidents
 from scrapers.db.models import User
 from .auth import get_password_hash
 
@@ -70,6 +70,11 @@ def scraper_job():
             resolved_count = auto_resolve_expired_outages(db)
             if resolved_count > 0:
                 logger.info(f"Auto-resolved {resolved_count} expired outages")
+                
+            # 3. Mark stale active incidents (> 30 days)
+            stale_count = mark_stale_active_incidents(db)
+            if stale_count > 0:
+                logger.info(f"Marked {stale_count} active incidents as stale")
         finally:
             db.close()
             

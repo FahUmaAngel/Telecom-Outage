@@ -8,6 +8,8 @@ import logging
 import json
 import sys
 import os
+import re
+from bs4 import BeautifulSoup
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -55,15 +57,15 @@ def parse_telia_html(html_content: str) -> List[Dict]:
                 outage_data = extract_outage_from_container(container)
                 if outage_data:
                     outages.append(outage_data)
-            except Exception as e:
-                logger.error(f"Error parsing outage container: {e}")
+            except Exception:
+                logger.exception("Error parsing outage container")
                 continue
         
         logger.info(f"Parsed {len(outages)} outages from Telia HTML")
         return outages
         
-    except Exception as e:
-        logger.error(f"Error parsing Telia HTML: {e}")
+    except Exception:
+        logger.exception("Error parsing Telia HTML")
         return []
 
 
@@ -112,8 +114,8 @@ def extract_outage_from_container(container) -> Optional[Dict]:
         
         return None
         
-    except Exception as e:
-        logger.error(f"Error extracting outage data: {e}")
+    except Exception:
+        logger.exception("Error extracting outage data")
         return None
 
 
@@ -143,8 +145,8 @@ def parse_telia_json(json_data: dict) -> List[Dict]:
         logger.info(f"Parsed {len(outages)} outages from Telia JSON")
         return outages
         
-    except Exception as e:
-        logger.error(f"Error parsing Telia JSON: {e}")
+    except Exception:
+        logger.exception("Error parsing Telia JSON")
         return []
 
 
