@@ -11,7 +11,7 @@ import requests
 import time
 import urllib.parse
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from playwright.sync_api import sync_playwright
 
 from scrapers.common.geocoding import get_county_coordinates
@@ -128,7 +128,7 @@ def handle_portal_response(response, captured, token_container):
         except Exception as e:
             logger.debug(f"JSON err: {e}")
 
-def run_playwright_capture() -> tuple[List[Dict], Optional[str]]:
+def run_playwright_capture() -> Tuple[List[Dict], Optional[str]]:
     """Runs Playwright session to capture incidents and session token."""
     captured = []
     token = [None]

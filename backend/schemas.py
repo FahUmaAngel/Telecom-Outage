@@ -56,6 +56,9 @@ class OutageResponse(BaseModel):
     place: Optional[str] = None
     quality_issues: Optional[List[str]] = None
     updated_at: Optional[datetime] = None
+    is_stale: bool = False
+    stale_reason: Optional[str] = None
+    resolution_type: Optional[str] = None
     
     @field_validator('status', mode='before')
     @classmethod
@@ -172,6 +175,9 @@ class OutageUpdate(BaseModel):
     longitude: Optional[float] = None
     affected_services: Optional[List[str]] = None
     place: Optional[str] = None
+    is_stale: Optional[bool] = None
+    stale_reason: Optional[str] = None
+    resolution_type: Optional[str] = None
 
     @field_validator('status', mode='before')
     @classmethod
