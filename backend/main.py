@@ -75,7 +75,7 @@ def scraper_job():
             
         logger.info("Scraper job completed successfully")
     except Exception as e:
-        logger.error(f"Error in scraper job: {e}")
+        logger.exception("Error in scraper job")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

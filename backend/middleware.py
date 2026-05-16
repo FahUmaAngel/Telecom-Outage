@@ -30,8 +30,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             
         except Exception as e:
             process_time = (time.time() - start_time) * 1000
-            logger.error(f"RID: {request_id} | ERROR | {str(e)} | Time: {process_time:.2f}ms")
-            logger.error(traceback.format_exc())
+            logger.exception(f"RID: {request_id} | ERROR | {str(e)} | Time: {process_time:.2f}ms")
             is_debug = logger.isEnabledFor(logging.DEBUG)
             
             return JSONResponse(
