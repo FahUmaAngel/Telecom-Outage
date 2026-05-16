@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from ..dependencies import get_db, role_checker
 from ..schemas import ReportResponse, OutageResponse, OutageUpdate, ResolvePlaceRequest, ResolvePlaceResponse
 from scrapers.db.models import RawData, Operator, UserReport, Outage
+from scrapers.db.crud import get_scraper_health
 from ..utils.geocoding import resolve_place
 from ..constants import OutageStatus
 import json
@@ -41,19 +42,24 @@ def _effective_status(o: Outage):
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
 def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
-    """Get the last scrape time for each operator."""
-    # Group by operator and get max(scraped_at)
-    subquery = db.query(
+    """Get health status for each scraper (latest run result + fallback to raw_data)."""
+    health = get_scraper_health(db)
+
+    # Fallback: if a scraper has never logged a run, use raw_data last_scraped_at
+    raw_subq = db.query(
         RawData.operator,
         func.max(RawData.scraped_at).label("last_scraped_at")
     ).group_by(RawData.operator).subquery()
-    
-    results = db.query(subquery).all()
-    
-    return [
-        {"operator": r.operator, "last_scraped_at": r.last_scraped_at}
-        for r in results
-    ]
+    raw_map = {r.operator: r.last_scraped_at for r in db.query(raw_subq).all()}
+
+    for entry in health:
+        if entry["last_run"] is None:
+            fallback = raw_map.get(entry["operator"])
+            entry["last_scraped_at"] = fallback.isoformat() if fallback else None
+        else:
+            entry["last_scraped_at"] = entry["last_run"]
+
+    return health
 
 def _map_outage_to_response(o: Outage) -> OutageResponse:
     """Helper to map Outage model to OutageResponse schema."""

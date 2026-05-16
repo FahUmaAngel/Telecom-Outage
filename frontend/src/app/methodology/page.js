@@ -82,7 +82,7 @@ const RQ = [
 ];
 
 const PIPELINE = [
-    { sv: "Datainsamling", en: "Data Collection", detail_sv: "Automatisk skrapning av Telia och Telenors driftstatussidor via Playwright/Selenium.", detail_en: "Automated scraping of Telia and Telenor status pages via Playwright/Selenium." },
+    { sv: "Datainsamling", en: "Data Collection", detail_sv: "Automatisk skrapning av Telia, Telenor och Tre:s driftstatussidor via Playwright/Selenium/Requests.", detail_en: "Automated scraping of Telia, Telenor and Tre status pages via Playwright/Selenium/Requests." },
     { sv: "Lagring", en: "Storage", detail_sv: "SQLite-databas med tabeller för Outage och Operator. Varje incident har start_time, resolved_at, severity och berörda regioner.", detail_en: "SQLite database with Outage and Operator tables. Each incident has start_time, resolved_at, severity, and affected regions." },
     { sv: "MTTR-beräkning", en: "MTTR Calculation", detail_sv: "MTTR = (resolved_at − start_time) i timmar. Orealistiska värden (> 8 760h) utesluts. Bootstrap CI med 1 000 iterationer.", detail_en: "MTTR = (resolved_at − start_time) in hours. Unrealistic values (> 8,760h) excluded. Bootstrap CI with 1,000 iterations." },
     { sv: "Normalisering (CVS)", en: "Normalisation (CVS)", detail_sv: "Varje CVS-komponent normaliseras till [0, 1] med min-max-skalning. Lägre MTTR/frekvens/driftstopp → högre poäng.", detail_en: "Each CVS component normalised to [0, 1] using min-max scaling. Lower MTTR/frequency/downtime → higher score." },
@@ -159,6 +159,7 @@ export default function MethodologyPage() {
                             <div className="arch-nodes">
                                 <div className="arch-node node-source">Telia<br/><span className="node-sub">Playwright</span></div>
                                 <div className="arch-node node-source">Telenor<br/><span className="node-sub">Selenium</span></div>
+                                <div className="arch-node node-source">Tre<br/><span className="node-sub">Requests</span></div>
                             </div>
                         </div>
 

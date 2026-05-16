@@ -205,41 +205,82 @@ function ScraperHealth({ scrapers, lang }) {
             <h2 className="section-title font-heading">{lang === "sv" ? "Scraper-status" : "Scraper Health"}</h2>
             <div className="scraper-grid">
                 {scrapers.filter(s => s.operator?.toLowerCase() !== 'tele2').map((s) => {
-                    const isOnline = Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
+                    const failed = s.status === "failed";
+                    const neverRun = s.status === "never_run";
+                    const isOnline = !failed && !neverRun && s.last_scraped_at &&
+                        Date.now() - new Date(s.last_scraped_at).getTime() < 3600000;
+                    const dotClass = failed ? "error" : isOnline ? "online" : "stale";
+
                     return (
-                    <div key={s.operator} className="premium-card scraper-card">
-                        <div className="scraper-main">
-                            <div className={`status-dot ${isOnline ? 'online' : 'stale'}`}></div>
-                            <div className="scraper-info">
-                                <span className="operator-name">{s.operator.toUpperCase()}</span>
-                                <span className="last-scrape">
-                                    {lang === "sv" ? "Senaste: " : "Last Sync: "}
-                                    {new Date(s.last_scraped_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div key={s.operator} className={`scraper-card ${failed ? "scraper-card--failed" : ""}`}>
+                            <div className="scraper-top">
+                                <div className="scraper-main">
+                                    <div className={`status-dot ${dotClass}`} />
+                                    <span className="operator-name">{s.operator.toUpperCase()}</span>
+                                </div>
+                                <span className={`run-badge run-badge--${failed ? "fail" : neverRun ? "never" : "ok"}`}>
+                                    {failed ? (lang === "sv" ? "Fel" : "Failed") :
+                                     neverRun ? (lang === "sv" ? "Aldrig kört" : "Never run") :
+                                     (lang === "sv" ? "OK" : "OK")}
                                 </span>
                             </div>
+
+                            <div className="scraper-stats">
+                                <div className="stat">
+                                    <span className="stat-label">{lang === "sv" ? "Senaste körning" : "Last run"}</span>
+                                    <span className="stat-value">
+                                        {s.last_scraped_at
+                                            ? new Date(s.last_scraped_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+                                            : "—"}
+                                    </span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-label">{lang === "sv" ? "Hittade" : "Found"}</span>
+                                    <span className="stat-value">{s.outages_found ?? "—"}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-label">{lang === "sv" ? "Lösta" : "Resolved"}</span>
+                                    <span className="stat-value">{s.outages_resolved ?? "—"}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-label">{lang === "sv" ? "Försök" : "Retries"}</span>
+                                    <span className="stat-value">{s.retry_count ?? 0}</span>
+                                </div>
+                            </div>
+
+                            {failed && s.error_message && (
+                                <div className="error-msg" title={s.error_message}>
+                                    {s.error_message.length > 80 ? `${s.error_message.slice(0, 80)}…` : s.error_message}
+                                </div>
+                            )}
                         </div>
-                        <div className="scraper-date">
-                            {new Date(s.last_scraped_at).toLocaleDateString()}
-                        </div>
-                    </div>
                     );
                 })}
             </div>
             <style jsx>{`
                 .admin-section { margin-bottom: 64px; }
                 .section-title { margin-bottom: 24px; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
-                .scraper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-                .scraper-card { display: flex; justify-content: space-between; align-items: center; padding: 24px; border-radius: 20px; background: var(--surface-color); border: 1px solid var(--border-color); transition: 0.3s; box-shadow: var(--shadow-sm); }
-                .scraper-card:hover { border-color: var(--accent-primary); box-shadow: 0 10px 25px -5px var(--accent-glow); transform: translateY(-4px); }
-                .scraper-main { display: flex; align-items: center; gap: 16px; }
-                .status-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; }
-                .status-dot.online { background: var(--status-success); box-shadow: 0 0 10px var(--status-success); }
-                .status-dot.stale { background: var(--status-warning); box-shadow: 0 0 10px var(--status-warning); }
-                .status-dot::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; background: currentColor; opacity: 0.2; animation: pulse 2s infinite; }
-                @keyframes pulse { 0% { transform: scale(1); opacity: 0.3; } 70% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 0; } }
-                .operator-name { font-weight: 800; font-size: 1.1rem; color: var(--text-primary); letter-spacing: 0.03em; }
-                .last-scrape { font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 4px; font-weight: 500; }
-                .scraper-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; background: var(--surface-hover); padding: 4px 10px; border-radius: 8px; }
+                .scraper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+                .scraper-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; transition: border-color 0.2s; }
+                .scraper-card:hover { border-color: var(--accent-primary); }
+                .scraper-card--failed { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.03); }
+                .scraper-top { display: flex; justify-content: space-between; align-items: center; }
+                .scraper-main { display: flex; align-items: center; gap: 10px; }
+                .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+                .status-dot.online { background: var(--status-success); box-shadow: 0 0 6px var(--status-success); }
+                .status-dot.stale { background: var(--status-warning); box-shadow: 0 0 6px var(--status-warning); }
+                .status-dot.error { background: var(--status-error); box-shadow: 0 0 6px var(--status-error); }
+                .operator-name { font-weight: 800; font-size: 1rem; color: var(--text-primary); letter-spacing: 0.04em; }
+                .run-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.04em; }
+                .run-badge--ok { background: rgba(34,197,94,0.1); color: var(--status-success); }
+                .run-badge--fail { background: rgba(239,68,68,0.1); color: var(--status-error); }
+                .run-badge--never { background: var(--surface-hover); color: var(--text-muted); }
+                .scraper-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                .stat { display: flex; flex-direction: column; gap: 2px; }
+                .stat-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+                .stat-value { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); font-family: monospace; }
+                .error-msg { font-size: 0.75rem; color: var(--status-error); background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 8px 10px; line-height: 1.4; word-break: break-word; }
+                @media (max-width: 768px) { .scraper-grid { grid-template-columns: 1fr; } }
             `}</style>
         </section>
     );

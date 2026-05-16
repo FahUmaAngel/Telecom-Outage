@@ -3,7 +3,7 @@ Database CRUD operations.
 """
 from sqlalchemy.orm import Session
 from typing import Optional
-from .models import Outage, RawData, Operator, Region
+from .models import Outage, RawData, Operator, Region, ScraperRun
 from ..common.models import NormalizedOutage, OperatorEnum
 from ..common.translation import SWEDISH_COUNTIES
 from ..common.engine import extract_region_from_text
@@ -294,3 +294,51 @@ def cleanup_old_data(db: Session, days: int = 30):
     
     db.commit()
     print(f"CLEANUP: Deleted {deleted_count} old outages and {deleted_raw} raw data records.")
+
+
+def log_scraper_run(db: Session, operator: str, started_at, finished_at,
+                    status: str, outages_found: int = 0, outages_resolved: int = 0,
+                    retry_count: int = 0, error_message: str = None):
+    run = ScraperRun(
+        operator=operator,
+        started_at=started_at,
+        finished_at=finished_at,
+        status=status,
+        outages_found=outages_found,
+        outages_resolved=outages_resolved,
+        retry_count=retry_count,
+        error_message=error_message,
+    )
+    db.add(run)
+    db.commit()
+
+
+def _run_to_dict(operator: str, run) -> dict:
+    if run is None:
+        return {"operator": operator, "last_run": None, "finished_at": None,
+                "status": "never_run", "outages_found": 0, "outages_resolved": 0,
+                "retry_count": 0, "error_message": None}
+    return {
+        "operator": operator,
+        "last_run": run.started_at.isoformat() if run.started_at else None,
+        "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+        "status": run.status,
+        "outages_found": run.outages_found,
+        "outages_resolved": run.outages_resolved,
+        "retry_count": run.retry_count,
+        "error_message": run.error_message,
+    }
+
+
+def get_scraper_health(db: Session) -> list:
+    """Return the latest run result for each operator."""
+    from sqlalchemy import desc
+    operators = ["telia", "telenor", "tre"]
+    results = []
+    for op in operators:
+        run = (db.query(ScraperRun)
+               .filter(ScraperRun.operator == op)
+               .order_by(desc(ScraperRun.started_at))
+               .first())
+        results.append(_run_to_dict(op, run))
+    return results

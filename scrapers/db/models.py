@@ -92,12 +92,25 @@ class UserReport(Base):
 
 class User(Base):
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String, default="user") # admin, researcher, user
     is_active = Column(Boolean, default=True)
-    
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ScraperRun(Base):
+    __tablename__ = "scraper_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    operator = Column(String, index=True)           # telia / telenor / tre
+    started_at = Column(DateTime(timezone=True))
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String)                          # success / failed / partial
+    outages_found = Column(Integer, default=0)
+    outages_resolved = Column(Integer, default=0)
+    retry_count = Column(Integer, default=0)
+    error_message = Column(Text, nullable=True)
 
