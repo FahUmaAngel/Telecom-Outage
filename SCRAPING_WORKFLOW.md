@@ -74,3 +74,17 @@ While Tre uses the same **Enghouse MIMCS** backend as Telia and Telenor (hosted 
 | **Telia** | Playwright / Requests | JSON / XML | API Interception / Direct API |
 | **Telenor** | Selenium / Requests | HTML / JSON | Desktop Simulation / Direct API |
 | **Tre** | BeautifulSoup | JSON (__NEXT_DATA__) | Static Page Parsing |
+
+---
+
+## Monitoring & Alerts
+
+The scraper runner logs each run into the `scraper_runs` table (status, last run time, retry count, error message).
+The Admin UI shows this under **Admin → Scraper Health**.
+
+Optional failure notifications can be enabled via environment variables (no alerts are sent unless configured):
+
+- `SCRAPER_ALERTS_ENABLED` (`true`/`false`, default `true`)
+- Slack: `SLACK_WEBHOOK_URL` (Incoming Webhook URL)
+- Discord: `DISCORD_WEBHOOK_URL` (Discord Channel Webhook URL)
+- Email (SMTP): `ALERT_EMAIL_TO`, `SMTP_HOST`, `SMTP_PORT` (default `587`), `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_TLS` (default `true`)

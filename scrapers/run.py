@@ -21,6 +21,7 @@ from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus,
 from scrapers.common.geocoding import get_county_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
 from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
+from scrapers.common.notify import notify_scraper_failure
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +57,13 @@ def _run_telia_scraper(db):
 
     if err:
         logger.exception("Telia scraper failed after %d retries", MAX_RETRIES)
+        notify_scraper_failure(
+            "telia",
+            str(err),
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            retry_count=retries,
+        )
         log_scraper_run(db, "telia", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message=str(err))
         return
@@ -108,12 +116,26 @@ def _run_telenor_scraper(db):
 
     if err:
         logger.exception("Telenor scraper failed after %d retries", MAX_RETRIES)
+        notify_scraper_failure(
+            "telenor",
+            str(err),
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            retry_count=retries,
+        )
         log_scraper_run(db, "telenor", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message=str(err))
         return
 
     if not result.get('success'):
         logger.error("Telenor scraper returned failure response")
+        notify_scraper_failure(
+            "telenor",
+            "success=False",
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            retry_count=retries,
+        )
         log_scraper_run(db, "telenor", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message="success=False")
         return
@@ -148,6 +170,13 @@ def _run_tre_scraper(db):
     if err:
         logger.exception("Tre scraper failed after %d retries", MAX_RETRIES)
         db.rollback()
+        notify_scraper_failure(
+            "tre",
+            str(err),
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            retry_count=retries,
+        )
         log_scraper_run(db, "tre", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message=str(err))
         return
