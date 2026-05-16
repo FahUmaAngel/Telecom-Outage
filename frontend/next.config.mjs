@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
+const isGitHubPages = process.env.GITHUB_PAGES === "true";
+const basePath = isGitHubPages ? "/Telecom-Outage" : "";
+
 const nextConfig = {
-  /* config options here */
+  output: "export",
+  images: { unoptimized: true },
+  trailingSlash: true,
+  basePath,
+  assetPrefix: basePath,
 };
 
 export default nextConfig;
