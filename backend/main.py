@@ -156,6 +156,19 @@ app.include_router(research_analytics.router)
 def read_root():
     return {"status": "ok", "message": "Telecom Outage API is running"}
 
+@app.get("/api/v1/health")
+def health_check():
+    from scrapers.db.connection import SessionLocal
+    from sqlalchemy import text
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": str(e)}
+    finally:
+        db.close()
+
 # Optional: serve exported frontend (Next.js output: export) when present.
 # This allows deploying backend + frontend together as a single service.
 _frontend_out = os.path.join(os.path.dirname(__file__), "..", "frontend", "out")
