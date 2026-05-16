@@ -2,18 +2,14 @@ services:
   - type: web
     name: telecom-outage
     runtime: python
-    buildCommand: |
-      pip install -r backend/requirements.txt
-      cd frontend && npm install && NEXT_OUTPUT_EXPORT=true npm run build
+    buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: NEXT_OUTPUT_EXPORT
-        value: "true"
+      - key: ALLOWED_ORIGINS
+        value: https://fahumaangel.github.io
       - key: DATABASE_URL
         sync: false
       - key: SECRET_KEY
         sync: false
-      - key: ALLOWED_ORIGINS
-        value: https://telecom-outage.onrender.com
       - key: ENABLE_SCHEDULER
         value: "true"
