@@ -139,7 +139,7 @@ const OutageList = ({ outages, lang, onOutageClick }) => (
     {outages.length > 0 ? (
       outages.slice(0, 15).map((outage) => (
         <Link 
-          href={`/outages/${outage.id}`} 
+          href={`/outage?id=${outage.id}`} 
           key={outage.id} 
           className="event-item"
           onClick={onOutageClick ? () => onOutageClick(outage) : undefined}

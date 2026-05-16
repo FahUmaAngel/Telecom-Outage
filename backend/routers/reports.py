@@ -18,7 +18,7 @@ def get_hotspots(db: Annotated[Session, Depends(get_db)]):
     external = aggregate_external_signals()
     return hotspots + external
 
-@router.post("/", response_model=ReportResponse)
+@router.post("", response_model=ReportResponse)
 def create_report(report: ReportCreate, db: Annotated[Session, Depends(get_db)]):
     """Submit a new outage report."""
     operator_id = None
@@ -50,7 +50,7 @@ def create_report(report: ReportCreate, db: Annotated[Session, Depends(get_db)])
         created_at=new_report.created_at
     )
 
-@router.get("/", response_model=List[ReportResponse])
+@router.get("", response_model=List[ReportResponse])
 def get_reports(db: Annotated[Session, Depends(get_db)]):
     """List all user reports."""
     from sqlalchemy.orm import joinedload

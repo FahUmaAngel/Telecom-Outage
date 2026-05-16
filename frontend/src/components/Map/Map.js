@@ -208,7 +208,7 @@ export default function OutageMap({ outages = [], hotspots = [], simple = false 
                                                 <p><strong>Severity:</strong> <span className={`severity-${outage.severity.toLowerCase()}`}>{outage.severity}</span></p>
                                             </div>
                                             <div className="popup-actions">
-                                                <Link href={`/outages/${outage.id}`} className="detail-link">
+                                                <Link href={`/outage?id=${outage.id}`} className="detail-link">
                                                     {lang === "sv" ? "Visa detaljer →" : "View details →"}
                                                 </Link>
                                             </div>

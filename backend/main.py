@@ -115,7 +115,8 @@ app = FastAPI(
     title="Telecom Outage API",
     description="API for accessing Swedish telecom outage data (Telia, Tre, Lycamobile)",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    redirect_slashes=False,
 )
 
 # CORS Configuration

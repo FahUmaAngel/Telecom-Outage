@@ -82,7 +82,7 @@ def get_outage_history(
     
     return [_map_to_outage_response(o) for o in outages]
 
-@router.get("/", response_model=List[OutageResponse])
+@router.get("", response_model=List[OutageResponse])
 def get_outages(
     db: Annotated[Session, Depends(get_db)],
     operator: Optional[str] = None,

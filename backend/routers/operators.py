@@ -10,7 +10,7 @@ from scrapers.db.models import Operator
 
 router = APIRouter(prefix="/api/v1/operators", tags=["operators"])
 
-@router.get("/", response_model=List[OperatorResponse])
+@router.get("", response_model=List[OperatorResponse])
 def get_operators(db: Annotated[Session, Depends(get_db)]):
     """List all supported operators."""
     operators = db.query(Operator).all()

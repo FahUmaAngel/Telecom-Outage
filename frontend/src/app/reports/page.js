@@ -200,7 +200,7 @@ const ReportRow = ({ outage, lang, t }) => {
                 {formatDate(outage.end_time || outage.estimated_fix_time)}
             </td>
             <td className="actions-cell">
-                <Link href={`/outages/${outage.id}`} className="view-link">
+                <Link href={`/outage?id=${outage.id}`} className="view-link">
                     {lang === "sv" ? "Visa" : "View"}
                 </Link>
             </td>

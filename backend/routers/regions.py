@@ -11,7 +11,7 @@ router = APIRouter(
     tags=["Regions"]
 )
 
-@router.get("/", response_model=List[schemas.RegionResponse])
+@router.get("", response_model=List[schemas.RegionResponse])
 def get_regions(db: Annotated[Session, Depends(get_db)]):
     """
     Get all regions with their current active outage counts.
