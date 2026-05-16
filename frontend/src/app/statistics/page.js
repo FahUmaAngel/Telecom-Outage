@@ -318,6 +318,17 @@ export default function StatisticsPage() {
                 .test-interpretation { margin-top: 16px; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; border-top: 1px solid var(--border-color); padding-top: 16px; }
                 .loading-container { display: flex; justify-content: center; align-items: center; min-height: 320px; }
                 .text-gradient { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+                @media (max-width: 768px) {
+                    .stats-container { padding: 20px 16px; }
+                    .page-header { flex-direction: column; gap: 12px; }
+                    .filters-row { flex-direction: column; gap: 10px; width: 100%; }
+                    .premium-filter { width: 100%; }
+                    .select-wrapper select { width: 100%; }
+                    .export-btn { width: 100%; justify-content: center; }
+                    .dist-grid { grid-template-columns: 1fr; }
+                    .test-header { flex-wrap: wrap; gap: 10px; }
+                    .test-card { padding: 16px; }
+                }
             `}</style>
         </div>
     );

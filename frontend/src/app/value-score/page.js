@@ -332,6 +332,20 @@ export default function ValueScorePage() {
                 .raw-val { font-size: 0.72rem; color: var(--text-muted); }
                 .loading-container { display: flex; justify-content: center; align-items: center; min-height: 300px; }
                 .empty-state { text-align: center; color: var(--text-muted); padding: 60px 16px; font-size: 0.9rem; }
+                @media (max-width: 768px) {
+                    .page-container { padding: 20px 16px; }
+                    .page-header { flex-direction: column; gap: 12px; }
+                    .filters-row { flex-wrap: wrap; gap: 10px; width: 100%; }
+                    .premium-filter { width: 100%; }
+                    .select-wrapper select { width: 100%; }
+                    .export-btn { width: 100%; justify-content: center; }
+                    .rank-grid { grid-template-columns: 1fr 1fr; }
+                    .rank-score { font-size: 1.5rem; }
+                    .methodology-note { font-size: 0.78rem; }
+                }
+                @media (max-width: 480px) {
+                    .rank-grid { grid-template-columns: 1fr; }
+                }
             `}</style>
         </div>
     );

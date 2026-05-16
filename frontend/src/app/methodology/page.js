@@ -371,6 +371,15 @@ export default function MethodologyPage() {
                 .arch-arrow-row { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; }
                 .arch-arrow { font-size: 1.2rem; color: var(--text-muted); opacity: 0.5; line-height: 1; }
                 .arch-arrow-label { font-size: 0.68rem; color: var(--text-muted); opacity: 0.6; font-family: monospace; }
+                @media (max-width: 768px) {
+                    .page-container { padding: 20px 16px; }
+                    .arch-node { min-width: 110px; font-size: 0.76rem; padding: 8px 12px; }
+                    .arch-nodes { gap: 8px; }
+                    .rq-card { padding: 14px; }
+                    .pipeline-step { gap: 10px; }
+                    .ref-item { gap: 10px; }
+                    .stats-table th, .stats-table td { padding: 10px 10px; font-size: 0.8rem; }
+                }
             `}</style>
         </div>
     );
