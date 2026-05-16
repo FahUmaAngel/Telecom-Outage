@@ -291,9 +291,15 @@ Step3Details.propTypes = {
  * Handles retrieving user geolocation. 
  * Necessary for pinpointing outages on the map and providing localized data.
  */
-const handleGetLocation = (setLocationLoading, setLocationError, setFormData, addToast, lang) => {
+const handleGetLocation = (setLocationLoading, setLocationError, setFormData, addToast, lang, geoConsent) => {
     setLocationLoading(true);
     setLocationError(null);
+
+    if (!geoConsent) {
+        setLocationError(lang === "sv" ? "Samtycke till plats krävs" : "Location consent is required");
+        setLocationLoading(false);
+        return;
+    }
 
     if (!navigator.geolocation) {
         setLocationError(lang === "sv" ? "Geolocation stöds inte" : "Geolocation not supported");
@@ -301,8 +307,7 @@ const handleGetLocation = (setLocationLoading, setLocationError, setFormData, ad
         return;
     }
 
-    // SECURITY AUDIT: Geolocation use verified for mapping necessity.
-    // Explicit consent obtained via UI checkbox (formData.geo_consent).
+    // Geolocation is optional and only used when the user explicitly consents.
     navigator.geolocation.getCurrentPosition(
         (position) => {
             setFormData(prev => ({
@@ -422,7 +427,8 @@ export default function ReportForm({ operators }) {
         title: "",
         description: "",
         latitude: null,
-        longitude: null
+        longitude: null,
+        geo_consent: false
     });
 
     const handleInputChange = useCallback((e) => {
@@ -444,7 +450,7 @@ export default function ReportForm({ operators }) {
 
     const prevStep = () => setStep(prev => prev - 1);
 
-    const getLocation = () => handleGetLocation(setLocationLoading, setLocationError, setFormData, addToast, lang);
+    const getLocation = () => handleGetLocation(setLocationLoading, setLocationError, setFormData, addToast, lang, formData.geo_consent);
 
     const handleSubmit = (e) => handleFormSubmit(e, formData, addToast, lang, setLoading, setSuccess);
 
