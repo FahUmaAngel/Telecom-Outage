@@ -10,6 +10,9 @@ ENV/
 # Databases
 *.db
 *.sqlite3
+*.db-shm
+*.db-wal
+*.db-journal
 
 # Secrets
 .env
@@ -34,3 +37,5 @@ dist/
 
 # Scraped Artifacts
 *.html
+*_screenshot.png
+*_selenium_*.png
