@@ -10,8 +10,13 @@ from scrapers.tre.fetch import scrape_tre_outages
 from scrapers.tre.parser import parse_tre_outages
 from scrapers.tre.mapper import map_tre_outages
 
-from scrapers.telia import scrape_portal_granular
-from scrapers.telia.portal_scraper import extract_incident_coords, parse_incident_dates, extract_services, resolve_location_name
+from scrapers.telia.fetch_enhanced import scrape_telia_outages
+from scrapers.telia.parser_enhanced import parse_telia_outages
+from scrapers.telia.mapper_enhanced import map_telia_outages
+
+from scrapers.telenor.fetch import scrape_telenor_outages
+from scrapers.telenor.parser import parse_telenor_outage
+from scrapers.telenor.mapper import map_to_normalized as map_telenor_outage
 
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import (
@@ -19,9 +24,6 @@ from scrapers.db.crud import (
     enrich_missing_geodata, enrich_region_ids, enrich_place_codes, log_scraper_run,
 )
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
-from scrapers.common.geocoding import get_county_coordinates
-from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
-from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
 from scrapers.common.notify import notify_scraper_failure
 
 logging.basicConfig(
@@ -51,72 +53,32 @@ def _with_retry(fn, *args, **kwargs):
     return None, MAX_RETRIES - 1, last_err
 
 
-def _map_telia_incident(item: dict) -> NormalizedOutage:
-    """Map a raw Telia API incident dict to a NormalizedOutage."""
-    inc_id = str(item.get("ExternalId", ""))
-    county_name = item.get("CountyName") or ""
-    if county_name.lower() == "unknown":
-        county_name = ""
-
-    lat, lon = extract_incident_coords(item, county_name)
-    precise_city = resolve_location_name(lat, lon) if (lat and lon) else None
-
-    from scrapers.common.engine import extract_region_from_text
-    from scrapers.common.translation import SWEDISH_COUNTIES
-    raw_location = ", ".join(p for p in [precise_city, item.get("AreaName"), county_name] if p)
-    location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or county_name or item.get("AreaName") or "Unknown"
-
-    start_time, end_time = parse_incident_dates(item)
-    desc_raw = item.get("Description") or item.get("Text") or ""
-    services_raw = extract_services(desc_raw + " " + item.get("AffectedServices", ""))
-
-    service_map: dict = {"5g": ServiceType.MOBILE_5G, "4g": ServiceType.MOBILE_4G, "2g": ServiceType.MOBILE_2G}
-    affected_services = [service_map[s] for s in services_raw if s in service_map]
-
-    return NormalizedOutage(
-        operator=OperatorEnum.TELIA,
-        incident_id=inc_id,
-        title={"sv": inc_id, "en": inc_id},
-        description={"sv": desc_raw, "en": desc_raw},
-        location=location,
-        status=OutageStatus.ACTIVE,
-        severity=SeverityLevel.MEDIUM,
-        affected_services=affected_services,
-        source_url="https://coverage.ddc.teliasonera.net/coverageportal_se?appmode=outage",
-        started_at=start_time,
-        estimated_fix_time=end_time,
-        latitude=lat,
-        longitude=lon,
-    )
-
-
 def _run_telia_scraper(db):
-    """Telia scraper with retry and health logging."""
+    """Telia scraper using HTTP (no browser required)."""
     started = datetime.now(timezone.utc)
-    result, retries, err = _with_retry(scrape_portal_granular)
+
+    def _fetch_and_map():
+        raw = scrape_telia_outages()
+        parsed = parse_telia_outages(raw)
+        return map_telia_outages(parsed)
+
+    result, retries, err = _with_retry(_fetch_and_map)
 
     if err:
         logger.exception("Telia scraper failed after %d retries", MAX_RETRIES)
-        notify_scraper_failure(
-            "telia",
-            str(err),
-            started_at=started,
-            finished_at=datetime.now(timezone.utc),
-            retry_count=retries,
-        )
+        notify_scraper_failure("telia", str(err), started_at=started,
+                               finished_at=datetime.now(timezone.utc), retry_count=retries)
         log_scraper_run(db, "telia", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message=str(err))
         return
 
-    incidents = result or []
     seen_ids = []
-    for item in incidents:
+    for item in (result or []):
         try:
-            normalized = _map_telia_incident(item)
-            save_outage(db, normalized, {"source": "telia_portal", "raw": item})
-            seen_ids.append(normalized.incident_id)
+            save_outage(db, item, {"source": "telia_http"})
+            seen_ids.append(item.incident_id)
         except Exception:
-            logger.exception("Failed to process Telia incident %s", item.get("ExternalId"))
+            logger.exception("Failed to save Telia outage %s", item.incident_id)
 
     db.commit()
     resolved = resolve_missing_outages(db, OperatorEnum.TELIA, seen_ids)
@@ -126,77 +88,34 @@ def _run_telia_scraper(db):
                     outages_resolved=resolved, retry_count=retries)
 
 
-def _process_telenor_outage(db, outage):
-    """Process and save a single Telenor outage."""
-    location_text = outage.get('location', '')
-    desc_text = outage.get('description', '')
-    title_text = outage.get('title', f"Incident {outage['incident_id']}")
-    context_text = f"{location_text} {desc_text} {title_text}"
-
-    normalized = NormalizedOutage(
-        operator=OperatorEnum.TELENOR,
-        incident_id=outage['incident_id'],
-        title={"sv": outage['incident_id'], "en": outage['incident_id']},
-        description=create_bilingual_text(desc_text or f"Incident ID: {outage['incident_id']}"),
-        location=location_text or 'Unknown',
-        status=classify_status(context_text, OutageStatus.ACTIVE),
-        severity=SeverityLevel.MEDIUM,
-        affected_services=[s for s in classify_services(context_text) if s.value not in ['voice', 'data']],
-        source_url="https://mboss.telenor.se/coverageportal?appmode=outage",
-        started_at=parse_swedish_date(outage.get('start_time')),
-        estimated_fix_time=parse_swedish_date(outage.get('estimated_end'))
-    )
-
-    search_text = location_text if location_text else context_text
-    county_name = extract_region_from_text(search_text, SWEDISH_COUNTIES)
-    if county_name:
-        normalized.location = county_name
-        coords = get_county_coordinates(county_name, jitter=True)
-        if coords:
-            normalized.latitude, normalized.longitude = coords
-
-    save_outage(db, normalized, {"source": "telenor_selenium", "raw": outage})
-
-
 def _run_telenor_scraper(db):
-    """Telenor scraper with retry and health logging."""
-    from scrapers.telenor_playwright_scraper import scrape_telenor_with_playwright
+    """Telenor scraper using HTTP (no browser required)."""
+    from scrapers.telenor.parser import parse_telenor_outages
+    from scrapers.telenor.mapper import map_telenor_outages
     started = datetime.now(timezone.utc)
-    result, retries, err = _with_retry(scrape_telenor_with_playwright)
+
+    def _fetch_and_map():
+        raw = scrape_telenor_outages()
+        parsed = parse_telenor_outages(raw)
+        return map_telenor_outages(parsed)
+
+    result, retries, err = _with_retry(_fetch_and_map)
 
     if err:
         logger.exception("Telenor scraper failed after %d retries", MAX_RETRIES)
-        notify_scraper_failure(
-            "telenor",
-            str(err),
-            started_at=started,
-            finished_at=datetime.now(timezone.utc),
-            retry_count=retries,
-        )
+        notify_scraper_failure("telenor", str(err), started_at=started,
+                               finished_at=datetime.now(timezone.utc), retry_count=retries)
         log_scraper_run(db, "telenor", started, datetime.now(timezone.utc),
                         "failed", retry_count=retries, error_message=str(err))
         return
 
-    if not result.get('success'):
-        logger.error("Telenor scraper returned failure response")
-        notify_scraper_failure(
-            "telenor",
-            "success=False",
-            started_at=started,
-            finished_at=datetime.now(timezone.utc),
-            retry_count=retries,
-        )
-        log_scraper_run(db, "telenor", started, datetime.now(timezone.utc),
-                        "failed", retry_count=retries, error_message="success=False")
-        return
-
     seen_ids = []
-    for outage in result['outages']:
+    for item in (result or []):
         try:
-            _process_telenor_outage(db, outage)
-            seen_ids.append(str(outage['incident_id']))
+            save_outage(db, item, {"source": "telenor_http"})
+            seen_ids.append(item.incident_id)
         except Exception:
-            logger.exception("Failed to process Telenor outage %s", outage.get('incident_id'))
+            logger.exception("Failed to save Telenor outage %s", item.incident_id)
 
     db.commit()
     resolved = resolve_missing_outages(db, OperatorEnum.TELENOR, seen_ids)
