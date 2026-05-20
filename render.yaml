@@ -4,11 +4,13 @@ services:
     runtime: python
     buildCommand: >
       pip install -r backend/requirements.txt &&
-      playwright install chromium &&
-      playwright install-deps chromium &&
+      PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright-browsers playwright install chromium &&
+      PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright-browsers playwright install-deps chromium &&
       cd frontend && npm install && NEXT_OUTPUT_EXPORT=true npm run build
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright-browsers
       - key: DATABASE_URL
         sync: false
       - key: ALLOWED_ORIGINS
