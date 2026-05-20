@@ -234,45 +234,17 @@ def process_single_incident(item, telia_id, region_id_map, timestamp, cursor):
 
 
 def scrape_portal_granular():
-    """Main function with enhanced per-incident location resolution."""
+    """Capture Telia incidents via Playwright and return normalized data for saving."""
     logger.info("Starting Enhanced Telia Portal Scraper...")
 
     captured, token = run_playwright_capture()
     if not captured:
         logger.error("No incidents captured")
-        return
+        return []
 
-    # Deduplicate
     unique_incidents = {item.get("ExternalId"): item for item in captured if item.get("ExternalId")}
-    logger.info(f"Processing {len(unique_incidents)} unique incidents. Token: {'Yes' if token else 'No'}")
-
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM operators WHERE name = 'telia'")
-        res = cursor.fetchone()
-        if not res:
-            logger.error("Telia operator not found")
-            return
-        telia_id = res[0]
-
-        cursor.execute("SELECT id, name FROM regions")
-        region_id_map = {}
-        for rid, name_json in cursor.fetchall():
-            try:
-                sv_name = json.loads(name_json).get('sv')
-                region_id_map[sv_name] = rid
-            except Exception:
-                region_id_map[name_json] = rid
-
-        timestamp = datetime.now().isoformat()
-        for item in unique_incidents.values():
-            process_single_incident(item, telia_id, region_id_map, timestamp, cursor)
-
-        conn.commit()
-
-    logger.info("Scraping complete")
-    return list(unique_incidents.keys())
+    logger.info(f"Captured %d unique incidents. Token: %s", len(unique_incidents), "Yes" if token else "No")
+    return list(unique_incidents.values())
 
 
 if __name__ == "__main__":
