@@ -7,7 +7,7 @@ from .models import Outage, RawData, Operator, Region, ScraperRun
 from ..common.models import NormalizedOutage, OperatorEnum
 from ..common.translation import SWEDISH_COUNTIES
 from ..common.engine import extract_region_from_text
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import json
 
 from sqlalchemy import func
@@ -131,20 +131,24 @@ def auto_resolve_expired_outages(db: Session):
     """
     now = datetime.now(timezone.utc)
     
-    # 1. Check end_time (definite resolution time)
+    # Grace period: only auto-resolve outages that have been stale for > 24 hours.
+    # This prevents false-positives where an outage's ETA passes but it's still
+    # actively showing on the operator's portal (and being re-scraped each cycle).
+    grace_cutoff = now - timedelta(hours=24)
+
+    # 1. Check end_time (definite resolution time) — only if stale for >24h
     expired_end = db.query(Outage).filter(
         Outage.status != 'resolved',
         Outage.end_time != None,
-        Outage.end_time <= now
+        Outage.end_time <= grace_cutoff
     ).all()
-    
-    # 2. Check estimated_fix_time (ETA passed)
-    # We only auto-resolve based on ETA if there's no definite end_time
+
+    # 2. Check estimated_fix_time (ETA passed >24h ago) — only if no definite end_time
     expired_eta = db.query(Outage).filter(
         Outage.status != 'resolved',
         Outage.end_time == None,
         Outage.estimated_fix_time != None,
-        Outage.estimated_fix_time <= now
+        Outage.estimated_fix_time <= grace_cutoff
     ).all()
     
     total_resolved = 0

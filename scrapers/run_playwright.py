@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from scrapers.db.connection import SessionLocal
 from scrapers.db.crud import (
-    save_outage, auto_resolve_expired_outages, resolve_missing_outages,
+    save_outage, resolve_missing_outages,
     enrich_missing_geodata, enrich_region_ids, enrich_place_codes, log_scraper_run,
 )
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
@@ -255,9 +255,6 @@ def run():
         _run_telia(db)
         _run_telenor(db)
         _run_tre(db)
-        resolved = auto_resolve_expired_outages(db)
-        if resolved:
-            logger.info("Auto-resolved %d expired outages", resolved)
         enrich_missing_geodata(db)
         enrich_region_ids(db)
         enrich_place_codes(db)
