@@ -66,14 +66,10 @@ def scraper_job():
         from scrapers.run import run_scrapers
         run_scrapers()
         
-        # 2. Auto-resolve expired outages
-        db = SessionLocal()
-        try:
-            resolved_count = auto_resolve_expired_outages(db)
-            if resolved_count > 0:
-                logger.info(f"Auto-resolved {resolved_count} expired outages")
-        finally:
-            db.close()
+        # Note: delta-based resolution is handled by resolve_missing_outages()
+        # inside each scraper. auto_resolve_expired_outages() is intentionally
+        # not called here to avoid resolving outages that are still active on
+        # operator portals but have a past ETA.
             
         logger.info("Scraper job completed successfully")
     except Exception as e:
