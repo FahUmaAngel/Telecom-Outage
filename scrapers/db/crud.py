@@ -68,7 +68,10 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.title = normalized.title
         existing.description = normalized.description
         existing.location = normalized.location
-        existing.end_time = normalized.estimated_fix_time
+        existing.estimated_fix_time = normalized.estimated_fix_time
+        # end_time = actual resolution time, only set when outage is resolved
+        if normalized.status and normalized.status.value == 'resolved' and not existing.end_time:
+            existing.end_time = datetime.now(timezone.utc)
         existing.updated_at = datetime.now(timezone.utc)
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
