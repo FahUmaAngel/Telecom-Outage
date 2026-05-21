@@ -26,17 +26,44 @@ def init_db():
                 op = Operator(name=name)
                 db.add(op)
         
-        # Seed Regions
+        # Seed Swedish regions
         for county in SWEDISH_COUNTIES:
-            # county format: "Stockholms län"
-            # Create bilingual name
             bilingual_name = create_bilingual_text(county)
-            # Check if exists by Swedish name (key 'sv')
             existing = db.query(Region).filter(Region.name["sv"].as_string() == county).first()
             if not existing:
                 logger.info(f"Seeding region: {county}")
-                region = Region(name=bilingual_name)
-                db.add(region)
+                db.add(Region(name=bilingual_name))
+
+        # Seed Norwegian regions
+        NORWEGIAN_REGIONS = [
+            {"sv": "Oslo", "en": "Oslo"},
+            {"sv": "Viken", "en": "Viken"},
+            {"sv": "Innlandet", "en": "Innlandet"},
+            {"sv": "Vestfold og Telemark", "en": "Vestfold og Telemark"},
+            {"sv": "Agder", "en": "Agder"},
+            {"sv": "Rogaland", "en": "Rogaland"},
+            {"sv": "Vestland", "en": "Vestland"},
+            {"sv": "Møre og Romsdal", "en": "Møre og Romsdal"},
+            {"sv": "Trøndelag", "en": "Trøndelag"},
+            {"sv": "Nordland fylke", "en": "Nordland"},
+            {"sv": "Narvik, Nordland", "en": "Narvik, Nordland"},
+            {"sv": "Troms og Finnmark", "en": "Troms og Finnmark"},
+        ]
+
+        # Seed Danish regions
+        DANISH_REGIONS = [
+            {"sv": "Region Hovedstaden", "en": "Capital Region of Denmark"},
+            {"sv": "Region Sjælland", "en": "Region Zealand"},
+            {"sv": "Region Syddanmark", "en": "Region of Southern Denmark"},
+            {"sv": "Region Midtjylland", "en": "Central Denmark Region"},
+            {"sv": "Region Nordjylland", "en": "North Denmark Region"},
+        ]
+
+        for name in NORWEGIAN_REGIONS + DANISH_REGIONS:
+            existing = db.query(Region).filter(Region.name["sv"].as_string() == name["sv"]).first()
+            if not existing:
+                logger.info(f"Seeding region: {name['sv']}")
+                db.add(Region(name=name))
                 
         db.commit()
         logger.info("Database initialized successfully.")
