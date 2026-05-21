@@ -171,9 +171,8 @@ def run_scrapers():
         _run_telia_scraper(db)
         _run_telenor_scraper(db)
         _run_tre_scraper(db)
-        resolved = auto_resolve_expired_outages(db)
-        if resolved:
-            logger.info("Auto-resolved %d expired outages", resolved)
+        # auto_resolve_expired_outages() intentionally removed —
+        # delta-based resolution is handled by resolve_missing_outages() per operator.
         enriched = enrich_missing_geodata(db)
         if enriched:
             logger.info("Enriched geodata for %d records", enriched)

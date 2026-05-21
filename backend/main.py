@@ -18,7 +18,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from scrapers.config import settings
 from scrapers.db.connection import SessionLocal
-from scrapers.db.crud import auto_resolve_expired_outages
 from scrapers.db.models import User
 from .auth import get_password_hash
 
