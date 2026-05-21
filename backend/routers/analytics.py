@@ -219,7 +219,7 @@ def get_dynamic_mttr(
     for op in operators:
         query = db.query(Outage).filter(
             Outage.operator_id == op.id,
-            func.datetime(Outage.start_time) >= func.datetime(since_date)
+            Outage.start_time >= since_date
         )
         if location:
             query = query.filter(Outage.location.ilike(f"%{location}%"))
