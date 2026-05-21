@@ -21,3 +21,4 @@ urllib3>=2.6.3
 playwright>=1.40.0
 psycopg2-binary>=2.9.0
 alembic>=1.13.0
+openlocationcode>=1.0.1
