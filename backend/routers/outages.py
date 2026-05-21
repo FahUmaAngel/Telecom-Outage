@@ -19,22 +19,8 @@ def _safe_val(v):
     return v.value if hasattr(v, 'value') else v
 
 def _effective_status(o):
-    """Return 'resolved' if the incident's end date has already passed, regardless of DB status."""
-    raw = _safe_val(o.status) or 'active'
-    if raw.lower() == 'resolved':
-        return raw
-    end = o.end_time or o.estimated_fix_time
-    if end:
-        try:
-            end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
-            # Make end_dt timezone aware (UTC) if it's naive
-            if end_dt.tzinfo is None:
-                end_dt = end_dt.replace(tzinfo=timezone.utc)
-            if end_dt < datetime.now(timezone.utc):
-                return 'resolved'
-        except Exception:
-            pass
-    return raw
+    """Return the status stored in the database without overriding by ETA."""
+    return _safe_val(o.status) or 'active'
 
 def _map_to_outage_response(o: Outage) -> OutageResponse:
     """Helper to map SQLAlchemy Outage model to Pydantic OutageResponse."""
