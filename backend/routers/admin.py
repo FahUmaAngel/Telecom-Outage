@@ -23,22 +23,8 @@ def _safe_val(v):
     return v.value if hasattr(v, 'value') else v
 
 def _effective_status(o: Outage):
-    """Keep detail and list responses aligned when the ETA has already passed."""
-    raw = _safe_val(o.status) or "active"
-    if raw.lower() == "resolved":
-        return raw
-
-    end = o.end_time or o.estimated_fix_time
-    if end:
-        try:
-            end_dt = end if isinstance(end, datetime) else datetime.fromisoformat(str(end))
-            end_dt = end_dt.replace(tzinfo=None)
-            if end_dt < datetime.now(timezone.utc).replace(tzinfo=None):
-                return "resolved"
-        except Exception:
-            pass
-
-    return raw
+    """Return the status stored in the database without overriding by ETA."""
+    return _safe_val(o.status) or "active"
 
 @router.get("/scrapers", response_model=List[Dict[str, Any]])
 def get_scraper_status(db: Annotated[Session, Depends(get_db)]):
@@ -228,11 +214,17 @@ def admin_resolve_place(request: ResolvePlaceRequest, db: Annotated[Session, Dep
         # but the user specific names include 'län')
         search_name = county_name
         
-        # Exact match attempt
-        db_region = db.query(Region).filter(
-            (func.json_extract(Region.name, '$.sv').ilike(f"{search_name}%")) |
-            (func.json_extract(Region.name, '$.en').ilike(f"{search_name}%"))
-        ).first()
+        # Match against all regions in Python (avoids SQLite/PostgreSQL JSON syntax differences)
+        all_regions = db.query(Region).all()
+        db_region = None
+        search_lower = search_name.lower()
+        for r in all_regions:
+            name = r.name if isinstance(r.name, dict) else (json.loads(r.name) if isinstance(r.name, str) else {})
+            sv = (name.get('sv') or '').lower()
+            en = (name.get('en') or '').lower()
+            if sv.startswith(search_lower) or en.startswith(search_lower) or search_lower.startswith(sv[:6]):
+                db_region = r
+                break
         
         if db_region:
             region_id = db_region.id
