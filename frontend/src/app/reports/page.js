@@ -11,15 +11,6 @@ import PropTypes from "prop-types";
  * Helper to determine display status
  */
 const getEffectiveStatus = (outageObj) => {
-    if (outageObj?.status?.toLowerCase() === 'resolved') return 'resolved';
-    
-    const endDateStr = outageObj?.end_time || outageObj?.estimated_fix_time;
-    if (endDateStr) {
-        const endDate = new Date(endDateStr);
-        if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) {
-            return 'resolved';
-        }
-    }
     return outageObj?.status || 'active';
 };
 
