@@ -295,11 +295,11 @@ export default function Home() {
     
     const activeCount = outagesData.filter(o => o.status.toLowerCase() !== "resolved").length;
     const validMttr = mttrData.filter(d => d.outage_count > 0);
-    const avgMttr = validMttr.length > 0
-      ? (validMttr.reduce((acc, curr) => acc + curr.average_mttr_hours, 0) / validMttr.length).toFixed(1)
-      : "0";
+    const totalMttrHours = validMttr.reduce((s, d) => s + (d.average_mttr_hours * d.outage_count), 0);
+    const totalMttrCount = validMttr.reduce((s, d) => s + d.outage_count, 0);
+    const avgMttr = totalMttrCount > 0 ? (totalMttrHours / totalMttrCount).toFixed(1) : "0";
     const totalDowntime = reliabilityData.reduce((acc, curr) => acc + curr.total_downtime_hours, 0);
-    const reliabilityScore = Math.max(0, 100 - (totalDowntime / 100)).toFixed(1);
+    const reliabilityScore = Math.max(0, 100 - (totalDowntime / 720 * 100)).toFixed(1);
 
     setStats(prev => prev.map(s => {
       const updated = { ...s };

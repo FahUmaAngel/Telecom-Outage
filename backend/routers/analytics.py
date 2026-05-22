@@ -37,22 +37,24 @@ def _calculate_mttr_hours(outage: Outage) -> float:
     et = _strip_tz(outage.end_time)
     duration_hours = (et - st).total_seconds() / 3600.0
     # Sanity Check: Ignore negative durations or those > 1 year (data errors)
-    if 0 < duration_hours <= 8760:
+    if 0 < duration_hours <= 720:  # cap at 30 days — exclude end_time bug artifacts
         return duration_hours
     return 0.0
 
 
 @router.get("/mttr", response_model=List[MTTRResponse])
 def get_mttr(db: Annotated[Session, Depends(get_db)]):
-    """Calculate Mean Time To Recovery (MTTR) per operator."""
+    """Calculate Mean Time To Recovery (MTTR) per operator (last 30 days)."""
+    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=30)
     operators = db.query(Operator).all()
     results = []
-    
+
     for op in operators:
         outages = db.query(Outage).filter(
             Outage.operator_id == op.id,
             Outage.start_time.isnot(None),
-            Outage.end_time.isnot(None)
+            Outage.end_time.isnot(None),
+            Outage.start_time >= since_date,
         ).all()
         
         if not outages:
@@ -141,19 +143,20 @@ def get_historical_trend(
     safe_days = _clamp_days(days)
     since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=safe_days)
     
-    outages = db.query(Outage).filter(Outage.created_at >= since_date).all()
-    
-    # Initialize all dates in range with 0
+    # Filter by start_time — show when outages actually occurred, not when scraped
+    outages = db.query(Outage).filter(Outage.start_time >= since_date).all()
+
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     counts_by_date = {
         (now - timedelta(days=i)).strftime("%Y-%m-%d"): 0
         for i in range(safe_days + 1)
     }
-        
+
     for o in outages:
-        d = o.created_at.strftime("%Y-%m-%d")
-        if d in counts_by_date:
-            counts_by_date[d] += 1
+        if o.start_time:
+            d = _strip_tz(o.start_time).strftime("%Y-%m-%d")
+            if d in counts_by_date:
+                counts_by_date[d] += 1
             
     sorted_trend = [
         DailyTrend(date=d, count=c)
