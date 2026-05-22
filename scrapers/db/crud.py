@@ -69,9 +69,14 @@ def save_outage(db: Session, normalized: NormalizedOutage, raw_data_dict: dict):
         existing.description = normalized.description
         existing.location = normalized.location
         existing.estimated_fix_time = normalized.estimated_fix_time
-        # end_time = actual resolution time, only set when outage is resolved
-        if normalized.status and normalized.status.value == 'resolved' and not existing.end_time:
-            existing.end_time = datetime.now(timezone.utc)
+        # end_time = actual resolution time, only set when outage is resolved.
+        # Clear any stale end_time that was set by the old bug (end_time = estimated_fix_time)
+        # so auto_resolve_expired_outages() doesn't fight with live portal data.
+        if normalized.status and normalized.status.value == 'resolved':
+            if not existing.end_time:
+                existing.end_time = datetime.now(timezone.utc)
+        else:
+            existing.end_time = None
         existing.updated_at = datetime.now(timezone.utc)
         existing.raw_data_id = raw_entry.id
         existing.affected_services = affected_services_json
@@ -134,31 +139,28 @@ def auto_resolve_expired_outages(db: Session):
     """
     now = datetime.now(timezone.utc)
     
-    # Grace period: only auto-resolve outages that have been stale for > 24 hours.
-    # This prevents false-positives where an outage's ETA passes but it's still
-    # actively showing on the operator's portal (and being re-scraped each cycle).
+    # Grace period: only auto-resolve outages whose ETA passed >24 hours ago.
     grace_cutoff = now - timedelta(hours=24)
 
-    # 1. Check end_time (definite resolution time) — only if stale for >24h
-    expired_end = db.query(Outage).filter(
-        Outage.status != 'resolved',
-        Outage.end_time != None,
-        Outage.end_time <= grace_cutoff
-    ).all()
+    # Scraper staleness threshold: skip outages updated within the last 2 hours.
+    # If a scraper just touched an outage (updated_at is fresh), the portal is
+    # still actively reporting it — trust the portal, not the stale ETA.
+    # Only auto-resolve outages the scraper hasn't seen in >2 hours (zombie outages).
+    scraper_active_cutoff = now - timedelta(hours=2)
 
-    # 2. Check estimated_fix_time (ETA passed >24h ago) — only if no definite end_time
+    # Outages still shown by a live scraper (updated recently) must NOT be auto-resolved;
+    # resolve_missing_outages() will handle them once the portal removes them.
     expired_eta = db.query(Outage).filter(
         Outage.status != 'resolved',
-        Outage.end_time == None,
         Outage.estimated_fix_time != None,
-        Outage.estimated_fix_time <= grace_cutoff
+        Outage.estimated_fix_time <= grace_cutoff,
+        Outage.updated_at <= scraper_active_cutoff,
     ).all()
     
     total_resolved = 0
-    for outage in expired_end + expired_eta:
+    for outage in expired_eta:
         outage.status = 'resolved'
-        if outage.end_time is None:
-            outage.end_time = now
+        outage.end_time = now
         outage.updated_at = now
         total_resolved += 1
         
