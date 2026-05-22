@@ -172,15 +172,18 @@ def auto_resolve_expired_outages(db: Session):
 
 def enrich_missing_geodata(db: Session) -> int:
     """
-    Enrichment pass: for records that have a location name but missing lat/lon,
-    attempt geocoding again. Runs after every scraper cycle.
+    Enrichment pass: runs two directions after every scraper cycle.
+    1. location → lat/lon: records with a known county but missing coordinates.
+    2. lat/lon → location: records with coordinates but location='Unknown'.
     """
-    from scrapers.common.geocoding import get_county_coordinates
+    from scrapers.common.geocoding import get_county_coordinates, get_county_from_coordinates
     from scrapers.common.translation import SWEDISH_COUNTIES
     from scrapers.common.engine import extract_region_from_text
 
-    SKIP_LOCATIONS = {None, '', 'Unknown', 'Sverige', 'Sweden'}
+    enriched = 0
+    now = datetime.now(timezone.utc)
 
+    # --- Pass 1: location name → coordinates ---
     candidates = db.query(Outage).filter(
         Outage.latitude == None,
         Outage.location != None,
@@ -188,24 +191,30 @@ def enrich_missing_geodata(db: Session) -> int:
         Outage.location != 'Unknown',
     ).all()
 
-    enriched = 0
-    now = datetime.now(timezone.utc)
-
     for outage in candidates:
         loc = outage.location or ''
-
-        # Try direct county lookup first
         coords = get_county_coordinates(loc, jitter=True)
-
-        # If not found, try extracting county from location string
         if not coords:
             county = extract_region_from_text(loc, SWEDISH_COUNTIES)
             if county:
                 outage.location = county
                 coords = get_county_coordinates(county, jitter=True)
-
         if coords:
             outage.latitude, outage.longitude = coords
+            outage.updated_at = now
+            enriched += 1
+
+    # --- Pass 2: coordinates → location name (reverse enrichment) ---
+    unknown_with_coords = db.query(Outage).filter(
+        Outage.location == 'Unknown',
+        Outage.latitude != None,
+        Outage.longitude != None,
+    ).all()
+
+    for outage in unknown_with_coords:
+        county = get_county_from_coordinates(float(outage.latitude), float(outage.longitude))
+        if county:
+            outage.location = county
             outage.updated_at = now
             enriched += 1
 

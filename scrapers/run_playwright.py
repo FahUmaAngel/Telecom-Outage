@@ -17,7 +17,7 @@ from scrapers.db.crud import (
     enrich_missing_geodata, enrich_region_ids, enrich_place_codes, log_scraper_run,
 )
 from scrapers.common.models import NormalizedOutage, OperatorEnum, OutageStatus, SeverityLevel, ServiceType
-from scrapers.common.geocoding import get_county_coordinates
+from scrapers.common.geocoding import get_county_coordinates, get_county_from_coordinates
 from scrapers.common.translation import SWEDISH_COUNTIES, create_bilingual_text
 from scrapers.common.engine import extract_region_from_text, classify_services, classify_status, parse_swedish_date
 from scrapers.common.notify import notify_scraper_failure
@@ -74,7 +74,11 @@ def _map_telia_incident(item: dict) -> NormalizedOutage:
     # Location
     area_name = item.get("AreaName") or ""
     raw_location = ", ".join(p for p in [area_name, county_name] if p)
-    location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or county_name or area_name or "Unknown"
+    location = extract_region_from_text(raw_location, SWEDISH_COUNTIES) or county_name or area_name
+    # Fallback: reverse-lookup from coordinates when no county name could be determined
+    if not location and lat and lon:
+        location = get_county_from_coordinates(float(lat), float(lon))
+    location = location or "Unknown"
 
     # Dates
     def _clean_date(val):

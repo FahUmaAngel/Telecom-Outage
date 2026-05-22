@@ -26,6 +26,20 @@ SWEDISH_COUNTY_COORDS = {
 
 
 import random
+import math
+
+def get_county_from_coordinates(lat: float, lon: float) -> str | None:
+    """Return the nearest Swedish county name for a given lat/lon."""
+    if lat is None or lon is None:
+        return None
+    best_county = None
+    best_dist = float('inf')
+    for county, (clat, clon) in SWEDISH_COUNTY_COORDS.items():
+        dist = math.sqrt((lat - clat) ** 2 + (lon - clon) ** 2)
+        if dist < best_dist:
+            best_dist = dist
+            best_county = county
+    return best_county
 
 def get_county_coordinates(county_name: str, jitter: bool = False):
     """Get central coordinates for a Swedish county."""
