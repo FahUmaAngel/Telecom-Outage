@@ -76,34 +76,58 @@ def get_mttr(db: Annotated[Session, Depends(get_db)]):
         
     return results
 
+def _merge_intervals_hours(intervals: list) -> float:
+    """Merge overlapping (start, end) datetime pairs and return total hours covered."""
+    if not intervals:
+        return 0.0
+    intervals = sorted(intervals)
+    merged = [list(intervals[0])]
+    for st, et in intervals[1:]:
+        if st <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], et)
+        else:
+            merged.append([st, et])
+    return sum((et - st).total_seconds() / 3600 for st, et in merged)
+
+
 @router.get("/reliability", response_model=List[ReliabilityResponse])
 def get_reliability(db: Annotated[Session, Depends(get_db)]):
-    """Compare operators by reliability (outage count and total downtime)."""
-    # Over the last 30 days — internal constant, not user-supplied
-    since_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=30)
-    
+    """Compare operators by reliability.
+
+    Reliability = fraction of the last 30 days with zero active outages.
+    Overlapping outages are merged before summing so a period covered by
+    N simultaneous outages counts as one affected period, not N.
+    """
+    window_days = 30
+    window_hours = float(window_days * 24)  # 720 h
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    since_date = now - timedelta(days=window_days)
+
     operators = db.query(Operator).all()
     results = []
-    
+
     for op in operators:
         outages = db.query(Outage).filter(
             Outage.operator_id == op.id,
-            Outage.created_at >= since_date
+            Outage.start_time >= since_date,
+            Outage.end_time.isnot(None),
         ).all()
-        
-        total_downtime = 0.0
+
+        intervals = []
         for o in outages:
-            if o.start_time and o.end_time:
-                st = _strip_tz(o.start_time)
-                et = _strip_tz(o.end_time)
-                total_downtime += (et - st).total_seconds() / 3600.0
-            
+            st = max(_strip_tz(o.start_time), since_date)
+            et = min(_strip_tz(o.end_time), now)
+            if et > st:
+                intervals.append((st, et))
+
+        affected_hours = min(_merge_intervals_hours(intervals), window_hours)
+
         results.append(ReliabilityResponse(
             operator_name=op.name,
             outage_count=len(outages),
-            total_downtime_hours=round(total_downtime, 2)
+            total_downtime_hours=round(affected_hours, 2)
         ))
-        
+
     return results
 
 

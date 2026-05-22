@@ -124,7 +124,9 @@ OutageCountChart.propTypes = {
 function ReliabilityChart({ comparisonData, lang }) {
     const titleLabel = lang === "sv" ? "Nätverkstillförlitlighet" : "Network Reliability";
     const barName = lang === "sv" ? "Tillförlitlighet" : "Reliability";
-    const noteLabel = lang === "sv" ? "Högre är bättre" : "Higher is better";
+    const noteLabel = lang === "sv"
+        ? "Högre är bättre · % av tid utan aktiva avbrott (30 dagar)"
+        : "Higher is better · % of time with no active outage (30 days)";
 
     return (
         <div className="chart-section">
