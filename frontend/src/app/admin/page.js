@@ -132,7 +132,13 @@ function useOutageManagement() {
             estimated_fix_time: fixStr,
             latitude: outage.latitude || "",
             longitude: outage.longitude || "",
-            location: outage.location || "",
+            location: (outage.location && outage.location !== 'Unknown')
+                ? outage.location
+                : (outage.region_name
+                    ? (typeof outage.region_name === 'object'
+                        ? (outage.region_name.sv || outage.region_name.en || '')
+                        : outage.region_name)
+                    : (outage.location || "")),
             place: outage.place || "",
             affected_services: outage.affected_services || [],
         });
@@ -146,10 +152,13 @@ function useOutageManagement() {
                 ...prev,
                 latitude: data.latitude,
                 longitude: data.longitude,
-                location: data.display_name,
+                location: data.display_name || prev.location,
                 region_id: data.region_id || prev.region_id
             }));
-            addToast(lang === "sv" ? "Plats identifierad" : "Place resolved", "success");
+            const msg = data.display_name
+                ? (lang === "sv" ? "Plats identifierad" : "Place resolved")
+                : (lang === "sv" ? "Koordinater hittade (ingen region)" : "Coordinates found (no region match)");
+            addToast(msg, data.display_name ? "success" : "warning");
         } catch (err) {
             console.error("Failed to resolve place:", err);
             addToast(lang === "sv" ? "Kunde inte hämta platsen" : "Failed to resolve place", "error");

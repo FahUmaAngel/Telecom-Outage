@@ -200,6 +200,10 @@ def admin_resolve_place(request: ResolvePlaceRequest, db: Annotated[Session, Dep
     result = resolve_place(request.query)
     if not result:
         raise HTTPException(status_code=404, detail="Place not found")
+    # Coordinates only (geopy unavailable) — return what we have without region lookup
+    if result.get('latitude') and not result.get('county') and not result.get('display_name'):
+        return {"latitude": result['latitude'], "longitude": result['longitude'],
+                "display_name": None, "region_id": None}
     
     # Map county/region name to database ID
     region_id = None
