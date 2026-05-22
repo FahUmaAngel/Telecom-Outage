@@ -65,7 +65,7 @@ function OperatorCard({ r, lang }) {
                 <tbody>
                     {sevEntries.map(([sevKey, sv]) => (
                         <tr key={sevKey}>
-                            <td><span className={`sev-pill sev-${sevKey}`}>{sevKey}</span></td>
+                            <td><span className={`sev-pill sev-${sevKey === "high" ? "critical" : sevKey === "medium" ? "major" : sevKey === "low" ? "minor" : "major"}`}>{sevKey}</span></td>
                             <td className="mono">≤{sv.threshold_hours}h</td>
                             <td className="mono">{sv.incidents}</td>
                             <td className="mono">{sv.actual_mean_hours?.toFixed(1)}h</td>

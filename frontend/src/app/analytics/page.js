@@ -42,8 +42,7 @@ export default function AnalyticsPage() {
         name: r.operator_name.toUpperCase(),
         count: r.outage_count,
         downtime: r.total_downtime_hours,
-        // Calculate a mock score for bar width if downtime is high
-        score: Math.max(10, 100 - (r.total_downtime_hours / 10))
+        score: Math.max(0, 100 - (r.total_downtime_hours / 720 * 100))
     }));
 
     // Map history trend for the line chart
@@ -52,9 +51,10 @@ export default function AnalyticsPage() {
         count: t.count
     }));
 
-    const avgMttr = mttr.length > 0
-        ? (mttr.reduce((acc, curr) => acc + curr.average_mttr_hours, 0) / mttr.length).toFixed(1)
-        : "0";
+    const validMttr = mttr.filter(d => d.outage_count > 0);
+    const totalMttrHours = validMttr.reduce((s, d) => s + (d.average_mttr_hours * d.outage_count), 0);
+    const totalMttrCount = validMttr.reduce((s, d) => s + d.outage_count, 0);
+    const avgMttr = totalMttrCount > 0 ? (totalMttrHours / totalMttrCount).toFixed(1) : "0";
 
     return (
         <div className="analytics-container animate-fade-in">
